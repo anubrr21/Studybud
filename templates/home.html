@@ -1,0 +1,16 @@
+ {% extends 'main.html' %}
+ {% block content %}
+<h1 style="color:red;">IF YOU SEE THIS, TEMPLATES ARE WORKING</h1>
+<div>
+    <div>
+        {% for room in rooms %}
+        <div>
+            <h5>{{room.id}} -- {{room.name}}</h5> 
+            <!--this is for pritning the room id and the nammes using the room variable ---->
+        </div>
+
+
+        {%endfor %} 
+    </div>
+</div>
+{% endblock content %}

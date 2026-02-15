@@ -1,0 +1,14 @@
+ {% extends 'main.html' %}
+ {% block content %}
+<div>
+    <form method="POST" action="">
+        {%csrf_token %}<!--used in django forms for security purposes -->
+        {{form.as_p}}<!--this will render the form field declared in the form class.as_p wraps a paragraph tag around every field-->    
+        <input type="submit" value="Submit" \><!--submit button with the value(text) submit-->
+    </form>
+</form>
+</div>
+
+
+
+ {%endblock content %}
