@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 
 from django.contrib.auth import authenticate,login,logout
+from django.contrib.auth import get_user_model
 
 from .models import Room,Topic,Message,User #importing the room model from models.py
 from .forms import RoomForm,UserForm,MyUserCreationForm
@@ -45,19 +46,22 @@ def logoutUser(request):
      logout(request)
      return redirect('home')
 def registerPage(request):
-     form=MyUserCreationForm()
-     if request.method == 'POST':
-          form=MyUserCreationForm(request.POST)#populating the form with the data from the request 
-          if form.is_valid():
-               user=form.save(commit=False)#saving the form to the database but not committing it yet 
-               user.username = user.username.lower()
-               user.save()
-               login(request,user)
-               return redirect('home')
-          else:
-               messages.error(request,'An error occured during registration')
-               
-     return render(request,'base/login_register.html',{'form':form})    
+    if request.method == 'POST':
+        form = MyUserCreationForm(request.POST, request.FILES)  # <-- ADD request.FILES
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.username = user.username.lower()
+            user.save()
+            login(request, user)
+            return redirect('home')
+        else:
+            print(form.errors)  # DEBUG
+            messages.error(request, form.errors)
+    else:
+        form = MyUserCreationForm()
+
+    return render(request, 'base/login_register.html', {'form': form})
+
 
      
      
@@ -168,3 +172,14 @@ def topicsPage(request):
 def activityPage(request):
      room_messages=Message.objects.all()
      return render(request,'base/activity.html',{'room_messages':room_messages})
+
+
+
+def create_admin(request):
+    User = get_user_model()
+    if not User.objects.filter(email="anubratabhattacharyya81@gmail.com").exists():
+        User.objects.create_superuser(
+            email="anubratabhattacharyya81@gmail.com",
+            password="Anuyz@2005"
+        )
+    return HttpResponse("Admin created")
