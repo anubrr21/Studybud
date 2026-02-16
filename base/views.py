@@ -5,7 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 
 from django.contrib.auth import authenticate,login,logout
-from django.contrib.auth import get_user_model
+
 
 from .models import Room,Topic,Message,User #importing the room model from models.py
 from .forms import RoomForm,UserForm,MyUserCreationForm
@@ -175,11 +175,3 @@ def activityPage(request):
 
 
 
-def create_admin(request):
-    User = get_user_model()
-    if not User.objects.filter(email="anubratabhattacharyya81@gmail.com").exists():
-        User.objects.create_superuser(
-            email="anubratabhattacharyya81@gmail.com",
-            password="Anuyz@2005"
-        )
-    return HttpResponse("Admin created")
