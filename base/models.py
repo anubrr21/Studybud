@@ -5,7 +5,8 @@ class User(AbstractUser):
     name=models.CharField(max_length=200,null=True)
     email=models.EmailField(null=True,unique=True)
     bio=models.TextField(null=True)
-    avatar = models.ImageField(null=True, blank=True)
+    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
+
 #default image for the user profile picture when the user does not upload one
 
     USERNAME_FIELD='email'
