@@ -5,7 +5,8 @@ class User(AbstractUser):
     name=models.CharField(max_length=200,null=True)
     email=models.EmailField(null=True,unique=True)
     bio=models.TextField(null=True)
-    avatar=models.ImageField(null=True,default='avatar.svg')#default image for the user profile picture when the user does not upload one
+    avatar = models.ImageField(null=True, blank=True)
+#default image for the user profile picture when the user does not upload one
 
     USERNAME_FIELD='email'
     REQUIRED_FIELDS=[]#this is required when we change the USERNAME_FIELD to email.it specifies the fields that are required when creating a superuser account using the createsuperuser command in django shell.since we have set it to an empty list there are no additional fields required when creating a superuser account using the createsuperuser command in django shell.
