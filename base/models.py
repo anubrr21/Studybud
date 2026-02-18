@@ -33,7 +33,7 @@ class User(AbstractUser):
     @property
     def avatar_url(self):
       if self.avatar and hasattr(self.avatar, 'url'):
-        return self.avatar.url
+        return self.avatar_url
       return '/static/images/avatar.svg'
 
 

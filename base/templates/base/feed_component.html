@@ -21,34 +21,29 @@
   <div class="roomListRoom__content">
     <a href="{% url 'room' room.id %}">{{room.name}}</a>
   </div>
+<div class="roomListRoom__meta" style="display:flex; justify-content:space-between; align-items:center;">
 
-  <div class="roomListRoom__meta">
-
-    <!-- Participants -->
+  <!-- Left Side -->
+  <div style="display:flex; gap:20px; align-items:center;">
     <a href="{% url 'room' room.id %}" class="roomListRoom__joined">
       {{room.participants.all.count}} Joined
     </a>
-
-    <!-- LIKE BUTTON -->
-    <div style="display:flex; align-items:center; gap:10px;">
-
-      <form action="{% url 'like-room' room.id %}" method="POST">
-        {% csrf_token %}
-        <button type="submit" style="background:none; border:none; cursor:pointer; font-size:18px;">
-          {% if request.user in room.likes.all %}
-            ❤️
-          {% else %}
-            🤍
-          {% endif %}
-        </button>
-      </form>
-
-      <span>{{ room.likes.count }} Likes</span>
-
-    </div>
-
     <p class="roomListRoom__topic">{{room.topic.name}}</p>
-
   </div>
+
+  <!-- Right Side Like -->
+  <div>
+    <button 
+      class="like-btn" 
+      data-room="{{ room.id }}"
+      style="background:none;border:none;cursor:pointer;font-size:18px;"
+    >
+      ❤️
+    </button>
+    <span id="like-count-{{ room.id }}">
+      {{ room.likes.count }}
+    </span>
+  </div>
+
 </div>
 {% endfor %}

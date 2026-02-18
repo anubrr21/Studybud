@@ -27,6 +27,55 @@
     {% endblock %}
     
      <script src="{%static 'js/script.js' %}"></script>
+     <script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  document.querySelectorAll(".like-btn").forEach(button => {
+
+    button.addEventListener("click", function () {
+
+      const roomId = this.dataset.room;
+
+      fetch(`/like-room/${roomId}/`, {
+        method: "POST",
+        headers: {
+          "X-CSRFToken": getCookie("csrftoken"),
+          "Content-Type": "application/json"
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        document.getElementById(`like-count-${roomId}`).innerText = data.total_likes;
+
+        if (data.liked) {
+          button.innerHTML = "❤️";
+        } else {
+          button.innerHTML = "🤍";
+        }
+      });
+
+    });
+
+  });
+
+});
+
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let cookie of cookies) {
+      cookie = cookie.trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+</script>
+
   </body>
 </html>
 
