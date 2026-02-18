@@ -73,3 +73,22 @@ class Message(models.Model):#messge model for chat messages in the room
    
    def __str__(self):
      return self.body[0:50]#returning the first 50 characters of the message
+   class Notification(models.Model):
+    NOTIFICATION_TYPES = (
+        ('like', 'Like'),
+        ('comment', 'Comment'),
+        ('join', 'Join'),
+    )
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications")
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name="sent_notifications")
+    room = models.ForeignKey(Room, on_delete=models.CASCADE, null=True, blank=True)
+    type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES)
+    is_read = models.BooleanField(default=False)
+    created = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created']
+
+    def __str__(self):
+        return f"{self.sender} {self.type} {self.room}"
