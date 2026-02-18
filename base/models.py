@@ -73,7 +73,7 @@ class Message(models.Model):#messge model for chat messages in the room
    
    def __str__(self):
      return self.body[0:50]#returning the first 50 characters of the message
-   class Notification(models.Model):
+class Notification(models.Model):
     NOTIFICATION_TYPES = (
         ('like', 'Like'),
         ('comment', 'Comment'),
