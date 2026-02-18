@@ -5,6 +5,7 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 
 from django.contrib.auth import authenticate,login,logout
+from django.http import JsonResponse
 
 
 from .models import Room,Topic,Message,User #importing the room model from models.py
@@ -172,6 +173,22 @@ def topicsPage(request):
 def activityPage(request):
      room_messages=Message.objects.all()
      return render(request,'base/activity.html',{'room_messages':room_messages})
+
+@login_required(login_url='login')
+def toggle_like(request, pk):
+    room = Room.objects.get(id=pk)
+
+    if request.user in room.likes.all():
+        room.likes.remove(request.user)
+        liked = False
+    else:
+        room.likes.add(request.user)
+        liked = True
+
+    return JsonResponse({
+        "liked": liked,
+        "total_likes": room.likes.count()
+    })
 
 
 
