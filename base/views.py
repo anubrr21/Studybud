@@ -8,7 +8,7 @@ from django.contrib.auth import authenticate,login,logout
 from django.http import JsonResponse
 
 
-from .models import Room,Topic,Message,User #importing the room model from models.py
+from .models import Room,Topic,Message,User,Notification #importing the room model from models.py
 from .forms import RoomForm,UserForm,MyUserCreationForm
 
 
@@ -185,10 +185,31 @@ def toggle_like(request, pk):
         room.likes.add(request.user)
         liked = True
 
+        # 🔔 CREATE NOTIFICATION (ONLY IF NOT SELF-LIKE)
+        if room.host != request.user:
+            Notification.objects.create(
+                user=room.host,
+                sender=request.user,
+                room=room,
+                type='like'
+            )
+
     return JsonResponse({
         "liked": liked,
         "total_likes": room.likes.count()
     })
+
+@login_required
+def notifications(request):
+    notifications = request.user.notifications.all()
+
+    # mark all as read
+    notifications.update(is_read=True)
+
+    return render(request, 'base/notifications.html', {
+        'notifications': notifications
+    })
+
 
 
 

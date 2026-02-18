@@ -1,0 +1,33 @@
+{% extends 'main.html' %}
+
+{% block content %}
+<main class="layout">
+  <div class="container">
+    <h2 style="margin-bottom:20px;">Notifications</h2>
+
+    {% for notification in notifications %}
+      <div style="padding:15px; margin-bottom:10px; background:#2d2d39; border-radius:10px;">
+        <strong>@{{ notification.sender.username }}</strong>
+
+        {% if notification.type == 'like' %}
+          liked your room
+        {% elif notification.type == 'comment' %}
+          commented in your room
+        {% elif notification.type == 'join' %}
+          joined your room
+        {% endif %}
+
+        <a href="{% url 'room' notification.room.id %}">
+          {{ notification.room.name }}
+        </a>
+
+        <div style="font-size:12px; opacity:0.6;">
+          {{ notification.created|timesince }} ago
+        </div>
+      </div>
+    {% empty %}
+      <p>No notifications yet.</p>
+    {% endfor %}
+  </div>
+</main>
+{% endblock %}
