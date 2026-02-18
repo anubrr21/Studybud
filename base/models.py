@@ -32,9 +32,13 @@ class User(AbstractUser):
     objects=CustomUserManager()
     @property
     def avatar_url(self):
-      if self.avatar and hasattr(self.avatar, 'url'):
-        return self.avatar_url
-      return '/static/images/avatar.svg'
+      if self.avatar:
+        try:
+            return self.avatar.url
+        except:
+            pass
+      return "/static/images/avatar.svg"
+
 
 
 class Topic(models.Model):#topic model for different topics of rooms
