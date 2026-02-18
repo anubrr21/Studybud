@@ -42,6 +42,7 @@ class Room(models.Model): #a topic can have many rooms but a room can have only 
  name=models.CharField(max_length=200)
  description=models.TextField(null=True,blank=True)#database cannot have an instance of the model here and this can be left blank
  participants=models.ManyToManyField(User,related_name='participants',blank=True)#stores the current users in the room 
+ likes = models.ManyToManyField(User, related_name="liked_rooms", blank=True)
  updated=models.DateTimeField(auto_now=True)#whenever we update the model this field will be updated automatically.takes timestamp every single time the model is saved
  created=models.DateTimeField(auto_now_add=True)#when the model is created this field will be set automatically. gives the timestamp of creation
 #id=models.BigAutoField(primary_key=True,auto_created=True,serialize=False,verbase_name='ID')#primary key field for the model
