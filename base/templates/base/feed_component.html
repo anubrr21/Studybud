@@ -1,6 +1,9 @@
-{% for room in rooms %}
 {% load static %}
+
+{% for room in rooms %}
 <div class="roomListRoom">
+
+  <!-- HEADER -->
   <div class="roomListRoom__header">
     <a href="{% url 'user-profile' room.host.id %}" class="roomListRoom__author">
       <div class="avatar avatar--small">
@@ -18,31 +21,40 @@
     </div>
   </div>
 
+  <!-- CONTENT -->
   <div class="roomListRoom__content">
     <a href="{% url 'room' room.id %}">{{room.name}}</a>
   </div>
-<div class="roomListRoom__meta" style="display:flex; justify-content:space-between; align-items:center;">
 
-  <!-- Left Side -->
-  <div style="display:flex; gap:20px; align-items:center;">
-    <a href="{% url 'room' room.id %}" class="roomListRoom__joined">
-      {{room.participants.all.count}} Joined
-    </a>
-    <p class="roomListRoom__topic">{{room.topic.name}}</p>
-  </div>
+  <!-- META -->
+  <div class="roomListRoom__meta" style="display:flex; justify-content:space-between; align-items:center;">
 
-  <!-- Right Side Like -->
-  <div>
-    <button 
-      class="like-btn" 
-      data-room="{{ room.id }}"
-      style="background:none;border:none;cursor:pointer;font-size:18px;"
-    >
-      ❤️
-    </button>
-    <span id="like-count-{{ room.id }}">
-      {{ room.likes.count }}
-    </span>
+    <!-- LEFT SIDE -->
+    <div style="display:flex; gap:20px; align-items:center;">
+      <a href="{% url 'room' room.id %}" class="roomListRoom__joined">
+        {{room.participants.all.count}} Joined
+      </a>
+
+      <p class="roomListRoom__topic">{{room.topic.name}}</p>
+    </div>
+
+    <!-- RIGHT SIDE (LIKE) -->
+    <div style="display:flex; align-items:center; gap:6px; cursor:pointer;"
+         onclick="likeRoom({{ room.id }}, this)">
+
+        <span class="heart-icon">
+            {% if request.user in room.likes.all %}
+                ❤️
+            {% else %}
+                🤍
+            {% endif %}
+        </span>
+
+        <span class="like-count">
+            {{ room.likes.count }}
+        </span>
+    </div>
+
   </div>
 
 </div>
