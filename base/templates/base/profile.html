@@ -16,7 +16,7 @@
         <div class="profile__avatar">
           <div class="avatar avatar--large active">
             {% if user.avatar %}
-              <img src="{{ user.avatar.url }}" alt="Profile Picture" />
+              <img src="{{ user.avatar_url }}" alt="Profile Picture" />
             {% else %}
               <img src="{% static 'images/avatar.svg' %}" alt="Default Avatar" />
             {% endif %}

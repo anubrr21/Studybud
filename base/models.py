@@ -30,6 +30,12 @@ class User(AbstractUser):
     USERNAME_FIELD='email'
     REQUIRED_FIELDS=[]#this is required when we change the USERNAME_FIELD to email.it specifies the fields that are required when creating a superuser account using the createsuperuser command in django shell.since we have set it to an empty list there are no additional fields required when creating a superuser account using the createsuperuser command in django shell.
     objects=CustomUserManager()
+    @property
+    def avatar_url(self):
+      if self.avatar and hasattr(self.avatar, 'url'):
+        return self.avatar.url
+      return '/static/images/avatar.svg'
+
 
 class Topic(models.Model):#topic model for different topics of rooms
     name=models.CharField(max_length=200)#name field for the topic
