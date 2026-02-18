@@ -1,4 +1,5 @@
 {% for room in rooms %}
+{% load static %}
 <div class="roomListRoom">
   <div class="roomListRoom__header">
     <a href="{% url 'user-profile' room.host.id %}" class="roomListRoom__author">
