@@ -95,7 +95,14 @@ STATICFILES_DIRS = [BASE_DIR / 'static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
-# MEDIA
+
+# MEDIA (Cloudinary)
+DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+
+
 
 
 
@@ -108,7 +115,7 @@ CORS_ALLOW_ALL_ORIGINS = True
 
 
 
-DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+
 
 
 
