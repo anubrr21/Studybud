@@ -25,6 +25,14 @@ class User(AbstractUser):
     bio=models.TextField(null=True)
     avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
 
+    followers = models.ManyToManyField(
+    "self",
+    symmetrical=False,
+    related_name="following",
+    blank=True
+)
+
+
 #default image for the user profile picture when the user does not upload one
 
     USERNAME_FIELD='email'
