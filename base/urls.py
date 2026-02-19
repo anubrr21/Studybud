@@ -16,4 +16,6 @@ urlpatterns=[
     path('activity/',views.activityPage,name="activity"),
     path('like-room/<str:pk>/', views.toggle_like, name="toggle-like"),
     path('notifications/', views.notifications, name='notifications'),
+    path('notifications/read/', views.mark_notifications_read, name='mark-notifications-read'),
+
 ]

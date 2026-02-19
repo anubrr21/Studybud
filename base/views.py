@@ -78,20 +78,50 @@ def home(request):
     context={'rooms':rooms,'topics':topics,
     'room_count':room_count,'room_messages':room_messages}#creating a context dictinary to pass the rooms to the template
     return render(request,'base/home.html',context)#calling the rooms dictionary to home.html
-def room(request,pk):
-        room=Room.objects.get(id=pk)#getting the room with the sepcific id(primary key)
-        room_messages=room.message_set.all()#getting all the messages related to the room 
-        participants=room.participants.all()
-        if request.method=='POST':
-             message=Message.objects.create(
-                  user=request.user,
-                  room=room,
-                  body=request.POST.get('body')
-             ) 
-             room.participants.add(request.user)
-             return redirect('room',pk=room.id)
-        context={'room':room,'room_messages':room_messages,'participants':participants}#creating a context dictionary to pass the room to the template
-        return render(request,'base/room.html',context)
+def room(request, pk):
+    room = Room.objects.get(id=pk)
+    room_messages = room.message_set.all()
+    participants = room.participants.all()
+
+    if request.method == 'POST':
+        message = Message.objects.create(
+            user=request.user,
+            room=room,
+            body=request.POST.get('body')
+        )
+
+        # Check if user is newly joining
+        is_new_participant = request.user not in room.participants.all()
+
+        room.participants.add(request.user)
+
+        # 🔔 COMMENT NOTIFICATION
+        if room.host != request.user:
+            Notification.objects.create(
+                user=room.host,
+                sender=request.user,
+                room=room,
+                type='comment'
+            )
+
+        # 🔔 JOIN NOTIFICATION (only if first time)
+        if is_new_participant and room.host != request.user:
+            Notification.objects.create(
+                user=room.host,
+                sender=request.user,
+                room=room,
+                type='join'
+            )
+
+        return redirect('room', pk=room.id)
+
+    context = {
+        'room': room,
+        'room_messages': room_messages,
+        'participants': participants
+    }
+    return render(request, 'base/room.html', context)
+
 def userProfile(request,pk):
      user = User.objects.get(id=pk)
      rooms=user.room_set.all()#getting all the rooms created by the user
@@ -208,6 +238,11 @@ def notifications(request):
     return render(request, 'base/notifications.html', {
         'notifications': notifications
     })
+@login_required(login_url='login')
+def mark_notifications_read(request):
+    request.user.notifications.update(is_read=True)
+    return redirect(request.META.get('HTTP_REFERER', 'home'))
+
 
 
 

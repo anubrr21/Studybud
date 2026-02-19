@@ -28,8 +28,9 @@
     <nav class="header__menu">
 
       {% if request.user.is_authenticated %}
-      <div style="position:relative; margin-right:20px;">
-  <a href="#">
+<div style="position:relative; margin-right:20px;">
+
+  <button id="notification-toggle" style="background:none;border:none;font-size:20px;cursor:pointer;">
     🔔
     {% if notification_count > 0 %}
       <span style="
@@ -45,8 +46,54 @@
         {{ notification_count }}
       </span>
     {% endif %}
-  </a>
+  </button>
+
+  <!-- DROPDOWN -->
+  <div id="notification-dropdown" style="
+      display:none;
+      position:absolute;
+      right:0;
+      top:30px;
+      width:300px;
+      background:white;
+      box-shadow:0 5px 15px rgba(0,0,0,0.2);
+      border-radius:10px;
+      padding:10px;
+      z-index:999;
+  ">
+    <h4 style="margin-bottom:10px;">Notifications</h4>
+
+    {% if notifications %}
+      {% for notification in notifications %}
+        <div style="padding:8px 0; border-bottom:1px solid #eee;">
+          <strong>{{ notification.sender.username }}</strong>
+
+          {% if notification.type == 'like' %}
+            liked your room
+          {% elif notification.type == 'comment' %}
+            commented on your room
+          {% elif notification.type == 'join' %}
+            joined your room
+          {% endif %}
+
+          <div style="font-size:12px; color:gray;">
+            {{ notification.created|timesince }} ago
+          </div>
+        </div>
+      {% endfor %}
+
+      <a href="{% url 'mark-notifications-read' %}" 
+         style="display:block;text-align:center;margin-top:10px;color:#3f51b5;">
+         Mark all as read
+      </a>
+
+    {% else %}
+      <p style="color:gray;">No new notifications</p>
+    {% endif %}
+
+  </div>
 </div>
+
 
 
         <div class="header__user">
@@ -84,4 +131,11 @@
     </nav>
 
   </div>
+  <script>
+document.getElementById("notification-toggle")?.addEventListener("click", function() {
+  const dropdown = document.getElementById("notification-dropdown");
+  dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+});
+</script>
+
 </header>
