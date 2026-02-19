@@ -28,6 +28,26 @@
     <nav class="header__menu">
 
       {% if request.user.is_authenticated %}
+      <div style="position:relative; margin-right:20px;">
+  <a href="#">
+    🔔
+    {% if notification_count > 0 %}
+      <span style="
+        position:absolute;
+        top:-8px;
+        right:-10px;
+        background:red;
+        color:white;
+        font-size:10px;
+        padding:2px 6px;
+        border-radius:50%;
+      ">
+        {{ notification_count }}
+      </span>
+    {% endif %}
+  </a>
+</div>
+
 
         <div class="header__user">
           <a href="{% url 'update-user' %}">
