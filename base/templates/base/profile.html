@@ -27,6 +27,37 @@
         <div class="profile__info">
           <h3>{{ user.name|default:user.username }}</h3>
           <p>@{{ user.username }}</p>
+          <br>
+          <br>
+
+          <div style="margin-top:10px; font-size:14px;">
+  <strong id="followers-count">{{ user.followers.count }}</strong> Followers |
+  <strong>{{ user.following.count }}</strong> Following
+</div>
+
+
+{% if request.user != user and request.user.is_authenticated %}
+  <button 
+      id="follow-btn"
+      data-user="{{ user.id }}"
+      style="
+        margin-top:10px;
+        padding:6px 12px;
+        border-radius:20px;
+        border:none;
+        background:#3f51b5;
+        color:white;
+        cursor:pointer;
+      ">
+    {% if request.user in user.followers.all %}
+      Unfollow
+    {% else %}
+      Follow
+    {% endif %}
+  </button>
+{% endif %}
+
+
 
           {% if request.user == user %}
             <a href="{% url 'update-user' %}" class="btn btn--main btn--pill">
@@ -61,4 +92,32 @@
 
   </div>
 </main>
+<script>
+const followBtn = document.getElementById("follow-btn");
+
+if (followBtn) {
+  followBtn.addEventListener("click", function() {
+    const userId = this.dataset.user;
+
+    fetch(`/follow/${userId}/`, {
+      method: "POST",
+      headers: {
+        "X-CSRFToken": "{{ csrf_token }}",
+        "X-Requested-With": "XMLHttpRequest"
+      }
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.following) {
+        followBtn.innerText = "Unfollow";
+      } else {
+        followBtn.innerText = "Follow";
+      }
+
+      document.getElementById("followers-count").innerText = data.followers_count;
+    });
+  });
+}
+</script>
+
 {% endblock content %}

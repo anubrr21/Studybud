@@ -243,6 +243,26 @@ def mark_notifications_read(request):
     request.user.notifications.update(is_read=True)
     return redirect(request.META.get('HTTP_REFERER', 'home'))
 
+@login_required(login_url='login')
+def toggle_follow(request, pk):
+    target_user = User.objects.get(id=pk)
+
+    if request.user == target_user:
+        return JsonResponse({"error": "You cannot follow yourself"}, status=400)
+
+    if request.user in target_user.followers.all():
+        target_user.followers.remove(request.user)
+        following = False
+    else:
+        target_user.followers.add(request.user)
+        following = True
+
+    return JsonResponse({
+        "following": following,
+        "followers_count": target_user.followers.count(),
+        "following_count": request.user.following.count()
+    })
+
 
 
 
