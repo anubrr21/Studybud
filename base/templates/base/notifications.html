@@ -18,29 +18,25 @@
 
           {% if notification.type == "follow" %}
             <a href="{% url 'user-profile' notification.sender.id %}" 
-               style="text-decoration:none; color:black;">
+               class="notification-link">
           
           {% elif notification.type == "comment" %}
             <a href="{% url 'room' notification.room.id %}" 
-               style="text-decoration:none; color:black;">
+               class="notification-link">
           
           {% elif notification.type == "join" %}
             <a href="{% url 'room' notification.room.id %}" 
-               style="text-decoration:none; color:black;">
+               class="notification-link">
           
           {% elif notification.type == "like" %}
             <a href="{% url 'room' notification.room.id %}" 
-               style="text-decoration:none; color:black;">
+               class="notification-link">
           {% endif %}
 
-            <!-- 🔥 Highlight unread -->
-            <div style="
-              padding:15px; 
-              border-bottom:1px solid #eee;
-              background:{% if not notification.is_read %}#e8f0fe{% else %}white{% endif %};
-            ">
+            <!-- 👇 Use class instead of inline logic -->
+            <div class="notification-item {% if not notification.is_read %}unread{% endif %}">
 
-              <p style="margin:0; font-size:15px; color:black;">
+              <p class="notification-text">
 
                 <strong>@{{ notification.sender.username }}</strong>
 
@@ -56,25 +52,17 @@
 
               </p>
 
-              <!-- 🔥 Step 4: Comment Preview -->
               {% if notification.type == "comment" %}
                 {% with notification.room.message_set.last as last_message %}
                   {% if last_message %}
-                    <div style="
-                      margin-top:8px;
-                      background:#f5f5f5;
-                      padding:8px;
-                      border-radius:6px;
-                      color:black;
-                      font-size:14px;
-                    ">
+                    <div class="notification-preview">
                       {{ last_message.body|truncatechars:60 }}
                     </div>
                   {% endif %}
                 {% endwith %}
               {% endif %}
 
-              <small style="color:black; display:block; margin-top:6px;">
+              <small class="notification-time">
                 {{ notification.created|timesince }} ago
               </small>
 
