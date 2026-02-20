@@ -127,6 +127,12 @@ def userProfile(request, pk):
     rooms = user.room_set.all()
     room_messages = user.message_set.all()
     topics = Topic.objects.all()
+    mutual_followers = []
+
+    if request.user.is_authenticated and request.user != user:
+        mutual_followers = user.followers.filter(
+        id__in=request.user.following.values_list('id', flat=True)
+    )
 
     context = {
         'user': user,
@@ -135,6 +141,7 @@ def userProfile(request, pk):
         'topics': topics,
         'followers': user.followers.all(),
         'following': user.following.all(),
+        'mutual_followers': mutual_followers,
     }
     return render(request, 'base/profile.html', context)
 @login_required(login_url='login')#decorator to restrict access to the view to only logged in users
@@ -262,10 +269,16 @@ def toggle_follow(request, pk):
         target_user.followers.add(request.user)
         following = True
 
+        # 🔔 FOLLOW NOTIFICATION
+        Notification.objects.create(
+            user=target_user,
+            sender=request.user,
+            type='follow'
+        )
+
     return JsonResponse({
         "following": following,
-        "followers_count": target_user.followers.count(),
-        "following_count": request.user.following.count()
+        "followers_count": target_user.followers.count()
     })
 
 def profile_followers(request, pk):

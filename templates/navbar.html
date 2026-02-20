@@ -74,6 +74,8 @@
             commented on your room
           {% elif notification.type == 'join' %}
             joined your room
+          {% elif notification.type == 'follow' %}
+            started following you
           {% endif %}
 
           <div style="font-size:12px; color:gray;">

@@ -35,6 +35,14 @@
               <strong>{{ user.following.count }}</strong> Following
             </span>
           </div>
+{% if mutual_followers %}
+  <div style="margin-top:8px; font-size:13px; color:gray;">
+    Followed by
+    {% for m in mutual_followers|slice:":2" %}
+      {{ m.username }}{% if not forloop.last %}, {% endif %}
+    {% endfor %}
+  </div>
+{% endif %}         
 
           {% if request.user != user and request.user.is_authenticated %}
             <button 

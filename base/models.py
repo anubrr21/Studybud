@@ -86,6 +86,7 @@ class Notification(models.Model):
         ('like', 'Like'),
         ('comment', 'Comment'),
         ('join', 'Join'),
+        ('follow','Follow'),
     )
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="notifications")
