@@ -1,47 +1,49 @@
 <div class="topics">
-          <div class="topics__header">
-            <h2>Browse Topics</h2>
-          </div>
-          <ul class="topics__list">
-            <li>
-              <a href="{% url 'home' %}" class="active">All <span>{{ topics.count }}</span></a>
-            </li>
-            {% for topic in topics %}
-            <li>
-              <a href="{% url 'home' %}?q={{topic.name}}">{{topic.name}} <span>{{topic.room_set.all.count}}</span></a>
-            </li>
-            {% endfor %}
-            
-          </ul>
-          <a class="btn btn--link" href="{% url 'topics' %}">
-            More
-            <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-              <title>chevron-down</title>
-              <path d="M16 21l-13-13h-3l16 16 16-16h-3l-13 13z"></path>
-            </svg>
-          </a>
-        </div>
-        
 
+  <div class="topics__header">
+    <h2>Browse Topics</h2>
+  </div>
 
-{% if suggested_users %}
-  <div style="margin-top:25px;">
-    <h3>Suggested Users</h3>
+  <ul class="topics__list">
+    <li>
+      <a href="{% url 'home' %}" class="active">
+        All <span>{{ topics.count }}</span>
+      </a>
+    </li>
+
+    {% for topic in topics %}
+    <li>
+      <a href="{% url 'home' %}?q={{topic.name}}">
+        {{topic.name}} 
+        <span>{{topic.room_set.all.count}}</span>
+      </a>
+    </li>
+    {% endfor %}
+  </ul>
+
+  <a class="btn btn--link" href="{% url 'topics' %}">
+    More
+    <svg width="32" height="32" viewBox="0 0 32 32">
+      <path d="M16 21l-13-13h-3l16 16 16-16h-3l-13 13z"></path>
+    </svg>
+  </a>
+
+  <!-- Suggested Users INSIDE sidebar -->
+  {% if suggested_users %}
+  <div style="margin-top:30px;">
+    <h3 style="margin-bottom:10px;">Suggested Users</h3>
 
     {% for u in suggested_users %}
-      <a href="{% url 'user-profile' u.id %}" style="
-        display:flex;
-        align-items:center;
-        margin-bottom:10px;
-        text-decoration:none;
-        color:white;
-      ">
-        <img src="{{ u.avatar_url }}"
-             style="width:30px;height:30px;border-radius:50%;margin-right:8px;" />
-        <span>@{{ u.username }}</span>
-      </a>
+    <a href="{% url 'user-profile' u.id %}" 
+       style="display:flex;align-items:center;margin-bottom:10px;text-decoration:none;color:white;">
+      
+      <img src="{{ u.avatar_url }}"
+           style="width:32px;height:32px;border-radius:50%;margin-right:8px;" />
+      
+      <span>@{{ u.username }}</span>
+    </a>
     {% endfor %}
   </div>
-{% endif %}
-       
+  {% endif %}
 
+</div>
