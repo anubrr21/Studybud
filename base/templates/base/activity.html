@@ -17,6 +17,11 @@
               <h3>Recent Activities</h3>
             </div>
           </div>
+<form method="GET" action="{% url 'activity' %}" style="margin-bottom:15px;">
+  <input type="text" name="q" value="{{ search_query }}" 
+         placeholder="Search activity..."
+         style="width:100%;padding:8px;border-radius:8px;border:none;">
+</form>
 
           <div class="activities-page layout__body">
           {% for message in room_messages %}

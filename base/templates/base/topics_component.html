@@ -22,5 +22,26 @@
           </a>
         </div>
         
+
+
+{% if suggested_users %}
+  <div style="margin-top:25px;">
+    <h3>Suggested Users</h3>
+
+    {% for u in suggested_users %}
+      <a href="{% url 'user-profile' u.id %}" style="
+        display:flex;
+        align-items:center;
+        margin-bottom:10px;
+        text-decoration:none;
+        color:white;
+      ">
+        <img src="{{ u.avatar_url }}"
+             style="width:30px;height:30px;border-radius:50%;margin-right:8px;" />
+        <span>@{{ u.username }}</span>
+      </a>
+    {% endfor %}
+  </div>
+{% endif %}
        
 

@@ -74,9 +74,12 @@ def home(request):
       )#query to get all the rooms from the database.objects is the model manager and all() is a method that retrieves all th objects from the database
     topics=Topic.objects.all()[0:5]#getting all the topics from the database
     room_count=rooms.count()#getting the count of the rooms
-    room_messages=Message.objects.filter(Q(room__topic__name__icontains=q)) #getting all the messages
+    room_messages=Message.objects.filter(Q(room__topic__name__icontains=q)).order_by('-created')[:8] #getting all the messages
+    suggested_users=[]
+    if request.user.is_authenticated:
+         suggested_users=User.objects.exclude(id__in=request.user.following.all()).exclude(id=request.user.id)[:5]#suggesting users to follow excluding the ones the user is already following and excluding the user himself
     context={'rooms':rooms,'topics':topics,
-    'room_count':room_count,'room_messages':room_messages}#creating a context dictinary to pass the rooms to the template
+    'room_count':room_count,'room_messages':room_messages,'suggested_users':suggested_users}#creating a context dictinary to pass the rooms to the template
     return render(request,'base/home.html',context)#calling the rooms dictionary to home.html
 def room(request, pk):
     room = Room.objects.get(id=pk)
@@ -212,8 +215,18 @@ def topicsPage(request):
      topics=Topic.objects.filter(name__icontains=q)#filtering the topics based on the search query 
      return render(request,'base/topics.html',{'topics':topics})
 def activityPage(request):
-     room_messages=Message.objects.all()
-     return render(request,'base/activity.html',{'room_messages':room_messages})
+    q = request.GET.get('q') if request.GET.get('q') else ''
+
+    room_messages = Message.objects.filter(
+        Q(user__username__icontains=q) |
+        Q(room__name__icontains=q) |
+        Q(body__icontains=q)
+    ).order_by('-created')
+
+    return render(request, 'base/activity.html', {
+        'room_messages': room_messages,
+        'search_query': q
+    })
 
 @login_required(login_url='login')
 def toggle_like(request, pk):
