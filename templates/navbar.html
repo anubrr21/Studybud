@@ -17,8 +17,7 @@
                    0-6.617-5.383-12-12-12s-12 5.383-12 12c0 6.617 5.383 12 12 12 
                    2.949 0 5.649-1.074 7.741-2.845l10.845 10.845 1.414-1.414zM12 
                    22c-5.514 0-10-4.486-10-10s4.486-10 10-10c5.514 0 10 4.486 
-                   10 10s-4.486 10-10 10z">
-          </path>
+                   10 10s-4.486 10-10 10z"></path>
         </svg>
         <input name="q" placeholder="Search for posts..." />
       </label>
@@ -28,113 +27,125 @@
     <nav class="header__menu">
 
       {% if request.user.is_authenticated %}
-<div style="position:relative; margin-right:20px;">
 
-  <button id="notification-toggle" style="background:none;border:none;font-size:20px;cursor:pointer;">
-    🔔
-    {% if notification_count > 0 %}
-      
-        {{ notification_count }}
-      </span>
-    {% endif %}
-  </button>
+      <!-- 🔔 Notification Section -->
+      <div style="position:relative; margin-right:20px;">
 
-  <!-- DROPDOWN -->
-  <!-- DROPDOWN -->
-<div id="notification-dropdown" class="notification-dropdown">
-  <h4 class="dropdown-title">Notifications</h4>
-
-  {% if notifications %}
-    {% for notification in notifications %}
-      
-      {% if notification.type == "follow" %}
-        <a href="{% url 'user-profile' notification.sender.id %}" class="dropdown-link-item">
-      
-      {% elif notification.type == "comment" %}
-        <a href="{% url 'room' notification.room.id %}" class="dropdown-link-item">
-      
-      {% elif notification.type == "join" %}
-        <a href="{% url 'room' notification.room.id %}" class="dropdown-link-item">
-      
-      {% elif notification.type == "like" %}
-        <a href="{% url 'room' notification.room.id %}" class="dropdown-link-item">
-      {% endif %}
-
-        <div class="dropdown-notification {% if not notification.is_read %}unread %}">
-          
-          <strong>@{{ notification.sender.username }}</strong>
-
-          {% if notification.type == 'like' %}
-            liked "<strong>{{ notification.room.name }}</strong>"
-          {% elif notification.type == 'comment' %}
-            commented in "<strong>{{ notification.room.name }}</strong>"
-          {% elif notification.type == 'join' %}
-            joined "<strong>{{ notification.room.name }}</strong>"
-          {% elif notification.type == 'follow' %}
-            started following you
+        <button id="notification-toggle"
+                style="background:none;border:none;font-size:20px;cursor:pointer;position:relative;">
+          🔔
+          {% if notification_count > 0 %}
+            <span style="
+              position:absolute;
+              top:-8px;
+              right:-10px;
+              background:red;
+              color:white;
+              font-size:10px;
+              padding:2px 6px;
+              border-radius:50%;
+            ">
+              {{ notification_count }}
+            </span>
           {% endif %}
+        </button>
 
-          <div class="dropdown-time">
-            {{ notification.created|timesince }} ago
+        <!-- Dropdown -->
+        <div id="notification-dropdown" class="notification-dropdown">
+          <h4 class="dropdown-title">Notifications</h4>
+
+          {% if notifications %}
+            {% for notification in notifications %}
+
+              {% if notification.type == "follow" %}
+                {% url 'user-profile' notification.sender.id as notif_url %}
+              {% elif notification.type == "comment" %}
+                {% url 'room' notification.room.id as notif_url %}
+              {% elif notification.type == "join" %}
+                {% url 'room' notification.room.id as notif_url %}
+              {% elif notification.type == "like" %}
+                {% url 'room' notification.room.id as notif_url %}
+              {% endif %}
+
+              <a href="{{ notif_url }}" class="dropdown-link-item">
+                <div class="dropdown-notification {% if not notification.is_read %}unread{% endif %}">
+
+                  <strong>@{{ notification.sender.username }}</strong>
+
+                  {% if notification.type == 'like' %}
+                    liked "<strong>{{ notification.room.name }}</strong>"
+                  {% elif notification.type == 'comment' %}
+                    commented in "<strong>{{ notification.room.name }}</strong>"
+                  {% elif notification.type == 'join' %}
+                    joined "<strong>{{ notification.room.name }}</strong>"
+                  {% elif notification.type == 'follow' %}
+                    started following you
+                  {% endif %}
+
+                  <div class="dropdown-time">
+                    {{ notification.created|timesince }} ago
+                  </div>
+
+                </div>
+              </a>
+
+            {% endfor %}
+
+            <a href="{% url 'notifications' %}" class="view-all-link">
+              View All Notifications
+            </a>
+
+          {% else %}
+            <p class="no-notifications">No new notifications</p>
+          {% endif %}
+        </div>
+
+      </div>
+
+      <!-- User Profile -->
+      <div class="header__user">
+        <a href="{% url 'update-user' %}">
+          <div class="avatar avatar--medium active">
+            <img src="{{ request.user.avatar_url }}" />
           </div>
+          <p>
+            {{ request.user.username }}
+            <span>@{{ request.user.username }}</span>
+          </p>
+        </a>
 
-        </div>
-      </a>
+        <button class="dropdown-button">
+          <svg width="32" height="32" viewBox="0 0 32 32">
+            <path d="M16 21l-13-13h-3l16 16 16-16h-3l-13 13z"></path>
+          </svg>
+        </button>
+      </div>
 
-    {% endfor %}
-
-    <a href="{% url 'notifications' %}" class="view-all-link">
-      View All Notifications
-    </a>
-
-  {% else %}
-    <p class="no-notifications">No new notifications</p>
-  {% endif %}
-</div>
-</div>
-
-
-
-        <div class="header__user">
-          <a href="{% url 'update-user' %}">
-            <div class="avatar avatar--medium active">
-              <img src="{{ request.user.avatar_url }}" />
-            </div>
-            <p>
-              {{ request.user.username }}
-              <span>@{{ request.user.username }}</span>
-            </p>
-          </a>
-
-          <button class="dropdown-button">
-            <svg width="32" height="32" viewBox="0 0 32 32">
-              <path d="M16 21l-13-13h-3l16 16 16-16h-3l-13 13z"></path>
-            </svg>
-          </button>
-        </div>
-
-        <div class="dropdown-menu">
-          <a href="{% url 'update-user' %}" class="dropdown-link">Settings</a>
-          <a href="{% url 'logout' %}" class="dropdown-link">Logout</a>
-        </div>
+      <div class="dropdown-menu">
+        <a href="{% url 'update-user' %}" class="dropdown-link">Settings</a>
+        <a href="{% url 'logout' %}" class="dropdown-link">Logout</a>
+      </div>
 
       {% else %}
 
-        <a href="{% url 'login' %}">
-          <img src="{% static 'images/avatar.svg' %}" />
-          <p>Login</p>
-        </a>
+      <a href="{% url 'login' %}">
+        <img src="{% static 'images/avatar.svg' %}" />
+        <p>Login</p>
+      </a>
 
       {% endif %}
 
     </nav>
 
   </div>
+
+  <!-- Toggle Script -->
   <script>
-document.getElementById("notification-toggle")?.addEventListener("click", function() {
-  const dropdown = document.getElementById("notification-dropdown");
-  dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
-});
-</script>
+    document.getElementById("notification-toggle")?.addEventListener("click", function() {
+      const dropdown = document.getElementById("notification-dropdown");
+      dropdown.style.display =
+        dropdown.style.display === "block" ? "none" : "block";
+    });
+  </script>
 
 </header>
