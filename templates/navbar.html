@@ -33,67 +33,64 @@
   <button id="notification-toggle" style="background:none;border:none;font-size:20px;cursor:pointer;">
     🔔
     {% if notification_count > 0 %}
-      <span style="
-        position:absolute;
-        top:-8px;
-        right:-10px;
-        background:red;
-        color:white;
-        font-size:10px;
-        padding:2px 6px;
-        border-radius:50%;
-      ">
+      
         {{ notification_count }}
       </span>
     {% endif %}
   </button>
 
   <!-- DROPDOWN -->
-  <div id="notification-dropdown" style="
-      display:none;
-      position:absolute;
-      right:0;
-      top:30px;
-      width:300px;
-      background:white;
-      box-shadow:0 5px 15px rgba(0,0,0,0.2);
-      border-radius:10px;
-      padding:10px;
-      z-index:999;
-  ">
-    <h4 style="margin-bottom:10px;">Notifications</h4>
+  <!-- DROPDOWN -->
+<div id="notification-dropdown" class="notification-dropdown">
+  <h4 class="dropdown-title">Notifications</h4>
 
-    {% if notifications %}
-      {% for notification in notifications %}
-        <div style="padding:8px 0; border-bottom:1px solid #eee;">
-          <strong>{{ notification.sender.username }}</strong>
+  {% if notifications %}
+    {% for notification in notifications %}
+      
+      {% if notification.type == "follow" %}
+        <a href="{% url 'user-profile' notification.sender.id %}" class="dropdown-link-item">
+      
+      {% elif notification.type == "comment" %}
+        <a href="{% url 'room' notification.room.id %}" class="dropdown-link-item">
+      
+      {% elif notification.type == "join" %}
+        <a href="{% url 'room' notification.room.id %}" class="dropdown-link-item">
+      
+      {% elif notification.type == "like" %}
+        <a href="{% url 'room' notification.room.id %}" class="dropdown-link-item">
+      {% endif %}
+
+        <div class="dropdown-notification {% if not notification.is_read %}unread %}">
+          
+          <strong>@{{ notification.sender.username }}</strong>
 
           {% if notification.type == 'like' %}
-            liked your room
+            liked "<strong>{{ notification.room.name }}</strong>"
           {% elif notification.type == 'comment' %}
-            commented on your room
+            commented in "<strong>{{ notification.room.name }}</strong>"
           {% elif notification.type == 'join' %}
-            joined your room
+            joined "<strong>{{ notification.room.name }}</strong>"
           {% elif notification.type == 'follow' %}
             started following you
           {% endif %}
 
-          <div style="font-size:12px; color:gray;">
+          <div class="dropdown-time">
             {{ notification.created|timesince }} ago
           </div>
-        </div>
-      {% endfor %}
 
-      <a href="{% url 'mark-notifications-read' %}" 
-         style="display:block;text-align:center;margin-top:10px;color:#3f51b5;">
-         Mark all as read
+        </div>
       </a>
 
-    {% else %}
-      <p style="color:gray;">No new notifications</p>
-    {% endif %}
+    {% endfor %}
 
-  </div>
+    <a href="{% url 'notifications' %}" class="view-all-link">
+      View All Notifications
+    </a>
+
+  {% else %}
+    <p class="no-notifications">No new notifications</p>
+  {% endif %}
+</div>
 </div>
 
 
