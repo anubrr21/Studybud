@@ -1,33 +1,103 @@
 {% extends 'main.html' %}
-
 {% block content %}
+
 <main class="layout">
   <div class="container">
-    <h2 style="margin-bottom:20px;">Notifications</h2>
 
-    {% for notification in notifications %}
-      <div style="padding:15px; margin-bottom:10px; background:#2d2d39; border-radius:10px;">
-        <strong>@{{ notification.sender.username }}</strong>
+    <div class="layout__box">
 
-        {% if notification.type == 'like' %}
-          liked your room
-        {% elif notification.type == 'comment' %}
-          commented in your room
-        {% elif notification.type == 'join' %}
-          joined your room
-        {% endif %}
-
-        <a href="{% url 'room' notification.room.id %}">
-          {{ notification.room.name }}
-        </a>
-
-        <div style="font-size:12px; opacity:0.6;">
-          {{ notification.created|timesince }} ago
+      <div class="layout__boxHeader">
+        <div class="layout__boxTitle">
+          <h3>Notifications</h3>
         </div>
       </div>
-    {% empty %}
-      <p>No notifications yet.</p>
-    {% endfor %}
+
+      <div class="layout__body">
+
+        {% for notification in notifications %}
+
+          {% if notification.type == "follow" %}
+            <a href="{% url 'user-profile' notification.sender.id %}" 
+               style="text-decoration:none; color:black;">
+          
+          {% elif notification.type == "comment" %}
+            <a href="{% url 'room' notification.room.id %}" 
+               style="text-decoration:none; color:black;">
+          
+          {% elif notification.type == "join" %}
+            <a href="{% url 'room' notification.room.id %}" 
+               style="text-decoration:none; color:black;">
+          
+          {% elif notification.type == "like" %}
+            <a href="{% url 'room' notification.room.id %}" 
+               style="text-decoration:none; color:black;">
+          {% endif %}
+
+            <!-- 🔥 Highlight unread -->
+            <div style="
+              padding:15px; 
+              border-bottom:1px solid #eee;
+              background:{% if not notification.is_read %}#e8f0fe{% else %}white{% endif %};
+            ">
+
+              <p style="margin:0; font-size:15px; color:black;">
+
+                <strong>@{{ notification.sender.username }}</strong>
+
+                {% if notification.type == "follow" %}
+                  started following you
+                {% elif notification.type == "comment" %}
+                  commented in "<strong>{{ notification.room.name }}</strong>"
+                {% elif notification.type == "join" %}
+                  joined "<strong>{{ notification.room.name }}</strong>"
+                {% elif notification.type == "like" %}
+                  liked "<strong>{{ notification.room.name }}</strong>"
+                {% endif %}
+
+              </p>
+
+              <!-- 🔥 Step 4: Comment Preview -->
+              {% if notification.type == "comment" %}
+                {% with notification.room.message_set.last as last_message %}
+                  {% if last_message %}
+                    <div style="
+                      margin-top:8px;
+                      background:#f5f5f5;
+                      padding:8px;
+                      border-radius:6px;
+                      color:black;
+                      font-size:14px;
+                    ">
+                      {{ last_message.body|truncatechars:60 }}
+                    </div>
+                  {% endif %}
+                {% endwith %}
+              {% endif %}
+
+              <small style="color:black; display:block; margin-top:6px;">
+                {{ notification.created|timesince }} ago
+              </small>
+
+            </div>
+
+          </a>
+
+        {% empty %}
+          <p style="color:black;">No notifications yet.</p>
+        {% endfor %}
+
+        <div style="text-align:center; padding:15px;">
+          <a href="{% url 'mark-notifications-read' %}" 
+             style="color:black; font-weight:600;">
+            Mark all as read
+          </a>
+        </div>
+
+      </div>
+
+    </div>
+
   </div>
 </main>
+
 {% endblock %}
