@@ -122,16 +122,21 @@ def room(request, pk):
     }
     return render(request, 'base/room.html', context)
 
-def userProfile(request,pk):
-     user = User.objects.get(id=pk)
-     rooms=user.room_set.all()#getting all the rooms created by the user
-     room_messages=user.message_set.all()#getting all the messages created by the user
-     topics=Topic.objects.all()
+def userProfile(request, pk):
+    user = User.objects.get(id=pk)
+    rooms = user.room_set.all()
+    room_messages = user.message_set.all()
+    topics = Topic.objects.all()
 
-     
-     context={'user': user,'rooms':rooms,
-              'room_messages':room_messages,'topics':topics}
-     return render(request,'base/profile.html',context)
+    context = {
+        'user': user,
+        'rooms': rooms,
+        'room_messages': room_messages,
+        'topics': topics,
+        'followers': user.followers.all(),
+        'following': user.following.all(),
+    }
+    return render(request, 'base/profile.html', context)
 @login_required(login_url='login')#decorator to restrict access to the view to only logged in users
 def createRoom(request):
       form=RoomForm()#creating an instance of the RoommForm
@@ -262,6 +267,38 @@ def toggle_follow(request, pk):
         "followers_count": target_user.followers.count(),
         "following_count": request.user.following.count()
     })
+
+def profile_followers(request, pk):
+    user = User.objects.get(id=pk)
+    followers = user.followers.all()
+
+    data = [
+        {
+            "id": u.id,
+            "username": u.username,
+            "avatar": u.avatar_url
+        }
+        for u in followers
+    ]
+
+    return JsonResponse({"users": data})
+
+
+def profile_following(request, pk):
+    user = User.objects.get(id=pk)
+    following = user.following.all()
+
+    data = [
+        {
+            "id": u.id,
+            "username": u.username,
+            "avatar": u.avatar_url
+        }
+        for u in following
+    ]
+
+    return JsonResponse({"users": data})
+
 
 
 
