@@ -17,49 +17,53 @@
         </div>
       </div>
 
-      <div class="layout__body">
+      <div class="layout__body" style="display:flex; flex-direction:column; height:70vh;">
 
-        <!-- SEARCH BAR -->
-        <form method="GET" action="{% url 'activity' %}" style="margin-bottom:20px;">
-          <input type="text"
-                 name="q"
-                 value="{{ search_query }}"
-                 placeholder="Search by username, room, message..."
-                 style="width:100%;padding:10px;border-radius:8px;border:none;">
-        </form>
+  <!-- SEARCH BAR (fixed at top) -->
+  <form method="GET" action="{% url 'activity' %}" style="margin-bottom:15px;">
+    <input type="text"
+           name="q"
+           value="{{ search_query }}"
+           placeholder="Search by username, room, message..."
+           style="width:100%;padding:10px;border-radius:8px;border:none;">
+  </form>
 
-        {% for message in room_messages %}
-        <div class="activities__box">
+  <!-- SCROLLABLE ACTIVITY SECTION -->
+  <div style="flex:1; overflow-y:auto; padding-right:5px;">
 
-          <div class="activities__boxHeader roomListRoom__header">
-            <a href="{% url 'user-profile' message.user.id %}" class="roomListRoom__author">
-              <div class="avatar avatar--small">
-                <img src="{{message.user.avatar_url}}" />
-              </div>
-              <p>
-                @{{message.user.username}}
-                <span>{{message.created|timesince}} ago</span>
-              </p>
-            </a>
+    {% for message in room_messages %}
+    <div class="activities__box">
+
+      <div class="activities__boxHeader roomListRoom__header">
+        <a href="{% url 'user-profile' message.user.id %}" class="roomListRoom__author">
+          <div class="avatar avatar--small">
+            <img src="{{message.user.avatar_url}}" />
           </div>
-
-          <div class="activities__boxContent">
-            <p>
-              replied to post
-              “<a href="{% url 'room' message.room.id %}">
-                {{message.room}}
-              </a>”
-            </p>
-
-            <div class="activities__boxRoomContent">
-              {{message.body}}
-            </div>
-          </div>
-
-        </div>
-        {% endfor %}
-
+          <p>
+            @{{message.user.username}}
+            <span>{{message.created|timesince}} ago</span>
+          </p>
+        </a>
       </div>
+
+      <div class="activities__boxContent">
+        <p>
+          replied to post
+          “<a href="{% url 'room' message.room.id %}">
+            {{message.room}}
+          </a>”
+        </p>
+
+        <div class="activities__boxRoomContent">
+          {{message.body}}
+        </div>
+      </div>
+
+    </div>
+    {% endfor %}
+
+  </div>
+</div>
     </div>
 
   </div>
