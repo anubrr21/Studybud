@@ -1272,3 +1272,32 @@ a {
   padding: 10px;
 }
 
+.layout__box {
+  margin-top: 20px;
+}
+.notifications-scroll {
+  max-height: 70vh;
+  overflow-y: auto;
+  padding-right: 6px;
+}
+
+.activity-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.activities__box {
+  transition: background 0.2s ease;
+}
+
+.activities__box:hover {
+  background: rgba(255,255,255,0.05);
+}
+
+.activities__box.unread {
+  border-left: 3px solid #4da3ff;
+}
+
+.highlight {
+  color: #4da3ff;
+}

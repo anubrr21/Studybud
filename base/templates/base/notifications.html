@@ -12,71 +12,79 @@
         </div>
       </div>
 
-      <div class="layout__body">
+      <!-- Scrollable Body -->
+      <div class="layout__body notifications-scroll">
 
-        {% for notification in notifications %}
+        {% if notifications %}
 
-          {% if notification.type == "follow" %}
-            <a href="{% url 'user-profile' notification.sender.id %}" 
-               class="notification-link">
-          
-          {% elif notification.type == "comment" %}
-            <a href="{% url 'room' notification.room.id %}" 
-               class="notification-link">
-          
-          {% elif notification.type == "join" %}
-            <a href="{% url 'room' notification.room.id %}" 
-               class="notification-link">
-          
-          {% elif notification.type == "like" %}
-            <a href="{% url 'room' notification.room.id %}" 
-               class="notification-link">
-          {% endif %}
+          {% for notification in notifications %}
 
-            <!-- 👇 Use class instead of inline logic -->
-            <div class="notification-item {% if not notification.is_read %}unread{% endif %}">
+            {% if notification.type == "follow" %}
+              {% url 'user-profile' notification.sender.id as notif_url %}
+            {% elif notification.type == "comment" %}
+              {% url 'room' notification.room.id as notif_url %}
+            {% elif notification.type == "join" %}
+              {% url 'room' notification.room.id as notif_url %}
+            {% elif notification.type == "like" %}
+              {% url 'room' notification.room.id as notif_url %}
+            {% endif %}
 
-              <p class="notification-text">
+            <a href="{{ notif_url }}" class="activity-link">
 
-                <strong>@{{ notification.sender.username }}</strong>
+              <div class="activities__box {% if not notification.is_read %}unread{% endif %}">
 
-                {% if notification.type == "follow" %}
-                  started following you
-                {% elif notification.type == "comment" %}
-                  commented in "<strong>{{ notification.room.name }}</strong>"
-                {% elif notification.type == "join" %}
-                  joined "<strong>{{ notification.room.name }}</strong>"
-                {% elif notification.type == "like" %}
-                  liked "<strong>{{ notification.room.name }}</strong>"
+                <!-- Header -->
+                <div class="activities__boxHeader roomListRoom__header">
+
+                  <div class="avatar avatar--small">
+                    <img src="{{ notification.sender.avatar_url }}" />
+                  </div>
+
+                  <p>
+                    <strong>@{{ notification.sender.username }}</strong>
+
+                    {% if notification.type == "follow" %}
+                      started following you
+                    {% elif notification.type == "comment" %}
+                      commented in 
+                      "<span class="highlight">{{ notification.room.name }}</span>"
+                    {% elif notification.type == "join" %}
+                      joined 
+                      "<span class="highlight">{{ notification.room.name }}</span>"
+                    {% elif notification.type == "like" %}
+                      liked 
+                      "<span class="highlight">{{ notification.room.name }}</span>"
+                    {% endif %}
+
+                    <span>{{ notification.created|timesince }} ago</span>
+                  </p>
+
+                </div>
+
+                <!-- Comment Preview -->
+                {% if notification.type == "comment" %}
+                  {% with notification.room.message_set.last as last_message %}
+                    {% if last_message %}
+                      <div class="activities__boxRoomContent">
+                        {{ last_message.body|truncatechars:100 }}
+                      </div>
+                    {% endif %}
+                  {% endwith %}
                 {% endif %}
 
-              </p>
+              </div>
 
-              {% if notification.type == "comment" %}
-                {% with notification.room.message_set.last as last_message %}
-                  {% if last_message %}
-                    <div class="notification-preview">
-                      {{ last_message.body|truncatechars:60 }}
-                    </div>
-                  {% endif %}
-                {% endwith %}
-              {% endif %}
+            </a>
 
-              <small class="notification-time">
-                {{ notification.created|timesince }} ago
-              </small>
+          {% endfor %}
 
-            </div>
-
-          </a>
-
-        {% empty %}
-          <p style="color:black;">No notifications yet.</p>
-        {% endfor %}
+        {% else %}
+          <p style="padding:15px;">No notifications yet.</p>
+        {% endif %}
 
         <div style="text-align:center; padding:15px;">
           <a href="{% url 'mark-notifications-read' %}" 
-             style="color:black; font-weight:600;">
+             style="font-weight:600;">
             Mark all as read
           </a>
         </div>
