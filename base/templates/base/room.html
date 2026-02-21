@@ -146,13 +146,17 @@
         <!--  End -->
       </div>
     </main>
-    <script src="script.js">
-      const form = document.getElementById("message-form");
+    <script>  
+    
+const form = document.getElementById("message-form");
 
 form.addEventListener("submit", function(e) {
   e.preventDefault();
 
-  const body = form.querySelector("input[name='body']").value;
+  const bodyInput = form.querySelector("input[name='body']");
+  const body = bodyInput.value.trim();
+
+  if (!body) return;
 
   fetch(window.location.href, {
     method: "POST",
@@ -167,19 +171,25 @@ form.addEventListener("submit", function(e) {
   .then(res => res.json())
   .then(data => {
 
-    const messagesContainer = document.querySelector(".room__conversation");
+    const threads = document.querySelector(".threads");
 
-    messagesContainer.insertAdjacentHTML("beforeend", `
-      <div class="message">
-        <strong>@${data.username}</strong>
-        <span>just now</span>
-        <p>${data.body}</p>
+    threads.insertAdjacentHTML("beforeend", `
+      <div class="thread">
+        <div class="thread__top">
+          <div class="thread__author">
+            <span>@${data.username}</span>
+            <span class="thread__date">just now</span>
+          </div>
+        </div>
+        <div class="thread__details">
+          ${data.body}
+        </div>
       </div>
     `);
 
     form.reset();
-    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    threads.scrollTop = threads.scrollHeight;
   });
 });
-    </script>
-{% endblock content %}
+</script>   
+  {% endblock content %}
