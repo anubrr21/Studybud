@@ -76,7 +76,7 @@ form.addEventListener("submit", function(e) {
 
   const body = form.querySelector("input[name='body']").value;
 
-  fetch("", {
+  fetch(window.location.href, {
     method: "POST",
     headers: {
       "X-CSRFToken": "{{ csrf_token }}",
