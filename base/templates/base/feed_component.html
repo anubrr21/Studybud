@@ -40,7 +40,7 @@
 
     <!-- RIGHT SIDE (LIKE) -->
     <div style="display:flex; align-items:center; gap:6px; cursor:pointer;"
-         onclick="likeRoom({{ room.id }}, this)">
+         onclick="likeRoom('{{ room.id }}', this)">
 
         <span class="heart-icon">
             {% if request.user in room.likes.all %}
