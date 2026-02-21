@@ -67,3 +67,40 @@ if (photoInput)
 // Scroll to Bottom
 const conversationThread = document.querySelector(".room__box");
 if (conversationThread) conversationThread.scrollTop = conversationThread.scrollHeight;
+
+
+const form = document.getElementById("message-form");
+
+form.addEventListener("submit", function(e) {
+  e.preventDefault();
+
+  const body = form.querySelector("input[name='body']").value;
+
+  fetch("", {
+    method: "POST",
+    headers: {
+      "X-CSRFToken": "{{ csrf_token }}",
+      "X-Requested-With": "XMLHttpRequest"
+    },
+    body: new URLSearchParams({
+      body: body
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+
+    const messagesContainer = document.querySelector(".room__conversation");
+
+    messagesContainer.insertAdjacentHTML("beforeend", `
+      <div class="message">
+        <strong>@${data.username}</strong>
+        <span>just now</span>
+        <p>${data.body}</p>
+      </div>
+    `);
+
+    form.reset();
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+  });
+});
+
