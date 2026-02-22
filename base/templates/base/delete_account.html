@@ -1,0 +1,51 @@
+{% extends 'main.html' %}
+
+{% block content %}
+<div class="layout">
+  <div class="container">
+    <div class="layout__box">
+
+      <div class="layout__boxHeader">
+        <div class="layout__boxTitle">
+          <h3>Delete Account</h3>
+        </div>
+      </div>
+
+      <div class="layout__body">
+
+        <p style="color:#ff5c5c; font-weight:600;">
+          This action is permanent. Enter your password to confirm.
+        </p>
+
+        {% if messages %}
+          {% for message in messages %}
+            <p style="color:#ff5c5c; margin-top:10px;">
+              {{ message }}
+            </p>
+          {% endfor %}
+        {% endif %}
+
+        <form method="POST" style="margin-top:20px;">
+          {% csrf_token %}
+
+          <label>Password</label>
+          <input type="password" name="password" required 
+                 style="width:100%; padding:10px; margin-top:5px;">
+
+          <div style="margin-top:20px; display:flex; gap:15px;">
+            <button type="submit" class="btn btn--danger">
+              Confirm Delete
+            </button>
+
+            <a href="{% url 'home' %}" class="btn btn--dark">
+              Cancel
+            </a>
+          </div>
+
+        </form>
+
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

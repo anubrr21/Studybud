@@ -363,6 +363,27 @@ def edit_message(request, pk):
 
     return JsonResponse({"error": "Invalid request"}, status=400)
 
+@login_required(login_url='login')
+def delete_account(request):
+
+    if request.method == "POST":
+        password = request.POST.get("password")
+
+        user = authenticate(
+            request,
+            email=request.user.email,
+            password=password
+        )
+
+        if user is not None:
+            request.user.delete()
+            logout(request)
+            return redirect('home')
+        else:
+            messages.error(request, "Incorrect password. Try again.")
+
+    return render(request, 'base/delete_account.html')
+
 
 
 

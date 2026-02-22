@@ -21,6 +21,7 @@ urlpatterns=[
     path('profile-followers/<int:pk>/', views.profile_followers, name='profile-followers'),
     path('profile-following/<int:pk>/', views.profile_following, name='profile-following'),
     path('edit-message/<int:pk>/', views.edit_message, name='edit-message'),
+    path('delete-account/', views.delete_account, name='delete-account'),
 
 
 ]

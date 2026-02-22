@@ -120,12 +120,24 @@
           </svg>
         </button>
       </div>
+<div class="dropdown-menu">
 
-      <div class="dropdown-menu">
-        <a href="{% url 'update-user' %}" class="dropdown-link">Settings</a>
-        <a href="{% url 'logout' %}" class="dropdown-link">Logout</a>
-      </div>
+  <a href="{% url 'user-profile' request.user.id %}">Profile</a>
 
+  <a href="{% url 'update-user' %}">Settings</a>
+
+  <a href="{% url 'notifications' %}">Notifications</a>
+
+  <hr style="opacity:0.2; margin:8px 0;">
+
+  <a href="{% url 'logout' %}">Logout</a>
+
+  <a href="{% url 'delete-account' %}" style="color:#ff5c5c;">
+    Delete Account
+  </a>
+
+</div>
+    
       {% else %}
 
       <a href="{% url 'login' %}">
