@@ -160,6 +160,7 @@ form.addEventListener("submit", function(e) {
 
   fetch(window.location.href, {
     method: "POST",
+    credentials:"same-origin",
     headers: {
       "X-CSRFToken": "{{ csrf_token }}",
       "X-Requested-With": "XMLHttpRequest"
