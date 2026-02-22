@@ -96,9 +96,14 @@
                     </div>
                     {% if request.user == message.user %}
                     <div style="display:flex; gap:10px; align-items:center;">
-  <a href="#" class="edit-btn" data-id="{{ message.id }}">
-    ✏️
-  </a>
+ <a href="#" class="edit-btn" data-id="{{ message.id }}">
+  <div class="thread__delete">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#b2bdbd" stroke-width="2">
+      <path d="M12 20h9"/>
+      <path d="M16.5 3.5l4 4L7 21H3v-4L16.5 3.5z"/>
+    </svg>
+  </div>
+</a>
                     <a href="{% url 'delete-message' message.id %}"> 
                     <div class="thread__delete">
                       <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
@@ -224,32 +229,37 @@ form.addEventListener("submit", function(e) {
 // 🔥 EDIT + SAVE LOGIC (Event Delegation)
 document.addEventListener("click", function(e) {
 
-  // Edit click
-  if (e.target.classList.contains("edit-btn")) {
+  // EDIT CLICK
+  if (e.target.closest(".edit-btn")) {
+
     e.preventDefault();
 
-    const messageId = e.target.dataset.id;
-    const thread = e.target.closest(".thread");
+    const button = e.target.closest(".edit-btn");
+    const messageId = button.dataset.id;
+    const thread = button.closest(".thread");
     const details = thread.querySelector(".thread__details");
-    const oldText = details.innerText;
+    const oldText = details.innerText.trim();
 
     details.innerHTML = `
-      <input type="text" value="${oldText}" class="edit-input" />
-      <button class="save-edit" data-id="${messageId}">Save</button>
+      <div class="edit-wrapper">
+        <input type="text" value="${oldText}" class="edit-input" />
+        <button class="save-edit" data-id="${messageId}">Save</button>
+      </div>
     `;
   }
 
-  // Save click
+  // SAVE CLICK
   if (e.target.classList.contains("save-edit")) {
 
     const messageId = e.target.dataset.id;
-    const input = e.target.previousElementSibling;
+    const input = e.target.closest(".edit-wrapper").querySelector(".edit-input");
     const newText = input.value.trim();
+
     if (!newText) return;
 
     fetch(`/edit-message/${messageId}/`, {
       method: "POST",
-      credentials:"same-origin",
+      credentials: "same-origin",
       headers: {
         "X-CSRFToken": "{{ csrf_token }}",
         "X-Requested-With": "XMLHttpRequest"
@@ -260,13 +270,24 @@ document.addEventListener("click", function(e) {
     })
     .then(res => res.json())
     .then(data => {
-      const thread = e.target.closest(".thread");
-      const details = thread.querySelector(".thread__details");
-      details.innerHTML = data.body;
+
+      if (data.success) {
+        const thread = e.target.closest(".thread");
+        const details = thread.querySelector(".thread__details");
+        details.innerHTML = data.body;
+      } else {
+        alert("Edit failed.");
+      }
+
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Something went wrong.");
     });
   }
 
 });
+
 
 </script>
     

@@ -350,15 +350,17 @@ def edit_message(request, pk):
 
     if request.method == "POST":
         new_body = request.POST.get("body")
-        message.body = new_body
-        message.save()
 
-        return JsonResponse({
-            "body": message.body
-        })
+        if new_body:
+            message.body = new_body
+            message.save()
+
+            return JsonResponse({
+                "success": True,
+                "body": message.body
+            })
 
     return JsonResponse({"error": "Invalid request"}, status=400)
-
 
 
 
