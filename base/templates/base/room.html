@@ -197,8 +197,13 @@ form.addEventListener("submit", function(e) {
 
           <div style="display:flex; gap:10px; align-items:center;">
             <a href="#" class="edit-btn" data-id="${data.id}">
-              ✏️
-            </a>
+  <div class="thread__delete">
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#b2bdbd" stroke-width="2">
+      <path d="M12 20h9"/>
+      <path d="M16.5 3.5l4 4L7 21H3v-4L16.5 3.5z"/>
+    </svg>
+  </div>
+</a>
 
             <a href="/delete-message/${data.id}/">
               <div class="thread__delete">

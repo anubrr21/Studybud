@@ -124,6 +124,7 @@ def room(request, pk):
             # AJAX response
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({
+                     "id": message.id,
                     "username": message.user.username,
                     "user_id":message.user.id,
                     "avatar":message.user.avatar_url,
