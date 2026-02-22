@@ -81,7 +81,7 @@ def home(request):
     context={'rooms':rooms,'topics':topics,
     'room_count':room_count,'room_messages':room_messages,'suggested_users':suggested_users}#creating a context dictinary to pass the rooms to the template
     return render(request,'base/home.html',context)#calling the rooms dictionary to home.html
-@login_required(login_url='login')
+
 def room(request, pk):
     room = Room.objects.get(id=pk)
     room_messages = room.message_set.all()
