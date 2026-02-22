@@ -125,7 +125,10 @@ def room(request, pk):
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({
                     "username": message.user.username,
+                    "user_id":message.user.id,
+                    "avatar":message.user.avatar_url,
                     "body": message.body
+                    
                 })
 
         return redirect('room', pk=room.id)
