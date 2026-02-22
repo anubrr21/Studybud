@@ -95,6 +95,10 @@
                       <span class="thread__date">{{message.created|timesince}} ago</span>
                     </div>
                     {% if request.user == message.user %}
+                    <div style="display:flex; gap:10px; align-items:center;">
+  <a href="#" class="edit-btn" data-id="{{ message.id }}">
+    ✏️
+  </a>
                     <a href="{% url 'delete-message' message.id %}"> 
                     <div class="thread__delete">
                       <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
@@ -146,8 +150,8 @@
         <!--  End -->
       </div>
     </main>
-    <script>  
-    
+    <script>
+
 const form = document.getElementById("message-form");
 
 form.addEventListener("submit", function(e) {
@@ -155,7 +159,6 @@ form.addEventListener("submit", function(e) {
 
   const bodyInput = form.querySelector("input[name='body']");
   const body = bodyInput.value.trim();
-
   if (!body) return;
 
   fetch(window.location.href, {
@@ -174,42 +177,97 @@ form.addEventListener("submit", function(e) {
 
     const threads = document.querySelector(".threads");
 
-   threads.insertAdjacentHTML("beforeend", `
-  <div class="thread">
-    <div class="thread__top">
-      <div class="thread__author">
-        <a href="/profile/${data.user_id}/" class="thread__authorInfo">
-          <div class="avatar avatar--small">
-            <img src="${data.avatar}" />
+    threads.insertAdjacentHTML("beforeend", `
+      <div class="thread">
+        <div class="thread__top">
+          <div class="thread__author">
+            <a href="/profile/${data.user_id}/" class="thread__authorInfo">
+              <div class="avatar avatar--small">
+                <img src="${data.avatar}" />
+              </div>
+              <span>@${data.username}</span>
+            </a>
+            <span class="thread__date">just now</span>
           </div>
-          <span>@${data.username}</span>
-        </a>
-        <span class="thread__date">just now</span>
-      </div>
 
-      <a href="/delete-message/${data.id}/">
-        <div class="thread__delete">
-          <svg version="1.1" xmlns="http://www.w3.org/2000/svg"
-            width="32" height="32" viewBox="0 0 32 32">
-            <title>remove</title>
-            <path d="M27.314 6.019l-1.333-1.333-9.98 9.981-9.981-9.981-1.333 1.333 
-            9.981 9.981-9.981 9.98 1.333 1.333 9.981-9.98 9.98 9.98 
-            1.333-1.333-9.98-9.98 9.98-9.981z"></path>
-          </svg>
+          <div style="display:flex; gap:10px; align-items:center;">
+            <a href="#" class="edit-btn" data-id="${data.id}">
+              ✏️
+            </a>
+
+            <a href="/delete-message/${data.id}/">
+              <div class="thread__delete">
+                <svg version="1.1" xmlns="http://www.w3.org/2000/svg"
+                  width="32" height="32" viewBox="0 0 32 32">
+                  <title>remove</title>
+                  <path d="M27.314 6.019l-1.333-1.333-9.98 9.981-9.981-9.981-1.333 1.333 
+                  9.981 9.981-9.981 9.98 1.333 1.333 9.981-9.98 9.98 9.98 
+                  1.333-1.333-9.98-9.98 9.98-9.981z"></path>
+                </svg>
+              </div>
+            </a>
+          </div>
         </div>
-      </a>
 
-    </div>
-
-    <div class="thread__details">
-      ${data.body}
-    </div>
-  </div>
-`);
+        <div class="thread__details">
+          ${data.body}
+        </div>
+      </div>
+    `);
 
     form.reset();
     threads.scrollTop = threads.scrollHeight;
   });
 });
-</script>   
+
+
+// 🔥 EDIT + SAVE LOGIC (Event Delegation)
+document.addEventListener("click", function(e) {
+
+  // Edit click
+  if (e.target.classList.contains("edit-btn")) {
+    e.preventDefault();
+
+    const messageId = e.target.dataset.id;
+    const thread = e.target.closest(".thread");
+    const details = thread.querySelector(".thread__details");
+    const oldText = details.innerText;
+
+    details.innerHTML = `
+      <input type="text" value="${oldText}" class="edit-input" />
+      <button class="save-edit" data-id="${messageId}">Save</button>
+    `;
+  }
+
+  // Save click
+  if (e.target.classList.contains("save-edit")) {
+
+    const messageId = e.target.dataset.id;
+    const input = e.target.previousElementSibling;
+    const newText = input.value.trim();
+    if (!newText) return;
+
+    fetch(`/edit-message/${messageId}/`, {
+      method: "POST",
+      credentials:"same-origin",
+      headers: {
+        "X-CSRFToken": "{{ csrf_token }}",
+        "X-Requested-With": "XMLHttpRequest"
+      },
+      body: new URLSearchParams({
+        body: newText
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      const thread = e.target.closest(".thread");
+      const details = thread.querySelector(".thread__details");
+      details.innerHTML = data.body;
+    });
+  }
+
+});
+
+</script>
+    
   {% endblock content %}

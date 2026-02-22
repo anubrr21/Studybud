@@ -20,6 +20,7 @@ urlpatterns=[
     path('follow/<int:pk>/', views.toggle_follow, name='toggle-follow'),
     path('profile-followers/<int:pk>/', views.profile_followers, name='profile-followers'),
     path('profile-following/<int:pk>/', views.profile_following, name='profile-following'),
+    path('edit-message/<int:pk>/', views.edit_message, name='edit-message'),
 
 
 ]

@@ -341,6 +341,24 @@ def profile_following(request, pk):
 
     return JsonResponse({"users": data})
 
+@login_required(login_url='login')
+def edit_message(request, pk):
+    message = Message.objects.get(id=pk)
+
+    if request.user != message.user:
+        return JsonResponse({"error": "Unauthorized"}, status=403)
+
+    if request.method == "POST":
+        new_body = request.POST.get("body")
+        message.body = new_body
+        message.save()
+
+        return JsonResponse({
+            "body": message.body
+        })
+
+    return JsonResponse({"error": "Invalid request"}, status=400)
+
 
 
 
