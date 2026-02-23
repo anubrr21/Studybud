@@ -7,7 +7,7 @@ def delete_orphan_rooms(apps, schema_editor):
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('base', '0007_auto_20260223_0237'),
+        ('base', '0006_alter_room_host'),
     ]
 
     operations = [
