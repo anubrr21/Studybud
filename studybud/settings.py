@@ -131,6 +131,12 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 ASGI_APPLICATION = 'studybud.asgi.application'
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://studybud-kxsv.onrender.com",
+]
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
 
 
 
