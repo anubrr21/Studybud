@@ -69,5 +69,12 @@ const conversationThread = document.querySelector(".room__box");
 if (conversationThread) conversationThread.scrollTop = conversationThread.scrollHeight;
 
 
+document.querySelector(".bell").addEventListener("click", function(){
+    const dropdown = document.querySelector(".notification-dropdown");
+    dropdown.style.display =
+        dropdown.style.display === "block" ? "none" : "block";
+});
+
+
 
 
