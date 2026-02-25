@@ -58,6 +58,9 @@ class ChatConsumer(AsyncWebsocketConsumer):
         Message = apps.get_model('base', 'Message')
 
         room = Room.objects.get(id=self.room_id)
+        if user not in room.participants.all():
+          room.participants.add(user)
+
 
         return Message.objects.create(
             user=user,
