@@ -1301,3 +1301,18 @@ a {
 .highlight {
   color: #4da3ff;
 }
+.dropdown-menu {
+  min-width: 200px;
+  padding: 10px 0;
+  border-radius: 12px;
+}
+
+.dropdown-menu a {
+  display: block;
+  padding: 10px 18px;
+  font-size: 14px;
+}
+
+.dropdown-menu a:hover {
+  background: rgba(255,255,255,0.05);
+}
