@@ -55,7 +55,7 @@ class Topic(models.Model):#topic model for different topics of rooms
       return self.name#string represntation of the topic model 
  #creating a room first
 class Room(models.Model): #a topic can have many rooms but a room can have only one topic(hence foreign key relationship)
- host=models.ForeignKey(User,on_delete=models.SET_NULL,null=True)#user who created the room.one to many relatioship.one user can create many rooms
+ host=models.ForeignKey(User,on_delete=models.CASCADE)#user who created the room.one to many relatioship.one user can create many rooms
  topic=models.ForeignKey(Topic,on_delete=models.SET_NULL,null=True)#many to one relationship.one topic can have many rooms but one room can only have one topic
  name=models.CharField(max_length=200)
  description=models.TextField(null=True,blank=True)#database cannot have an instance of the model here and this can be left blank
