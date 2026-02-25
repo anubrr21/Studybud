@@ -1,5 +1,8 @@
 import json
 from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.db import database_sync_to_async
+from base.models import Room, Message
+
 
 class ChatConsumer(AsyncWebsocketConsumer):
 
@@ -22,20 +25,40 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def receive(self, text_data):
         data = json.loads(text_data)
-        message = data['message']
-        username = self.scope["user"].username
+        message_text = data['message']
+        user = self.scope["user"]
 
+        # 🔥 Save message to DB
+        message = await self.save_message(user, message_text)
+
+        # 🔥 Broadcast full message data
         await self.channel_layer.group_send(
             self.room_group_name,
             {
                 'type': 'chat_message',
-                'message': message,
-                'username': username
+                'message': message.body,
+                'username': message.user.username,
+                'user_id': message.user.id,
+                'message_id': message.id,
+                'avatar': message.user.avatar_url,
             }
         )
 
     async def chat_message(self, event):
         await self.send(text_data=json.dumps({
             'message': event['message'],
-            'username': event['username']
+            'username': event['username'],
+            'user_id': event['user_id'],
+            'message_id': event['message_id'],
+            'avatar': event['avatar'],
+            'current_user_id': self.scope["user"].id,
         }))
+
+    @database_sync_to_async
+    def save_message(self, user, message_text):
+        room = Room.objects.get(id=self.room_id)
+        return Message.objects.create(
+            user=user,
+            room=room,
+            body=message_text
+        )

@@ -172,18 +172,38 @@ socket.onmessage = function(e) {
   const threads = document.querySelector(".threads");
 
   threads.insertAdjacentHTML("beforeend", `
-    <div class="thread">
-      <div class="thread__top">
-        <div class="thread__author">
+  <div class="thread">
+    <div class="thread__top">
+      <div class="thread__author">
+        <a href="/profile/${data.user_id}/" class="thread__authorInfo">
+          <div class="avatar avatar--small">
+            <img src="${data.avatar}" />
+          </div>
           <span>@${data.username}</span>
-          <span class="thread__date">just now</span>
-        </div>
+        </a>
+        <span class="thread__date">just now</span>
       </div>
-      <div class="thread__details">
-        ${data.message}
+
+      ${data.user_id === data.current_user_id ? `
+      <div style="display:flex; gap:10px; align-items:center;">
+        <a href="#" class="edit-btn" data-id="${data.message_id}">
+          <div class="thread__delete">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#b2bdbd" stroke-width="2">
+              <path d="M12 20h9"/>
+              <path d="M16.5 3.5l4 4L7 21H3v-4L16.5 3.5z"/>
+            </svg>
+          </div>
+        </a>
       </div>
+      ` : ''}
+
     </div>
-  `);
+
+    <div class="thread__details">
+      ${data.message}
+    </div>
+  </div>
+`);
 
   threads.scrollTop = threads.scrollHeight;
 };
