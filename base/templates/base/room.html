@@ -1,7 +1,7 @@
 {% extends 'main.html' %}
 
 {% block content %}
-    <main class="profile-page layout layout--2">
+    <main class="layout layout--2">
       <div class="container">
         <!-- Room Start -->
         <div class="room">
@@ -217,9 +217,7 @@ socket.onmessage = function(e) {
   threads.scrollTop = threads.scrollHeight;
 };
 // 🔥 Update participant count dynamically
-const countElement = document.querySelector(".participants__top span");
-let currentCount = parseInt(countElement.innerText.match(/\d+/)[0]);
-countElement.innerText = `(${currentCount + 1}) Joined`;
+
 
 // 🔥 Send message through WebSocket
 document.getElementById("message-form").onsubmit = function(e) {
