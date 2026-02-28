@@ -1308,15 +1308,18 @@ a {
 }
 
 
+/* FORCE 2-COLUMN LAYOUT */
 .layout.layout--2 > .container {
-  max-width: 1280px !important;
-  width: 100% !important;
+  display: flex !important;
+  gap: 2rem;
 }
 
 .layout.layout--2 > .container > .room {
-  flex: 0 0 72% !important;
+  flex: 0 0 70% !important;
+  max-width: 70% !important;
 }
 
 .layout.layout--2 > .container > .participants {
-  flex: 0 0 25% !important;
+  flex: 0 0 28% !important;
+  max-width: 28% !important;
 }
