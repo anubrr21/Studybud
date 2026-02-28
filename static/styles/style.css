@@ -966,11 +966,11 @@ a {
 .room__header {
   max-height: 30vh;
   overflow-y: auto;
-  position: absolute;
-  width: 95%;
+  
+  
   background: var(--color-dark);
-  z-index: 999;
-  top: 4.4rem;
+  
+  
   padding-top: 2rem;
   padding-bottom: 1rem;
 }
@@ -1058,7 +1058,6 @@ a {
   border-radius: 0.7rem;
   overflow-y: auto;
   height: 100%;
-  margin-top: 28vh;
   padding: 0 2rem 4rem 2rem;
 }
 

@@ -216,6 +216,10 @@ socket.onmessage = function(e) {
 
   threads.scrollTop = threads.scrollHeight;
 };
+// 🔥 Update participant count dynamically
+const countElement = document.querySelector(".participants__top span");
+let currentCount = parseInt(countElement.innerText.match(/\d+/)[0]);
+countElement.innerText = `(${currentCount + 1}) Joined`;
 
 // 🔥 Send message through WebSocket
 document.getElementById("message-form").onsubmit = function(e) {
@@ -241,6 +245,57 @@ socket.onopen = function() {
 socket.onclose = function() {
   console.log("WebSocket Disconnected");
 };
+// 🔥 EDIT + SAVE LOGIC
+document.addEventListener("click", function(e) {
+
+  // EDIT CLICK
+  if (e.target.closest(".edit-btn")) {
+    e.preventDefault();
+
+    const button = e.target.closest(".edit-btn");
+    const messageId = button.dataset.id;
+    const thread = button.closest(".thread");
+    const details = thread.querySelector(".thread__details");
+    const oldText = details.innerText.trim();
+
+    details.innerHTML = `
+      <div class="edit-wrapper">
+        <input type="text" value="${oldText}" class="edit-input" />
+        <button class="save-edit" data-id="${messageId}">Save</button>
+      </div>
+    `;
+  }
+
+  // SAVE CLICK
+  if (e.target.classList.contains("save-edit")) {
+
+    const messageId = e.target.dataset.id;
+    const input = e.target.closest(".edit-wrapper").querySelector(".edit-input");
+    const newText = input.value.trim();
+
+    if (!newText) return;
+
+    fetch(`/edit-message/${messageId}/`, {
+      method: "POST",
+      credentials: "same-origin",
+      headers: {
+        "X-CSRFToken": "{{ csrf_token }}",
+        "X-Requested-With": "XMLHttpRequest"
+      },
+      body: new URLSearchParams({
+        body: newText
+      })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        const thread = e.target.closest(".thread");
+        thread.querySelector(".thread__details").innerHTML = data.body;
+      }
+    });
+  }
+
+});
 
 </script>
     

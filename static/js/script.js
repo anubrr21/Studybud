@@ -69,11 +69,15 @@ const conversationThread = document.querySelector(".room__box");
 if (conversationThread) conversationThread.scrollTop = conversationThread.scrollHeight;
 
 
-document.querySelector(".bell").addEventListener("click", function(){
+const bell = document.querySelector(".bell");
+
+if (bell) {
+  bell.addEventListener("click", function(){
     const dropdown = document.querySelector(".notification-dropdown");
     dropdown.style.display =
-        dropdown.style.display === "block" ? "none" : "block";
-});
+      dropdown.style.display === "block" ? "none" : "block";
+  });
+}
 
 
 
