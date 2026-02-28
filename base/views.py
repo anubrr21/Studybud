@@ -99,9 +99,7 @@ def room(request, pk):
                 body=body
             )
 
-            # Check participant
-            is_new_participant = request.user not in room.participants.all()
-            room.participants.add(request.user)
+          
 
             # Comment notification
             if room.host != request.user:
@@ -113,13 +111,7 @@ def room(request, pk):
                 )
 
             # Join notification
-            if is_new_participant and room.host != request.user:
-                Notification.objects.create(
-                    user=room.host,
-                    sender=request.user,
-                    room=room,
-                    type='join'
-                )
+            
 
             # AJAX response
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':

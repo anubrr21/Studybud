@@ -54,16 +54,27 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     @database_sync_to_async
     def save_message(self, user, message_text):
-        Room = apps.get_model('base', 'Room')
-        Message = apps.get_model('base', 'Message')
+     Room = apps.get_model('base', 'Room')
+     Message = apps.get_model('base', 'Message')
+     Notification = apps.get_model('base', 'Notification')
 
-        room = Room.objects.get(id=self.room_id)
-       
-        room.participants.add(user)
+     room = Room.objects.get(id=self.room_id)
 
+     room.participants.add(user)
 
-        return Message.objects.create(
-            user=user,
+     message = Message.objects.create(
+        user=user,
+        room=room,
+        body=message_text
+    )
+
+    # 🔔 CREATE COMMENT NOTIFICATION
+     if room.host != user:
+        Notification.objects.create(
+            user=room.host,
+            sender=user,
             room=room,
-            body=message_text
+            type='comment'
         )
+
+     return message
