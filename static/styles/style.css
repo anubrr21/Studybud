@@ -964,15 +964,7 @@ a {
 }
 
 .room__header {
-  max-height: 30vh;
-  overflow-y: auto;
-  
-  
-  background: var(--color-dark);
-  
-  
-  padding-top: 2rem;
-  padding-bottom: 1rem;
+  flex-shrink: 0;
 }
 
 @media screen and (max-width: 500px) {
@@ -983,11 +975,10 @@ a {
 }
 
 .room__box {
-  padding-left: 2rem;
-  padding-right: 2rem;
-  height: 80.5vh;
-  /* overflow-y: auto; */
-  padding-bottom: 0;
+  display: flex;
+  flex-direction: column;
+  height: 80vh;
+  padding: 2rem;
 }
 
 @media screen and (max-width: 500px) {
@@ -1042,9 +1033,9 @@ a {
 }
 
 .room__conversation {
-  margin-top: 1rem;
-  margin-bottom: 4rem;
-  height: 64%;
+  flex:1;
+  overflow:hidden;
+  
 }
 
 .threads h3 {
