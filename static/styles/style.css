@@ -1308,16 +1308,15 @@ a {
 }
 
 
-.layout > .container {
-  display: flex !important;
-  justify-content: space-between !important;
-  align-items: flex-start !important;
+.layout.layout--2 > .container {
+  max-width: 1280px !important;
+  width: 100% !important;
 }
 
-.layout--2 > .container > div:first-child {
+.layout.layout--2 > .container > .room {
   flex: 0 0 72% !important;
 }
 
-.layout--2 > .container > div:last-child {
+.layout.layout--2 > .container > .participants {
   flex: 0 0 25% !important;
 }
