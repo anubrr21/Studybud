@@ -977,8 +977,7 @@ a {
 .room__box {
   display: flex;
   flex-direction: column;
-  height: 80vh;
-  padding: 2rem;
+  flex:1;
 }
 
 @media screen and (max-width: 500px) {
@@ -1034,7 +1033,7 @@ a {
 
 .room__conversation {
   flex:1;
-  overflow:hidden;
+  overflow-y:auto;
 
 }
 
@@ -1307,19 +1306,21 @@ a {
   background: rgba(255,255,255,0.05);
 }
 
-
-/* FORCE 2-COLUMN LAYOUT */
-.layout.layout--2 > .container {
-  display: flex !important;
+.layout--2 > .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
   gap: 2rem;
 }
 
-.layout.layout--2 > .container > .room {
-  flex: 0 0 70% !important;
-  max-width: 70% !important;
+.layout--2 > .container > .room {
+  flex: 0 0 72%;
 }
 
-.layout.layout--2 > .container > .participants {
-  flex: 0 0 28% !important;
-  max-width: 28% !important;
+.layout--2 > .container > .participants {
+  flex: 0 0 26%;
+}
+.room {
+  display: flex;
+  flex-direction: column;
 }
