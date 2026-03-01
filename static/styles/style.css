@@ -977,8 +977,7 @@ a {
 .room__box {
   display: flex;
   flex-direction: column;
-  flex:1;
-  overflow:hidden;
+  height: 100%;
 }
 
 @media screen and (max-width: 500px) {
@@ -1035,6 +1034,7 @@ a {
 .room__conversation {
   flex:1;
   overflow-y:auto;
+  min-height: 0;
 
 }
 
@@ -1305,16 +1305,15 @@ a {
 .dropdown-menu a:hover {
   background: rgba(255,255,255,0.05);
 }
-.room {
-  background: var(--color-dark);
-  max-height: 87.5vh;
-  border-radius: 0.7rem;
-  overflow: hidden;
-  position: relative;
+.layout--2 > .container {
+  display: flex;
+  gap: 2rem;
 }
 
+.layout--2 > .container > .room {
+  flex: 0 0 72%;
+}
 
-.room__conversation {
-  flex: 1;
-  overflow-y: auto;
+.layout--2 > .container > .participants {
+  flex: 0 0 26%;
 }
