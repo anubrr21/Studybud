@@ -1086,11 +1086,14 @@ a {
   font-size: 1.4rem;
   margin-top: 0.5rem;
 }
-
 .room__message {
   padding: 2rem;
-  background: var(--color-dark);
-  flex-shrink: 0;
+  position: absolute;
+  z-index: 111;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: transparent;
 }
 
 .room__message > form > input {
@@ -1302,26 +1305,15 @@ a {
 .dropdown-menu a:hover {
   background: rgba(255,255,255,0.05);
 }
-
-.layout--2 > .container {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 2rem;
-}
-
-.layout--2 > .container > .room {
-  flex: 0 0 72%;
-}
-
-.layout--2 > .container > .participants {
-  flex: 0 0 26%;
-}
 .room {
-  display: flex;
-  flex-direction: column;
-  height: 87.5vh;
+  background: var(--color-dark);
+  max-height: 87.5vh;
+  border-radius: 0.7rem;
+  overflow: hidden;
+  position: relative;
 }
+
+
 .room__conversation {
   flex: 1;
   overflow-y: auto;
