@@ -1324,3 +1324,91 @@ a {
   height: 87.5vh; /* Match your existing max-height */
   position: relative;
 }
+
+/* Fix message box alignment */
+.room {
+  display: flex;
+  flex-direction: column;
+  height: 87.5vh;
+  position: relative;
+  background: var(--color-dark);
+  border-radius: 0.7rem;
+  overflow: hidden;
+}
+
+.room__box {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: calc(100% - 110px); /* Adjust for top bar + message input */
+}
+
+.room__conversation {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding-bottom: 1rem;
+}
+
+.room__message {
+  background: var(--color-dark);
+  padding: 1.5rem 2rem;
+  border-top: 1px solid var(--color-dark-light);
+  width: 100%;
+  position: relative;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+
+.room__message > form {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.room__message > form > input {
+  background-color: var(--color-dark-light);
+  color: var(--color-light);
+  border: none;
+  outline: none;
+  border-radius: 2rem; /* Make it more rounded */
+  height: 4.5rem;
+  width: 100%;
+  padding: 1.2rem 2rem;
+  font-size: 1.4rem;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.room__message > form > input:focus {
+  background-color: var(--color-dark-medium);
+  box-shadow: 0 0 0 2px var(--color-main);
+}
+
+.room__message > form > input::placeholder {
+  color: var(--color-light-gray);
+  font-style: italic;
+}
+
+/* Fix thread padding to prevent overlap */
+.threads {
+  background: var(--color-bg);
+  border-radius: 0.7rem;
+  height: 100%;
+  padding: 1rem 2rem 2rem 2rem;
+  overflow-y: auto;
+}
+
+.thread {
+  border-left: 2px solid var(--color-dark);
+  margin: 1.5rem 0;
+  padding: 1.5rem 2rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 0 0.5rem 0.5rem 0;
+}
+
+.thread:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
