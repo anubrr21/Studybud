@@ -975,9 +975,11 @@ a {
 }
 
 .room__box {
+  flex: 1;
+  overflow: hidden;
   display: flex;
   flex-direction: column;
-  height: 100%;
+  height: calc(100% - 60px); /* Subtract the height of room__top */
 }
 
 @media screen and (max-width: 500px) {
@@ -1087,13 +1089,12 @@ a {
   margin-top: 0.5rem;
 }
 .room__message {
-  padding: 2rem;
-  position: absolute;
-  z-index: 111;
+  position: sticky;
   bottom: 0;
-  left: 0;
-  right: 0;
-  background: transparent;
+  background: var(--color-dark);
+  padding: 1rem 2rem;
+  border-top: 1px solid var(--color-dark-light);
+  z-index: 10;
 }
 
 .room__message > form > input {
@@ -1316,4 +1317,10 @@ a {
 
 .layout--2 > .container > .participants {
   flex: 0 0 26%;
+}
+.room {
+  display: flex;
+  flex-direction: column;
+  height: 87.5vh; /* Match your existing max-height */
+  position: relative;
 }
