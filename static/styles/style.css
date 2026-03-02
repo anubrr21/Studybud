@@ -1456,3 +1456,158 @@ a {
 .thread:hover {
   background: rgba(255, 255, 255, 0.05);
 }
+
+
+
+
+
+
+
+
+
+/* Fix the layout container */
+.layout--2 > .container {
+  display: flex;
+  gap: 2rem;
+  align-items: stretch; /* Changed from flex-start */
+  padding: 0; /* Remove any default padding */
+  margin: 0 auto; /* Center the container */
+  width: 100%;
+}
+
+/* Fix the room container */
+.room {
+  display: flex;
+  flex-direction: column;
+  height: 87.5vh;
+  position: relative;
+  background: var(--color-dark);
+  border-radius: 1rem;
+  overflow: hidden;
+  flex: 0 0 72%; /* Match your existing flex basis */
+  margin: 0; /* Remove any margin */
+  border: none; /* Ensure no border is causing issues */
+}
+
+/* Fix the top bar - this is the key fix */
+.room__top {
+  background: var(--color-dark-light);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  position: relative;
+  border-top-left-radius: 1rem;
+  border-top-right-radius: 1rem;
+  width: 100%; /* Ensure full width */
+  box-sizing: border-box; /* Include padding in width calculation */
+}
+
+/* Fix the room box */
+.room__box {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: calc(100% - 110px);
+  width: 100%; /* Ensure full width */
+  background: var(--color-dark); /* Match background */
+}
+
+/* Fix the header section */
+.room__header {
+  flex-shrink: 0;
+  padding: 1.5rem 2rem; /* Add padding */
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Fix the conversation area */
+.room__conversation {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  width: 100%;
+}
+
+/* Fix threads container */
+.threads {
+  background: var(--color-bg);
+  height: 100%;
+  padding: 1rem 2rem 2rem 2rem;
+  overflow-y: auto;
+  width: 100%;
+  box-sizing: border-box;
+  border-radius: 0; /* Remove border radius here since parent has it */
+}
+
+/* Fix individual thread */
+.thread {
+  border-left: 2px solid var(--color-dark);
+  margin: 1.5rem 0;
+  padding: 1.5rem 2rem;
+  background: rgba(255, 255, 255, 0.02);
+  border-radius: 0 0.5rem 0.5rem 0;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+/* Fix message input area */
+.room__message {
+  background: var(--color-dark);
+  padding: 1.5rem 2rem;
+  border-top: 1px solid var(--color-dark-light);
+  width: 100%;
+  position: relative;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  border-bottom-left-radius: 1rem;
+  border-bottom-right-radius: 1rem;
+  box-sizing: border-box;
+}
+
+/* Fix the participants section */
+.participants {
+  background: var(--color-dark);
+  max-height: 87.5vh;
+  border-radius: 1rem;
+  overflow: hidden;
+  position: relative;
+  flex: 0 0 26%;
+  margin: 0;
+}
+
+/* Remove any conflicting styles */
+.room__topLeft,
+.room__topRight {
+  position: relative;
+  z-index: 1;
+}
+
+/* Ensure the room topic doesn't cause overflow */
+.room__topics {
+  padding: 0.5rem 1.5rem;
+  background: var(--color-dark-light);
+  color: var(--color-light);
+  display: inline-block;
+  font-size: 1.4rem;
+  border-radius: 1.5rem;
+  margin: 1rem 0;
+  max-width: 100%;
+  word-break: break-word;
+}
+
+/* Fix the host section */
+.room__hosted {
+  width: 100%;
+}
+
+.room__author {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  margin-bottom: 1rem;
+  transition: all 0.3s ease-in-out;
+  width: fit-content;
+}
