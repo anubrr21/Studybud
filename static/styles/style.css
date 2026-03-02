@@ -1318,39 +1318,32 @@ a {
 .layout--2 > .container > .participants {
   flex: 0 0 26%;
 }
-.room {
-  display: flex;
-  flex-direction: column;
-  height: 87.5vh; /* Match your existing max-height */
-  position: relative;
-}
-
-/* Fix message box alignment */
+/* Fix the room container border-radius */
 .room {
   display: flex;
   flex-direction: column;
   height: 87.5vh;
   position: relative;
   background: var(--color-dark);
-  border-radius: 0.7rem;
-  overflow: hidden;
+  border-radius: 1rem; /* Increased from 0.7rem */
+  overflow: hidden; /* This is important - keeps the border-radius */
+  border-top-left-radius: 1rem;
+  border-top-right-radius: 1rem;
 }
 
-.room__box {
-  flex: 1;
-  overflow: hidden;
+/* Ensure the top bar also has rounded corners */
+.room__top {
+  background: var(--color-dark-light);
   display: flex;
-  flex-direction: column;
-  height: calc(100% - 110px); /* Adjust for top bar + message input */
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  position: relative;
+  border-top-left-radius: 1rem;
+  border-top-right-radius: 1rem;
 }
 
-.room__conversation {
-  flex: 1;
-  overflow-y: auto;
-  min-height: 0;
-  padding-bottom: 1rem;
-}
-
+/* Fix the message input area */
 .room__message {
   background: var(--color-dark);
   padding: 1.5rem 2rem;
@@ -1360,7 +1353,58 @@ a {
   bottom: 0;
   left: 0;
   right: 0;
+  border-bottom-left-radius: 1rem;
+  border-bottom-right-radius: 1rem;
 }
+
+/* Make sure the box content doesn't overflow the radius */
+.room__box {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: calc(100% - 110px);
+}
+
+/* Fix the participants section too */
+.participants {
+  background: var(--color-dark);
+  max-height: 87.5vh;
+  border-radius: 1rem;
+  overflow: hidden;
+  position: relative;
+}
+
+.participants__top {
+  background: var(--color-dark-light);
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 1rem 2rem;
+  position: relative;
+  gap: 0.5rem;
+  border-top-left-radius: 1rem;
+  border-top-right-radius: 1rem;
+}
+
+.participants__list {
+  padding: 2rem;
+  height: calc(87.5vh - 60px);
+  overflow-y: auto;
+  padding-bottom: 0;
+}
+
+
+
+
+.room__conversation {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 0;
+  padding-bottom: 1rem;
+}
+
+
 
 .room__message > form {
   width: 100%;
