@@ -1,20 +1,21 @@
 from django.urls import path
-from  .import views
+from . import views
 from django.contrib.auth import views as auth_views
-urlpatterns=[
-    path('login/',views.loginPage,name="login"),
-    path('logout/',views.logoutUser,name="logout"),
-    path('register/',views.registerPage,name="register"),
-    path('',views.home ,name="home"),
-    path('room/<str:pk>/',views.room,name="room"),
-    path('profile/<str:pk>/',views.userProfile,name="user-profile"),
-    path('create-room/',views.createRoom,name="create-room"),
-    path('update-room/<str:pk>/',views.updateRoom,name="update-room"),
-    path('delete-room/<str:pk>/',views.deleteRoom,name="delete-room"),
-    path('delete-message/<str:pk>/',views.deleteMessage,name="delete-message"),
-    path('update-user/',views.updateUser,name="update-user"),
-    path('topics/',views.topicsPage,name="topics"),
-    path('activity/',views.activityPage,name="activity"),
+
+urlpatterns = [
+    path('login/', views.loginPage, name="login"),
+    path('logout/', views.logoutUser, name="logout"),
+    path('register/', views.registerPage, name="register"),
+    path('', views.home, name="home"),
+    path('room/<str:pk>/', views.room, name="room"),
+    path('profile/<str:pk>/', views.userProfile, name="user-profile"),
+    path('create-room/', views.createRoom, name="create-room"),
+    path('update-room/<str:pk>/', views.updateRoom, name="update-room"),
+    path('delete-room/<str:pk>/', views.deleteRoom, name="delete-room"),
+    path('delete-message/<str:pk>/', views.deleteMessage, name="delete-message"),
+    path('update-user/', views.updateUser, name="update-user"),
+    path('topics/', views.topicsPage, name="topics"),
+    path('activity/', views.activityPage, name="activity"),
     path('like-room/<str:pk>/', views.toggle_like, name="toggle-like"),
     path('notifications/', views.notifications, name='notifications'),
     path('notifications/read/', views.mark_notifications_read, name='mark-notifications-read'),
@@ -25,7 +26,11 @@ urlpatterns=[
     path('delete-account/', views.delete_account, name='delete-account'),
     path('pin-message/<int:message_id>/', views.pin_message, name='pin-message'),
     path('unpin-message/<int:message_id>/', views.unpin_message, name='unpin-message'),
-     path('password-reset/', 
+    path('verify-email/<int:user_id>/', views.verify_email, name='verify-email'),
+    path('resend-verification/<int:user_id>/', views.resend_verification, name='resend-verification'),
+    
+    # Password reset URLs
+    path('password-reset/', 
          auth_views.PasswordResetView.as_view(
              template_name='base/password_reset.html',
              email_template_name='base/password_reset_email.html',
@@ -46,8 +51,4 @@ urlpatterns=[
          auth_views.PasswordResetCompleteView.as_view(
              template_name='base/password_reset_complete.html'
          ), name='password_reset_complete'),
-         # In base/urls.py, add this path
-    path('resend-verification/<int:user_id>/', views.resend_verification, name='resend-verification'),
-
-
 ]
