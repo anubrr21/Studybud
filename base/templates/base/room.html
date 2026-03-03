@@ -150,10 +150,26 @@
         <!-- Participants End -->
       </div>
     </main>
+    {{ request.user.id|json_script:"user-id" }}
+
     
     <script>
-      const roomId = "{{ room.id }}";
-      const currentUserId = {{ request.user.id }};
+      const roomId = "{{ room.id }}"; 
+
+      let currentUserId = null;
+  try {
+    const userIdElement = document.getElementById('user-id');
+    if (userIdElement) {
+      currentUserId = JSON.parse(userIdElement.textContent);
+    }
+  } catch (e) {
+    console.log('User not authenticated or error parsing user ID');
+    currentUserId = null;
+  }
+  
+  console.log('Current User ID:', currentUserId);
+
+     
 
       // Auto-detect ws or wss
       const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
