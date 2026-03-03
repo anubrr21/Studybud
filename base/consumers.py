@@ -4,7 +4,7 @@ from channels.db import database_sync_to_async
 from django.apps import apps
 from django.contrib.auth import get_user_model
 
-User = get_user_model()
+
 
 class ChatConsumer(AsyncWebsocketConsumer):
 
@@ -95,6 +95,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         """Get all participants who have sent messages in this room"""
         Room = apps.get_model('base', 'Room')
         Message = apps.get_model('base', 'Message')
+        User=get_user_model()
         
         room = Room.objects.get(id=self.room_id)
         
