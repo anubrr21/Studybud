@@ -312,7 +312,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 sender=user,
                 room=room,
                 message=message,
-                notification_type='comment'  # Make sure this field name matches your model
+                type='comment'  # Make sure this field name matches your model
             )
 
         return message
