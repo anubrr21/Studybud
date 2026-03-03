@@ -29,6 +29,44 @@ from .forms import RoomForm,UserForm,MyUserCreationForm
 #     ]
 
 def loginPage(request):
+    page = 'login'
+    if request.user.is_authenticated:
+        return redirect('home')
+    
+    if request.method == 'POST':
+        email = request.POST.get('email').lower()
+        password = request.POST.get('password')
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            messages.error(request, 'User does not exist')
+            return render(request, 'base/login_register.html', {'page': page})
+
+        user = authenticate(request, email=email, password=password)
+
+        if user is not None:
+            # Only redirect to verification if email is NOT verified AND token exists
+            if not user.email_verified and user.email_verification_token:
+                messages.warning(request, 'Please verify your email first')
+                return redirect('verify-email', user_id=user.id)
+            elif not user.email_verified and not user.email_verification_token:
+                # This shouldn't happen, but just in case
+                user.email_verification_token = generate_verification_code()
+                user.save()
+                # Send new verification email
+                subject = 'Verify your StudyBud account'
+                message = f'Your verification code is: {user.email_verification_token}'
+                send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email], fail_silently=False)
+                messages.info(request, 'A new verification code has been sent to your email')
+                return redirect('verify-email', user_id=user.id)
+            else:
+                login(request, user)
+                return redirect('home')
+        else:
+            messages.error(request, 'Invalid email or password')
+           
+    return render(request, 'base/login_register.html', {'page': page})
     page='login'
     if request.user.is_authenticated:
          return redirect('home')
@@ -70,6 +108,38 @@ def registerPage(request):
         if form.is_valid():
             user = form.save(commit=False)
             user.username = user.username.lower()
+            user.email_verified = False
+            user.save()
+            
+            # Generate verification code
+            verification_code = generate_verification_code()
+            user.email_verification_token = verification_code
+            user.save()
+            
+            # Send verification email with error handling
+            try:
+                subject = 'Verify your StudyBud account'
+                message = f'Welcome to StudyBud! Your verification code is: {verification_code}'
+                from_email = settings.DEFAULT_FROM_EMAIL
+                recipient_list = [user.email]
+                
+                send_mail(subject, message, from_email, recipient_list, fail_silently=False)
+                messages.success(request, 'Account created! Please check your email for verification code.')
+            except Exception as e:
+                messages.error(request, f'Account created but email could not be sent: {str(e)}')
+                # Still allow them to proceed to verification page
+                
+            return redirect('verify-email', user_id=user.id)
+
+    return render(request, 'base/login_register.html', {'form': form})
+    form = MyUserCreationForm()
+
+    if request.method == 'POST':
+        form = MyUserCreationForm(request.POST)
+
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.username = user.username.lower()
             user.email_verified = False  # Set email as not verified initially
             user.save()
             
@@ -92,6 +162,33 @@ def registerPage(request):
     return render(request, 'base/login_register.html', {'form': form})
 
 def verify_email(request, user_id):
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        messages.error(request, 'Invalid user')
+        return redirect('login')
+    
+    # If user is already verified, redirect to home
+    if user.email_verified:
+        messages.success(request, 'Your email is already verified!')
+        return redirect('home')
+    
+    if request.method == 'POST':
+        entered_code = request.POST.get('verification_code')
+        
+        if entered_code == user.email_verification_token:
+            user.email_verified = True
+            user.email_verification_token = None  # Changed from '' to None
+            user.save()
+            
+            # Log the user in
+            login(request, user)
+            messages.success(request, 'Email verified successfully!')
+            return redirect('home')
+        else:
+            messages.error(request, 'Invalid verification code')
+    
+    return render(request, 'base/verify_email.html', {'user_id': user_id})
     try:
         user = User.objects.get(id=user_id)
     except User.DoesNotExist:
