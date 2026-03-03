@@ -2,7 +2,7 @@
 
 {% block content %}
 <style>
-    .reset-container {
+    .verify-container {
         max-width: 500px;
         margin: 5rem auto;
         padding: 3rem;
@@ -11,48 +11,40 @@
         box-shadow: 0 5px 15px rgba(0,0,0,0.3);
     }
     
-    .reset-title {
+    .verify-title {
         color: var(--color-main);
         font-size: 2.4rem;
         margin-bottom: 1rem;
         text-align: center;
     }
     
-    .reset-subtitle {
+    .verify-subtitle {
         color: var(--color-light-gray);
         font-size: 1.4rem;
         margin-bottom: 2.5rem;
         text-align: center;
     }
     
-    .form-group {
-        margin-bottom: 2rem;
-    }
-    
-    .form-label {
-        display: block;
-        color: var(--color-light);
-        font-size: 1.4rem;
-        margin-bottom: 0.8rem;
-    }
-    
-    .form-input {
+    .code-input {
         width: 100%;
-        padding: 1.2rem;
+        padding: 1.5rem;
         background: var(--color-dark-medium);
         border: 2px solid var(--color-dark-light);
-        border-radius: 0.8rem;
+        border-radius: 1rem;
         color: var(--color-light);
-        font-size: 1.6rem;
-        transition: all 0.3s ease;
+        font-size: 2rem;
+        text-align: center;
+        letter-spacing: 0.5rem;
+        margin-bottom: 2rem;
+        font-weight: bold;
     }
     
-    .form-input:focus {
+    .code-input:focus {
         border-color: var(--color-main);
         outline: none;
     }
     
-    .reset-btn {
+    .verify-btn {
         width: 100%;
         padding: 1.5rem;
         background: var(--color-main);
@@ -63,25 +55,25 @@
         font-weight: bold;
         cursor: pointer;
         transition: all 0.3s ease;
-        margin-top: 1rem;
+        margin-bottom: 1.5rem;
     }
     
-    .reset-btn:hover {
+    .verify-btn:hover {
         opacity: 0.9;
         transform: translateY(-2px);
     }
     
-    .back-link {
+    .resend-link {
         text-align: center;
         display: block;
-        color: var(--color-light-gray);
+        color: var(--color-main);
         text-decoration: none;
         font-size: 1.4rem;
-        margin-top: 2rem;
+        margin-top: 1.5rem;
     }
     
-    .back-link:hover {
-        color: var(--color-main);
+    .resend-link:hover {
+        text-decoration: underline;
     }
     
     .error-message {
@@ -93,34 +85,47 @@
         margin-bottom: 2rem;
         text-align: center;
     }
+    
+    .success-message {
+        background: rgba(93, 214, 147, 0.1);
+        border: 1px solid var(--color-success);
+        color: var(--color-success);
+        padding: 1rem;
+        border-radius: 0.5rem;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
 </style>
 
 <div class="container">
-    <div class="reset-container">
-        <h1 class="reset-title">Reset Password</h1>
-        <p class="reset-subtitle">Enter your email address and we'll send you instructions to reset your password.</p>
+    <div class="verify-container">
+        <h1 class="verify-title">Verify Your Email</h1>
+        <p class="verify-subtitle">We've sent a 6-digit verification code to your email. Please enter it below.</p>
         
         {% if messages %}
             {% for message in messages %}
-                <div class="error-message">{{ message }}</div>
+                <div class="{% if message.tags == 'success' %}success-message{% else %}error-message{% endif %}">
+                    {{ message }}
+                </div>
             {% endfor %}
         {% endif %}
         
         <form method="POST">
             {% csrf_token %}
-            <div class="form-group">
-                <label class="form-label">Email Address</label>
-                <input type="email" 
-                       name="email" 
-                       class="form-input" 
-                       placeholder="your@email.com"
-                       required>
-            </div>
+            <input type="text" 
+                   name="verification_code" 
+                   class="code-input" 
+                   placeholder="••••••"
+                   maxlength="6"
+                   pattern="\d{6}"
+                   title="Please enter a 6-digit code"
+                   required
+                   autofocus>
             
-            <button type="submit" class="reset-btn">Send Reset Link</button>
+            <button type="submit" class="verify-btn">Verify Email</button>
         </form>
         
-        <a href="{% url 'login' %}" class="back-link">← Back to Login</a>
+        <a href="{% url 'resend-verification' user_id=user_id %}" class="resend-link">Resend verification code</a>
     </div>
 </div>
 {% endblock %}

@@ -5,6 +5,13 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
+from django.contrib.sites.shortcuts import get_current_site
+from django.template.loader import render_to_string
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_bytes, force_str
+from django.core.mail import send_mail
+from django.conf import settings
+from .tokens import email_verification_token, generate_verification_code
 
 from django.contrib.auth import authenticate,login,logout
 from django.http import JsonResponse
@@ -38,8 +45,13 @@ def loginPage(request):
         user = authenticate(request, email=email, password=password)
 
         if user is not None:
-            login(request, user)
-            return redirect('home')
+            # Check if email is verified
+            if user.email_verified:
+                login(request, user)
+                return redirect('home')
+            else:
+                messages.error(request, 'Please verify your email first')
+                return redirect('verify-email', user_id=user.id)
         else:
             messages.error(request, 'Username OR password does not exist')
            
@@ -48,6 +60,7 @@ def loginPage(request):
 def logoutUser(request):
      logout(request)
      return redirect('home')
+
 def registerPage(request):
     form = MyUserCreationForm()
 
@@ -57,13 +70,71 @@ def registerPage(request):
         if form.is_valid():
             user = form.save(commit=False)
             user.username = user.username.lower()
+            user.email_verified = False  # Set email as not verified initially
             user.save()
-            login(request, user)
-            return redirect('home')
+            
+            # Generate verification code
+            verification_code = generate_verification_code()
+            user.email_verification_token = verification_code
+            user.save()
+            
+            # Send verification email
+            subject = 'Verify your StudyBud account'
+            message = f'Welcome to StudyBud! Your verification code is: {verification_code}'
+            from_email = settings.DEFAULT_FROM_EMAIL
+            recipient_list = [user.email]
+            
+            send_mail(subject, message, from_email, recipient_list, fail_silently=False)
+            
+            messages.success(request, 'Account created! Please verify your email.')
+            return redirect('verify-email', user_id=user.id)
 
     return render(request, 'base/login_register.html', {'form': form})
 
+def verify_email(request, user_id):
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        messages.error(request, 'Invalid user')
+        return redirect('login')
+    
+    if request.method == 'POST':
+        entered_code = request.POST.get('verification_code')
+        
+        if entered_code == user.email_verification_token:
+            user.email_verified = True
+            user.email_verification_token = ''  # Clear the token
+            user.save()
+            
+            # Log the user in
+            login(request, user)
+            messages.success(request, 'Email verified successfully!')
+            return redirect('home')
+        else:
+            messages.error(request, 'Invalid verification code')
+    
+    return render(request, 'base/verify_email.html', {'user_id': user_id})
 
+def resend_verification(request, user_id):
+    try:
+        user = User.objects.get(id=user_id)
+    except User.DoesNotExist:
+        messages.error(request, 'Invalid user')
+        return redirect('login')
+    
+    # Generate new code
+    verification_code = generate_verification_code()
+    user.email_verification_token = verification_code
+    user.save()
+    
+    # Resend email
+    subject = 'Verify your StudyBud account'
+    message = f'Your new verification code is: {verification_code}'
+    from_email = settings.DEFAULT_FROM_EMAIL
+    send_mail(subject, message, from_email, [user.email], fail_silently=False)
+    
+    messages.success(request, 'Verification code resent!')
+    return redirect('verify-email', user_id=user.id)
 
      
      
@@ -157,6 +228,7 @@ def userProfile(request, pk):
         'mutual_followers': mutual_followers,
     }
     return render(request, 'base/profile.html', context)
+
 @login_required(login_url='login')#decorator to restrict access to the view to only logged in users
 def createRoom(request):
       form=RoomForm()#creating an instance of the RoommForm
@@ -173,8 +245,9 @@ def createRoom(request):
             return redirect('home')
                 
 
-      context={'form':form, 'topics':topics,'room':room}
+      context={'form':form, 'topics':topics}
       return render(request,'base/room_form.html',context)
+
 @login_required(login_url='login')
 def updateRoom(request,pk):
       room=Room.objects.get(id=pk)#getting the room with the speicific id(primary key)
@@ -192,6 +265,7 @@ def updateRoom(request,pk):
              return redirect('home')
       context={'form':form,'topics':topics}
       return render(request,'base/room_form.html',context)
+
 @login_required(login_url='login')
 def deleteRoom(request,pk):
       room=Room.objects.get(id=pk)#which room to delete
@@ -201,6 +275,7 @@ def deleteRoom(request,pk):
             room.delete()#deleting the room from the database
             return redirect('home')
       return render(request,'base/delete.html',{'obj':room})   
+
 @login_required(login_url='login')
 def deleteMessage(request,pk):
       message=Message.objects.get(id=pk)#which room to delete
@@ -210,6 +285,7 @@ def deleteMessage(request,pk):
             message.delete()#deleting the room from the database
             return redirect('home')
       return render(request,'base/delete.html',{'obj':message})     
+
 @login_required(login_url='login')
 def updateUser(request):
        user=request.user
@@ -220,10 +296,12 @@ def updateUser(request):
                  form.save()
                  return redirect('user-profile',pk=user.id)
        return render(request,'base/update-user.html',{'form':form})
+
 def topicsPage(request):
      q=request.GET.get('q') if request.GET.get('q')!=None else '' 
      topics=Topic.objects.filter(name__icontains=q)#filtering the topics based on the search query 
      return render(request,'base/topics.html',{'topics':topics})
+
 def activityPage(request):
     q = request.GET.get('q') if request.GET.get('q') else ''
 
@@ -273,6 +351,7 @@ def notifications(request):
     return render(request, 'base/notifications.html', {
         'notifications': notifications
     })
+
 @login_required(login_url='login')
 def mark_notifications_read(request):
     request.user.notifications.update(is_read=True)
@@ -376,6 +455,7 @@ def delete_account(request):
             messages.error(request, "Incorrect password. Try again.")
 
     return render(request, 'base/delete_account.html')
+
 @login_required
 def pin_message(request, message_id):
     message = get_object_or_404(Message, id=message_id)
@@ -411,8 +491,3 @@ def unpin_message(request, message_id):
     room.pinned_messages.remove(message)
     
     return redirect('room', pk=room.id)
-
-
-
-
-
