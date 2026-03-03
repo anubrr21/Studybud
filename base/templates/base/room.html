@@ -465,6 +465,24 @@
         }
     };
 
+    // ===== AUTO-SCROLL FUNCTIONALITY =====
+    // Function to scroll to bottom
+    function scrollToBottom() {
+        const threads = document.querySelector(".threads");
+        if (threads) {
+            threads.scrollTop = threads.scrollHeight;
+        }
+    }
+
+    // Scroll to bottom when page loads
+    window.addEventListener('load', function() {
+        setTimeout(scrollToBottom, 100); // Small delay to ensure content is loaded
+    });
+
+    // Also scroll to bottom when DOM is ready
+    document.addEventListener('DOMContentLoaded', scrollToBottom);
+    // ===== END OF AUTO-SCROLL FUNCTIONALITY =====
+
     function addMessageToThread(data) {
         const threads = document.querySelector(".threads");
         
@@ -607,7 +625,8 @@
             </div>
         `);
         
-        threads.scrollTop = threads.scrollHeight;
+        // Auto-scroll to bottom when new message is added
+        scrollToBottom();
     }
 
     function updateParticipantsList(participants) {
