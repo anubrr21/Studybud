@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 
 from django.contrib.auth import authenticate,login,logout
 from django.http import JsonResponse
@@ -375,6 +376,41 @@ def delete_account(request):
             messages.error(request, "Incorrect password. Try again.")
 
     return render(request, 'base/delete_account.html')
+@login_required
+def pin_message(request, message_id):
+    message = get_object_or_404(Message, id=message_id)
+    room = message.room
+    
+    # Check if user is participant
+    if request.user not in room.participants.all() and request.user != room.host:
+        return redirect('home')
+    
+    # Check pin limit
+    pinned_count = Message.objects.filter(room=room, is_pinned=True).count()
+    if pinned_count < 3:
+        message.is_pinned = True
+        message.pinned_at = timezone.now()
+        message.pinned_by = request.user
+        message.save()
+        
+        # Add to room's pinned messages
+        room.pinned_messages.add(message)
+    
+    return redirect('room', pk=room.id)
+
+@login_required
+def unpin_message(request, message_id):
+    message = get_object_or_404(Message, id=message_id)
+    room = message.room
+    
+    message.is_pinned = False
+    message.pinned_at = None
+    message.pinned_by = None
+    message.save()
+    
+    room.pinned_messages.remove(message)
+    
+    return redirect('room', pk=room.id)
 
 
 

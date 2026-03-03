@@ -63,6 +63,8 @@ class Room(models.Model): #a topic can have many rooms but a room can have only 
  likes = models.ManyToManyField(User, related_name="liked_rooms", blank=True)
  updated=models.DateTimeField(auto_now=True)#whenever we update the model this field will be updated automatically.takes timestamp every single time the model is saved
  created=models.DateTimeField(auto_now_add=True)#when the model is created this field will be set automatically. gives the timestamp of creation
+ pinned_messages = models.ManyToManyField('Message', related_name='pinned_in_rooms', blank=True)
+
 #id=models.BigAutoField(primary_key=True,auto_created=True,serialize=False,verbase_name='ID')#primary key field for the model
  class Meta:#meta class to specify the ordering of the model instances.to print the newest rooms first
     ordering=['-updated','-created']#negative sign indicates descending order
@@ -73,14 +75,27 @@ class Message(models.Model):#messge model for chat messages in the room
    user=models.ForeignKey(User,on_delete=models.CASCADE)#user who sent the message.one to many relationship.one user can send many messgaes
    room=models.ForeignKey(Room,on_delete=models.CASCADE)#many to one relationship.many messages can be sent in one room  
    body=models.TextField()#body of the message
+   
+   parent_message = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='replies')
+   reply_count = models.IntegerField(default=0)
+
+   is_pinned = models.BooleanField(default=False)
+   pinned_at = models.DateTimeField(null=True, blank=True)
+   pinned_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='pinned_messages')
    updated=models.DateTimeField(auto_now=True)
    created=models.DateTimeField(auto_now_add=True)
 
    class Meta:#meta class to specify the ordering of the model instances.to print the newest rooms first
-    ordering=['-updated','-created']#negative sign indicates descending order
+    ordering=['-is_pinned','-created']#negative sign indicates descending order
    
    def __str__(self):
      return self.body[0:50]#returning the first 50 characters of the message
+   def save(self, *args, **kwargs):
+        # Update reply count on parent message
+        if self.parent_message:
+            self.parent_message.reply_count = self.parent_message.replies.count()
+            self.parent_message.save()
+        super().save(*args, **kwargs)
 class Notification(models.Model):
     NOTIFICATION_TYPES = (
         ('like', 'Like'),
