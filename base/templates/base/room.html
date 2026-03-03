@@ -455,6 +455,14 @@
         else if (data.type === 'pinned_messages_update') {
             updatePinnedMessagesBar(data.pinned_messages, data.count);
         }
+        else if (data.type === 'pin_status_update') {
+            // Update the pin button for the specific message
+            const messageThread = document.querySelector(`.thread[data-message-id="${data.message_id}"]`);
+            if (messageThread) {
+                // You can update the UI here if needed
+                console.log('Pin status updated:', data);
+            }
+        }
     };
 
     function addMessageToThread(data) {
@@ -464,14 +472,29 @@
         data.user_id = parseInt(data.user_id);
         const showActions = currentUserId && data.user_id === currentUserId;
         
+        // ===== UPDATED REPLY INDICATOR SECTION =====
         let replyIndicator = '';
         if (data.parent_id) {
+            let parentUsername = 'someone';
+            let parentPreview = '';
+            
+            // If we have parent_info from the WebSocket, use it
+            if (data.parent_info) {
+                parentUsername = data.parent_info.username;
+                parentPreview = data.parent_info.body;
+            } else {
+                // Fallback for older messages
+                parentUsername = 'someone';
+                parentPreview = 'a message';
+            }
+            
             replyIndicator = `
                 <div class="reply-indicator">
-                    <a href="#message-${data.parent_id}">↪ Reply to someone</a>
+                    <a href="#message-${data.parent_id}">↪ Reply to @${parentUsername}</a>: ${parentPreview}
                 </div>
             `;
         }
+        // ===== END OF UPDATED SECTION =====
         
         let pinIcon = '';
         if (data.is_pinned) {

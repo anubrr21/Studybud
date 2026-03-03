@@ -39,6 +39,14 @@ class ChatConsumer(AsyncWebsocketConsumer):
             message_text = data['message']
             parent_id = data.get('parent_id')
             message = await self.save_message(user, message_text, parent_id)
+
+            parent_info = None
+            if message.parent_message:
+             parent_info = {
+                'id': message.parent_message.id,
+                'username': message.parent_message.user.username,
+                'body': message.parent_message.body[:50] + ('...' if len(message.parent_message.body) > 50 else '')
+            }
             
             # Send the new message to everyone
             await self.channel_layer.group_send(
@@ -51,6 +59,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     'message_id': message.id,
                     'avatar': message.user.avatar_url,
                     'parent_id': message.parent_message.id if message.parent_message else None,
+                    'parent_info':parent_info,
                     'reply_count': message.reply_count,
                     'is_pinned': message.is_pinned,
                 }
@@ -60,17 +69,41 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.send_participants_update()
             
         elif message_type == 'pin_message':
-            message_id = data['message_id']
-            success = await self.pin_message(user, message_id)
-            if success:
-                await self.send_pinned_messages()
+         message_id = data['message_id']
+         success = await self.pin_message(user, message_id)
+         if success:
+           await self.send_pinned_messages()
+        # Also send a message update to refresh the pin icon
+           await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                'type': 'pin_status_update',
+                'message_id': message_id,
+                'is_pinned': True
+            }
+        )
                 
         elif message_type == 'unpin_message':
-            message_id = data['message_id']
-            success = await self.unpin_message(user, message_id)
-            if success:
-                await self.send_pinned_messages()
-
+         message_id = data['message_id']
+         success = await self.unpin_message(user, message_id)
+         if success:
+          await self.send_pinned_messages()
+        # Also send a message update to refresh the pin icon
+          await self.channel_layer.group_send(
+            self.room_group_name,
+            {
+                'type': 'pin_status_update',
+                'message_id': message_id,
+                'is_pinned': False
+            }
+        )
+    async def pin_status_update(self, event):
+     """Send pin status update to WebSocket"""
+     await self.send(text_data=json.dumps({
+        'type': 'pin_status_update',
+        'message_id': event['message_id'],
+        'is_pinned': event['is_pinned']
+    }))
     async def chat_message(self, event):
         await self.send(text_data=json.dumps({
             'type': 'new_message',
@@ -80,6 +113,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'message_id': event['message_id'],
             'avatar': event['avatar'],
             'parent_id': event['parent_id'],
+            'parent_info':event['parent_info'],
             'reply_count': event['reply_count'],
             'is_pinned': event['is_pinned'],
             'current_user_id': self.scope["user"].id,
