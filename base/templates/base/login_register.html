@@ -1,115 +1,426 @@
 {% extends 'main.html' %}
 
 {% block content %}
-    <main class="auth layout">
-      {% if page == 'login' %}
-         <div class="container">
+<style>
+    /* Password validation styling */
+    .password-errors {
+        background: var(--color-dark-medium);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin: 1rem 0 2rem;
+        border-left: 4px solid var(--color-error);
+        animation: slideDown 0.3s ease;
+    }
+
+    @keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .password-error-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        color: var(--color-light-gray);
+        font-size: 1.3rem;
+        margin: 0.8rem 0;
+        padding: 0.5rem;
+        border-radius: 0.5rem;
+        background: rgba(0, 0, 0, 0.2);
+    }
+
+    .password-error-item::before {
+        content: "⚠️";
+        font-size: 1.4rem;
+    }
+
+    /* Real-time password strength indicator */
+    .password-strength {
+        margin: 1rem 0;
+        padding: 1rem;
+        background: var(--color-dark-medium);
+        border-radius: 0.8rem;
+    }
+
+    .strength-bar {
+        height: 0.8rem;
+        background: var(--color-dark-light);
+        border-radius: 1rem;
+        overflow: hidden;
+        margin-bottom: 0.8rem;
+    }
+
+    .strength-bar-fill {
+        height: 100%;
+        width: 0%;
+        transition: width 0.3s ease, background-color 0.3s ease;
+    }
+
+    .strength-text {
+        color: var(--color-light-gray);
+        font-size: 1.2rem;
+        text-align: center;
+    }
+
+    /* Requirements checklist */
+    .password-requirements {
+        background: var(--color-dark-medium);
+        border-radius: 1rem;
+        padding: 1.5rem;
+        margin: 1rem 0;
+    }
+
+    .requirement-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        color: var(--color-light-gray);
+        font-size: 1.3rem;
+        margin: 0.8rem 0;
+        transition: color 0.3s ease;
+    }
+
+    .requirement-item.met {
+        color: var(--color-success);
+    }
+
+    .requirement-item .check {
+        color: var(--color-success);
+        font-weight: bold;
+    }
+
+    .requirement-item .cross {
+        color: var(--color-error);
+        font-weight: bold;
+    }
+
+    /* Password field with eye icon */
+    .password-wrapper {
+        position: relative;
+        width: 100%;
+    }
+
+    .password-wrapper input {
+        padding-right: 4rem !important;
+        width: 100%;
+    }
+
+    .toggle-password {
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0.5rem;
+        z-index: 10;
+    }
+
+    .toggle-password svg {
+        width: 2rem;
+        height: 2rem;
+        fill: var(--color-light-gray);
+        transition: fill 0.2s ease;
+    }
+
+    .toggle-password:hover svg {
+        fill: var(--color-main);
+    }
+
+    /* Form group adjustments */
+    .form__group {
+        margin-bottom: 2rem;
+    }
+
+    .form__group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        color: var(--color-light);
+        font-size: 1.4rem;
+    }
+</style>
+
+<main class="auth layout">
+    {% if page == 'login' %}
+    <div class="container">
         <div class="layout__box">
-          <div class="layout__boxHeader">
-            <div class="layout__boxTitle">
-              <h3>Login</h3>
+            <div class="layout__boxHeader">
+                <div class="layout__boxTitle">
+                    <h3>Login</h3>
+                </div>
             </div>
-          </div>
-          <div class="layout__body">
-            <h2 class="auth__tagline">Find your study partner</h2>
+            <div class="layout__body">
+                <h2 class="auth__tagline">Find your study partner</h2>
 
-            <form class="form" action="" method="POST">
-              {% csrf_token %}
-              <div class="form__group form__group">
-                <label for="room_name">Email</label>
-                <input id="username" name="email" type="text" placeholder="e.g. anubrata@gmail.com" />
-              </div>
-              <div class="form__group">
-                <label for="password">Password</label>
-                <input
-                  id="password"
-                  name="password"
-                  type="password"
-                  placeholder="&bull;&bull;&bull;&bull;&bull;&bull;&bull;&bull;"
-                />
-              </div>
+                <form class="form" action="" method="POST">
+                    {% csrf_token %}
+                    <div class="form__group">
+                        <label for="username">Email or Username</label>
+                        <input id="username" name="email" type="text" placeholder="e.g. anubrata@gmail.com or anubrata" />
+                    </div>
+                    
+                    <div class="form__group">
+                        <label for="password">Password</label>
+                        <div class="password-wrapper">
+                            <input id="password" name="password" type="password" placeholder="••••••••" />
+                            <button type="button" class="toggle-password" onclick="togglePassword('password')">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M12 4.5C7 4.5 2.7 7.6 1 12c1.7 4.4 6 7.5 11 7.5s9.3-3.1 11-7.5c-1.7-4.4-6-7.5-11-7.5zM12 17c-2.8 0-5-2.2-5-5s2.2-5 5-5 5 2.2 5 5-2.2 5-5 5zm0-8c-1.7 0-3 1.3-3 3s1.3 3 3 3 3-1.3 3-3-1.3-3-3-3z"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
 
-              <button class="btn btn--main" type="submit">
-                <svg
-                  version="1.1"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="32"
-                  height="32"
-                  viewBox="0 0 32 32"
-                >
-                  <title>lock</title>
-                  <path
-                    d="M27 12h-1v-2c0-5.514-4.486-10-10-10s-10 4.486-10 10v2h-1c-0.553 0-1 0.447-1 1v18c0 0.553 0.447 1 1 1h22c0.553 0 1-0.447 1-1v-18c0-0.553-0.447-1-1-1zM8 10c0-4.411 3.589-8 8-8s8 3.589 8 8v2h-16v-2zM26 30h-20v-16h20v16z"
-                  ></path>
-                  <path
-                    d="M15 21.694v4.306h2v-4.306c0.587-0.348 1-0.961 1-1.694 0-1.105-0.895-2-2-2s-2 0.895-2 2c0 0.732 0.413 1.345 1 1.694z"
-                  ></path>
-                </svg>
+                    <button class="btn btn--main" type="submit">
+                        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+                            <title>lock</title>
+                            <path d="M27 12h-1v-2c0-5.514-4.486-10-10-10s-10 4.486-10 10v2h-1c-0.553 0-1 0.447-1 1v18c0 0.553 0.447 1 1 1h22c0.553 0 1-0.447 1-1v-18c0-0.553-0.447-1-1-1zM8 10c0-4.411 3.589-8 8-8s8 3.589 8 8v2h-16v-2zM26 30h-20v-16h20v16z"></path>
+                            <path d="M15 21.694v4.306h2v-4.306c0.587-0.348 1-0.961 1-1.694 0-1.105-0.895-2-2-2s-2 0.895-2 2c0 0.732 0.413 1.345 1 1.694z"></path>
+                        </svg>
+                        Login
+                    </button>
+                    <br>
+                    <p><a href="{% url 'password_reset' %}">Forgot password?</a></p>
+                </form>
 
-                Login
-              </button>
-              <br>
-              <p><a href="{% url 'password_reset' %}">Forgot password?</a></p>
-
-            </form>
-
-            <div class="auth__action">
-              <p>Haven't signed up yet?</p>
-              <a href="{% url 'register' %}" class="btn btn--link">Sign Up</a>
+                <div class="auth__action">
+                    <p>Haven't signed up yet?</p>
+                    <a href="{% url 'register' %}" class="btn btn--link">Sign Up</a>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
-      {% else %}
-       <div class="container">
+    </div>
+    {% else %}
+    <div class="container">
         <div class="layout__box">
-          <div class="layout__boxHeader">
-            <div class="layout__boxTitle">
-              <h3>Register</h3>
+            <div class="layout__boxHeader">
+                <div class="layout__boxTitle">
+                    <h3>Register</h3>
+                </div>
             </div>
-          </div>
-          <div class="layout__body">
-            <h2 class="auth__tagline">Find your study partner</h2>
+            <div class="layout__body">
+                <h2 class="auth__tagline">Find your study partner</h2>
 
-            <form class="form" action="" method="POST" enctype="multipart/form-data">
-              {% csrf_token %}
+                <form class="form" action="" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
 
-              {% for field in form %}
-              <div class="form__group form__group">
-                <label for="room_name">{{field.label}}</label>
-                {{field}}
-              </div>
-              {% endfor %}
-            
+                    {% for field in form %}
+                    <div class="form__group">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {% if field.name == 'password1' or field.name == 'password2' %}
+                        <div class="password-wrapper">
+                            {{ field }}
+                            <button type="button" class="toggle-password" onclick="togglePassword('{{ field.id_for_label }}')">
+                                <svg viewBox="0 0 24 24">
+                                    <path d="M12 4.5C7 4.5 2.7 7.6 1 12c1.7 4.4 6 7.5 11 7.5s9.3-3.1 11-7.5c-1.7-4.4-6-7.5-11-7.5zM12 17c-2.8 0-5-2.2-5-5s2.2-5 5-5 5 2.2 5 5-2.2 5-5 5zm0-8c-1.7 0-3 1.3-3 3s1.3 3 3 3 3-1.3 3-3-1.3-3-3-3z"/>
+                                </svg>
+                            </button>
+                        </div>
+                        {% else %}
+                            {{ field }}
+                        {% endif %}
+                        {% if field.help_text %}
+                            <small style="color: var(--color-light-gray);">{{ field.help_text }}</small>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
 
-              <button class="btn btn--main" type="submit">
-                <svg
-                  version="1.1"
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="32"
-                  height="32"
-                  viewBox="0 0 32 32"
-                >
-                  <title>lock</title>
-                  <path
-                    d="M27 12h-1v-2c0-5.514-4.486-10-10-10s-10 4.486-10 10v2h-1c-0.553 0-1 0.447-1 1v18c0 0.553 0.447 1 1 1h22c0.553 0 1-0.447 1-1v-18c0-0.553-0.447-1-1-1zM8 10c0-4.411 3.589-8 8-8s8 3.589 8 8v2h-16v-2zM26 30h-20v-16h20v16z"
-                  ></path>
-                  <path
-                    d="M15 21.694v4.306h2v-4.306c0.587-0.348 1-0.961 1-1.694 0-1.105-0.895-2-2-2s-2 0.895-2 2c0 0.732 0.413 1.345 1 1.694z"
-                  ></path>
-                </svg>
+                    <button class="btn btn--main" type="submit">
+                        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+                            <title>lock</title>
+                            <path d="M27 12h-1v-2c0-5.514-4.486-10-10-10s-10 4.486-10 10v2h-1c-0.553 0-1 0.447-1 1v18c0 0.553 0.447 1 1 1h22c0.553 0 1-0.447 1-1v-18c0-0.553-0.447-1-1-1zM8 10c0-4.411 3.589-8 8-8s8 3.589 8 8v2h-16v-2zM26 30h-20v-16h20v16z"></path>
+                            <path d="M15 21.694v4.306h2v-4.306c0.587-0.348 1-0.961 1-1.694 0-1.105-0.895-2-2-2s-2 0.895-2 2c0 0.732 0.413 1.345 1 1.694z"></path>
+                        </svg>
+                        Register
+                    </button>
+                </form>
 
-                Register
-              </button>
-            </form>
-
-            <div class="auth__action">
-              <p>Already signed up?</p>
-              <a href="{% url 'login' %}" class="btn btn--link">Sign In</a>
+                <div class="auth__action">
+                    <p>Already signed up?</p>
+                    <a href="{% url 'login' %}" class="btn btn--link">Sign In</a>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
-      {% endif %}
-    </main>
+    </div>
+    {% endif %}
+</main>
+
+<script>
+// Toggle password visibility
+function togglePassword(fieldId) {
+    const field = document.getElementById(fieldId);
+    if (field) {
+        const type = field.getAttribute('type') === 'password' ? 'text' : 'password';
+        field.setAttribute('type', type);
+    }
+}
+
+// Password validation and strength checker
+document.addEventListener('DOMContentLoaded', function() {
+    const password1 = document.getElementById('id_password1');
+    const password2 = document.getElementById('id_password2');
+    
+    if (password1) {
+        // Create strength indicator
+        const strengthDiv = document.createElement('div');
+        strengthDiv.className = 'password-strength';
+        strengthDiv.innerHTML = `
+            <div class="strength-bar">
+                <div class="strength-bar-fill" id="strengthBarFill"></div>
+            </div>
+            <div class="strength-text" id="strengthText">Enter a password</div>
+        `;
+        
+        // Create requirements checklist
+        const requirementsDiv = document.createElement('div');
+        requirementsDiv.className = 'password-requirements';
+        requirementsDiv.innerHTML = `
+            <div class="requirement-item" id="req-length">
+                <span class="cross">✗</span> At least 8 characters
+            </div>
+            <div class="requirement-item" id="req-letter">
+                <span class="cross">✗</span> Contains letters
+            </div>
+            <div class="requirement-item" id="req-number">
+                <span class="cross">✗</span> Contains numbers
+            </div>
+            <div class="requirement-item" id="req-common">
+                <span class="cross">✗</span> Not too common
+            </div>
+        `;
+        
+        // Insert after password field's parent (the password-wrapper)
+        password1.closest('.form__group').appendChild(strengthDiv);
+        password1.closest('.form__group').appendChild(requirementsDiv);
+        
+        // Password strength checker
+        password1.addEventListener('input', function() {
+            const password = this.value;
+            const strength = checkPasswordStrength(password);
+            updateStrengthUI(strength);
+            updateRequirements(password);
+        });
+        
+        password2.addEventListener('input', function() {
+            if (password1.value && this.value) {
+                if (password1.value === this.value) {
+                    this.style.borderColor = 'var(--color-success)';
+                    this.style.borderWidth = '2px';
+                } else {
+                    this.style.borderColor = 'var(--color-error)';
+                    this.style.borderWidth = '2px';
+                }
+            }
+        });
+    }
+});
+
+function checkPasswordStrength(password) {
+    let score = 0;
+    
+    if (password.length >= 8) score += 25;
+    if (password.length >= 12) score += 25;
+    if (/[a-z]/.test(password)) score += 15;
+    if (/[A-Z]/.test(password)) score += 15;
+    if (/[0-9]/.test(password)) score += 10;
+    if (/[^a-zA-Z0-9]/.test(password)) score += 10;
+    
+    return Math.min(score, 100);
+}
+
+function updateStrengthUI(score) {
+    const bar = document.getElementById('strengthBarFill');
+    const text = document.getElementById('strengthText');
+    
+    if (bar && text) {
+        bar.style.width = score + '%';
+        
+        if (score < 30) {
+            bar.style.backgroundColor = 'var(--color-error)';
+            text.textContent = 'Weak password';
+            text.style.color = 'var(--color-error)';
+        } else if (score < 60) {
+            bar.style.backgroundColor = '#ffa500';
+            text.textContent = 'Medium password';
+            text.style.color = '#ffa500';
+        } else if (score < 80) {
+            bar.style.backgroundColor = 'var(--color-main)';
+            text.textContent = 'Strong password';
+            text.style.color = 'var(--color-main)';
+        } else {
+            bar.style.backgroundColor = 'var(--color-success)';
+            text.textContent = 'Very strong password';
+            text.style.color = 'var(--color-success)';
+        }
+    }
+}
+
+function updateRequirements(password) {
+    const reqLength = document.getElementById('req-length');
+    const reqLetter = document.getElementById('req-letter');
+    const reqNumber = document.getElementById('req-number');
+    const reqCommon = document.getElementById('req-common');
+    
+    if (reqLength) {
+        // Length check
+        if (password.length >= 8) {
+            reqLength.classList.add('met');
+            reqLength.querySelector('span').innerHTML = '✓';
+            reqLength.querySelector('span').className = 'check';
+        } else {
+            reqLength.classList.remove('met');
+            reqLength.querySelector('span').innerHTML = '✗';
+            reqLength.querySelector('span').className = 'cross';
+        }
+    }
+    
+    if (reqLetter) {
+        // Letter check
+        if (/[a-zA-Z]/.test(password)) {
+            reqLetter.classList.add('met');
+            reqLetter.querySelector('span').innerHTML = '✓';
+            reqLetter.querySelector('span').className = 'check';
+        } else {
+            reqLetter.classList.remove('met');
+            reqLetter.querySelector('span').innerHTML = '✗';
+            reqLetter.querySelector('span').className = 'cross';
+        }
+    }
+    
+    if (reqNumber) {
+        // Number check
+        if (/[0-9]/.test(password)) {
+            reqNumber.classList.add('met');
+            reqNumber.querySelector('span').innerHTML = '✓';
+            reqNumber.querySelector('span').className = 'check';
+        } else {
+            reqNumber.classList.remove('met');
+            reqNumber.querySelector('span').innerHTML = '✗';
+            reqNumber.querySelector('span').className = 'cross';
+        }
+    }
+    
+    if (reqCommon) {
+        // Common password check (simplified)
+        const commonPasswords = ['password', '12345678', 'qwerty', 'abcdefg', 'password123', 'admin123'];
+        if (password.length > 0 && !commonPasswords.includes(password.toLowerCase())) {
+            reqCommon.classList.add('met');
+            reqCommon.querySelector('span').innerHTML = '✓';
+            reqCommon.querySelector('span').className = 'check';
+        } else {
+            reqCommon.classList.remove('met');
+            reqCommon.querySelector('span').innerHTML = '✗';
+            reqCommon.querySelector('span').className = 'cross';
+        }
+    }
+}
+</script>
+
 {% endblock content %}

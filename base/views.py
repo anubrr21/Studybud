@@ -34,6 +34,69 @@ def loginPage(request):
         return redirect('home')
     
     if request.method == 'POST':
+        login_input = request.POST.get('email', '').lower().strip()
+        password = request.POST.get('password', '')
+
+        if not login_input or not password:
+            messages.error(request, 'Please fill in all fields')
+            return render(request, 'base/login_register.html', {'page': page})
+
+        # Try to find user by email or username
+        try:
+            if '@' in login_input:  # It's an email
+                user = User.objects.get(email=login_input)
+            else:  # It's a username
+                user = User.objects.get(username=login_input)
+        except User.DoesNotExist:
+            messages.error(request, 'Invalid email/username or password')
+            return render(request, 'base/login_register.html', {'page': page})
+
+        user = authenticate(request, email=user.email, password=password)
+
+        if user is not None:
+            login(request, user)
+            request.session['welcome_message'] = f'Welcome back, {user.username}!'
+            request.session['welcome_type'] = 'returning'
+            return redirect('home')
+        else:
+            messages.error(request, 'Invalid email/username or password')
+           
+    return render(request, 'base/login_register.html', {'page': page})
+    page = 'login'
+    if request.user.is_authenticated:
+        return redirect('home')
+    
+    if request.method == 'POST':
+        email = request.POST.get('email', '').lower().strip()
+        password = request.POST.get('password', '')
+
+        if not email or not password:
+            messages.error(request, 'Please fill in all fields')
+            return render(request, 'base/login_register.html', {'page': page})
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            messages.error(request, 'Invalid email or password')
+            return render(request, 'base/login_register.html', {'page': page})
+
+        user = authenticate(request, email=email, password=password)
+
+        if user is not None:
+            login(request, user)
+            # Add a special message for the toast
+            request.session['welcome_message'] = f'Welcome back, {user.username}!'
+            request.session['welcome_type'] = 'returning'
+            return redirect('home')
+        else:
+            messages.error(request, 'Invalid email or password')
+           
+    return render(request, 'base/login_register.html', {'page': page})
+    page = 'login'
+    if request.user.is_authenticated:
+        return redirect('home')
+    
+    if request.method == 'POST':
         email = request.POST.get('email', '').lower().strip()
         password = request.POST.get('password', '')
 
@@ -169,6 +232,34 @@ def logoutUser(request):
      return redirect('home')
 
 def registerPage(request):
+    page = 'register'
+    form = MyUserCreationForm()
+
+    if request.user.is_authenticated:
+        return redirect('home')
+
+    if request.method == 'POST':
+        form = MyUserCreationForm(request.POST)
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.username = user.username.lower()
+            user.email = user.email.lower()
+            user.email_verified = True
+            user.email_verification_token = None
+            user.save()
+            
+            login(request, user)
+            # Add welcome message for new user
+            request.session['welcome_message'] = f'Welcome, {user.username}!'
+            request.session['welcome_type'] = 'new'
+            return redirect('home')
+        else:
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f'{error}')
+    
+    context = {'form': form, 'page': page}
+    return render(request, 'base/login_register.html', context)
     page = 'register'
     form = MyUserCreationForm()
 
@@ -366,8 +457,10 @@ def home(request):
     suggested_users=[]
     if request.user.is_authenticated:
          suggested_users=User.objects.exclude(id__in=request.user.following.all()).exclude(id=request.user.id)[:5]#suggesting users to follow excluding the ones the user is already following and excluding the user himself
+    welcome_message = request.session.pop('welcome_message', None)
+    welcome_type = request.session.pop('welcome_type', None)     
     context={'rooms':rooms,'topics':topics,
-    'room_count':room_count,'room_messages':room_messages,'suggested_users':suggested_users}#creating a context dictinary to pass the rooms to the template
+    'room_count':room_count,'room_messages':room_messages,'suggested_users':suggested_users,'welcome_message':welcome_message,'welcome_type':welcome_type}#creating a context dictinary to pass the rooms to the template
     return render(request,'base/home.html',context)#calling the rooms dictionary to home.html
 
 @login_required(login_url='login')

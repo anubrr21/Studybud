@@ -5,6 +5,9 @@
    
     <main class="layout layout--3">
       <div class="container">
+        {% if welcome_message %}
+<div class="welcome-message" data-type="{{ welcome_type }}" style="display: none;">{{ welcome_message }}</div>
+{% endif %}
         <!-- Topics Start -->
          {% include 'base/topics_component.html' %}
         
