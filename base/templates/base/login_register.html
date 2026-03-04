@@ -484,9 +484,12 @@ function showToast(message, type = 'error', duration = 6000) {
     }, duration);
 }
 
-// ===== IMPROVED TOAST CODE =====
+// ===== FIXED TOAST CODE - NO DUPLICATES =====
 // Check for Django messages and show as toasts
 document.addEventListener('DOMContentLoaded', function() {
+    // Set to track processed messages to avoid duplicates
+    const processedMessages = new Set();
+    
     // Look for any Django messages that might be in the page
     setTimeout(function() {
         // Try multiple selectors to catch all possible message containers
@@ -503,7 +506,14 @@ document.addEventListener('DOMContentLoaded', function() {
         messageSelectors.forEach(selector => {
             document.querySelectorAll(selector).forEach(msg => {
                 const text = msg.textContent.trim();
-                if (text && text.length > 0) {
+                
+                // Create a unique key for this message (text + parent class)
+                const messageKey = text + msg.parentElement?.className || '';
+                
+                // Only process if we haven't seen this message before
+                if (text && text.length > 0 && !processedMessages.has(messageKey)) {
+                    processedMessages.add(messageKey);
+                    
                     // Determine message type
                     let type = 'error';
                     if (msg.classList.contains('success') || msg.classList.contains('success-message')) {
@@ -518,17 +528,8 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         });
         
-        // Also check for any Django messages in the page source
-        const bodyText = document.body.innerHTML;
-        const messageMatches = bodyText.match(/<li[^>]*>([^<]+)<\/li>/g);
-        if (messageMatches) {
-            messageMatches.forEach(match => {
-                const text = match.replace(/<[^>]*>/g, '').trim();
-                if (text && text.includes('password') || text.includes('username') || text.includes('email')) {
-                    showToast(text, 'error');
-                }
-            });
-        }
+        // Also check for any Django messages in the page source (less aggressive now)
+        // Removed the bodyText scanning as it was causing duplicates
     }, 100); // Small delay to ensure DOM is fully loaded
 });
 
@@ -551,7 +552,7 @@ document.addEventListener('DOMContentLoaded', function() {
         password2.addEventListener('blur', checkPasswordMatch);
     }
 });
-// ===== END OF IMPROVED TOAST CODE =====
+// ===== END OF FIXED TOAST CODE =====
 
 // Toggle password visibility
 function togglePassword(fieldId) {
