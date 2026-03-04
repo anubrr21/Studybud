@@ -484,34 +484,52 @@ function showToast(message, type = 'error', duration = 6000) {
     }, duration);
 }
 
-// ===== START OF NEW TOAST CODE =====
+// ===== IMPROVED TOAST CODE =====
 // Check for Django messages and show as toasts
 document.addEventListener('DOMContentLoaded', function() {
-    // Django messages are usually in a div with class 'messages'
-    const messageElements = document.querySelectorAll('.messages .message, .error-message, .success-message');
-    
-    messageElements.forEach(msg => {
-        const text = msg.textContent.trim();
-        if (text) {
-            if (msg.classList.contains('success')) {
-                showToast(text, 'success');
-            } else {
-                showToast(text, 'error');
-            }
-            msg.style.display = 'none'; // Hide the original message
+    // Look for any Django messages that might be in the page
+    setTimeout(function() {
+        // Try multiple selectors to catch all possible message containers
+        const messageSelectors = [
+            '.messages .message',
+            '.error-message',
+            '.success-message',
+            '.errorlist li',
+            '.error',
+            '.success',
+            '[class*="message"]'
+        ];
+        
+        messageSelectors.forEach(selector => {
+            document.querySelectorAll(selector).forEach(msg => {
+                const text = msg.textContent.trim();
+                if (text && text.length > 0) {
+                    // Determine message type
+                    let type = 'error';
+                    if (msg.classList.contains('success') || msg.classList.contains('success-message')) {
+                        type = 'success';
+                    } else if (msg.classList.contains('warning')) {
+                        type = 'warning';
+                    }
+                    
+                    showToast(text, type);
+                    msg.style.display = 'none'; // Hide the original message
+                }
+            });
+        });
+        
+        // Also check for any Django messages in the page source
+        const bodyText = document.body.innerHTML;
+        const messageMatches = bodyText.match(/<li[^>]*>([^<]+)<\/li>/g);
+        if (messageMatches) {
+            messageMatches.forEach(match => {
+                const text = match.replace(/<[^>]*>/g, '').trim();
+                if (text && text.includes('password') || text.includes('username') || text.includes('email')) {
+                    showToast(text, 'error');
+                }
+            });
         }
-    });
-    
-    // Also check for form errors
-    const errorlist = document.querySelectorAll('.errorlist li');
-    errorlist.forEach(err => {
-        showToast(err.textContent.trim(), 'error');
-    });
-    
-    // Hide errorlists
-    document.querySelectorAll('.errorlist').forEach(el => {
-        el.style.display = 'none';
-    });
+    }, 100); // Small delay to ensure DOM is fully loaded
 });
 
 // Password mismatch toast
@@ -533,7 +551,7 @@ document.addEventListener('DOMContentLoaded', function() {
         password2.addEventListener('blur', checkPasswordMatch);
     }
 });
-// ===== END OF NEW TOAST CODE =====
+// ===== END OF IMPROVED TOAST CODE =====
 
 // Toggle password visibility
 function togglePassword(fieldId) {
@@ -600,10 +618,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     this.style.borderWidth = '2px';
                     
                     // Show toast for password mismatch
-                    const mismatchToast = document.querySelector('.toast:contains("passwords don\'t match")');
-                    if (!mismatchToast) {
-                        showToast('The two password fields didn\'t match.', 'error', 4000);
-                    }
+                    showToast('The two password fields didn\'t match.', 'error', 4000);
                 }
             }
         });
