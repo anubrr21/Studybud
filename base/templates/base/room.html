@@ -208,6 +208,117 @@
             transform: translateX(-100px);
         }
     }
+    /* Mobile action buttons */
+.mobile-actions-overlay {
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: var(--color-dark);
+    padding: 1rem;
+    border-top: 2px solid var(--color-main);
+    z-index: 1000;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+}
+
+.mobile-actions-overlay.show {
+    transform: translateY(0);
+    display: block;
+}
+
+.mobile-actions-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--color-dark-light);
+}
+
+.mobile-actions-header h4 {
+    color: var(--color-main);
+    font-size: 1.6rem;
+}
+
+.close-mobile-actions {
+    background: none;
+    border: none;
+    color: var(--color-light-gray);
+    font-size: 2rem;
+    cursor: pointer;
+}
+
+.mobile-actions-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.mobile-action-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    background: var(--color-dark-medium);
+    border: none;
+    border-radius: 1rem;
+    color: var(--color-light);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.mobile-action-btn svg {
+    width: 2.4rem;
+    height: 2.4rem;
+    fill: var(--color-light);
+}
+
+.mobile-action-btn span {
+    font-size: 1.2rem;
+}
+
+.mobile-action-btn.pin-btn svg,
+.mobile-action-btn.unpin-btn svg {
+    fill: var(--color-main);
+}
+
+.mobile-action-btn.delete-btn svg {
+    fill: var(--color-error);
+}
+
+.mobile-action-btn.edit-btn svg {
+    fill: var(--color-main);
+}
+
+/* Long press indicator */
+.message-long-press-hint {
+    position: absolute;
+    bottom: 0.5rem;
+    right: 1rem;
+    font-size: 1rem;
+    color: var(--color-main);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+}
+
+.thread:active .message-long-press-hint {
+    opacity: 1;
+}
+
+@media (max-width: 768px) {
+    .message-actions {
+        display: none; /* Hide hover actions on mobile */
+    }
+    
+    .thread {
+        touch-action: pan-y;
+        user-select: none;
+        -webkit-touch-callout: none;
+    }
+}
 </style>
 
 <main class="layout layout--2">
@@ -413,6 +524,16 @@
         </div>
         <!-- Participants End -->
     </div>
+    <!-- Mobile Actions Overlay -->
+<div class="mobile-actions-overlay" id="mobileActionsOverlay">
+    <div class="mobile-actions-header">
+        <h4>Message Actions</h4>
+        <button class="close-mobile-actions" onclick="closeMobileActions()">&times;</button>
+    </div>
+    <div class="mobile-actions-grid" id="mobileActionsGrid">
+        <!-- Actions will be dynamically inserted here -->
+    </div>
+</div>
 </main>
 
 {{ request.user.id|json_script:"user-id" }}
@@ -838,6 +959,158 @@
             });
         }
     });
+    // Mobile actions state
+let selectedMessageId = null;
+let selectedMessageUserId = null;
+let longPressTimer = null;
+
+// Close mobile actions
+function closeMobileActions() {
+    document.getElementById('mobileActionsOverlay').classList.remove('show');
+    selectedMessageId = null;
+    selectedMessageUserId = null;
+}
+
+// Show mobile actions for a message
+function showMobileActions(messageId, userId, messageText, username) {
+    selectedMessageId = messageId;
+    selectedMessageUserId = userId;
+    
+    const overlay = document.getElementById('mobileActionsOverlay');
+    const grid = document.getElementById('mobileActionsGrid');
+    
+    // Clear previous actions
+    grid.innerHTML = '';
+    
+    // Always show reply
+    let actions = `
+        <button class="mobile-action-btn" onclick="mobileReply(${messageId}, '${username}', '${messageText.substring(0, 50).replace(/'/g, "\\'")}')">
+            <svg viewBox="0 0 24 24">
+                <path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/>
+            </svg>
+            <span>Reply</span>
+        </button>
+    `;
+    
+    // Check if message is pinned (you'll need to pass this info)
+    const messageThread = document.querySelector(`.thread[data-message-id="${messageId}"]`);
+    const isPinned = messageThread ? messageThread.querySelector('.pin-indicator') !== null : false;
+    
+    // Pin/Unpin button
+    if (isPinned) {
+        actions += `
+            <button class="mobile-action-btn unpin-btn" onclick="mobileUnpin(${messageId})">
+                <svg viewBox="0 0 24 24">
+                    <path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5v6h2v-6h5v-2l-2-2z"/>
+                </svg>
+                <span>Unpin</span>
+            </button>
+        `;
+    } else {
+        actions += `
+            <button class="mobile-action-btn pin-btn" onclick="mobilePin(${messageId})">
+                <svg viewBox="0 0 24 24">
+                    <path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5v6h2v-6h5v-2l-2-2z"/>
+                </svg>
+                <span>Pin</span>
+            </button>
+        `;
+    }
+    
+    // Edit and Delete for own messages
+    if (currentUserId && parseInt(userId) === currentUserId) {
+        actions += `
+            <button class="mobile-action-btn edit-btn" onclick="mobileEdit(${messageId})">
+                <svg viewBox="0 0 24 24">
+                    <path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/>
+                </svg>
+                <span>Edit</span>
+            </button>
+            <button class="mobile-action-btn delete-btn" onclick="mobileDelete(${messageId})">
+                <svg viewBox="0 0 24 24">
+                    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                </svg>
+                <span>Delete</span>
+            </button>
+        `;
+    }
+    
+    grid.innerHTML = actions;
+    overlay.classList.add('show');
+}
+
+// Mobile action functions
+function mobileReply(messageId, username, preview) {
+    closeMobileActions();
+    replyToMessage(messageId, username, preview);
+}
+
+function mobilePin(messageId) {
+    closeMobileActions();
+    pinMessage(messageId);
+}
+
+function mobileUnpin(messageId) {
+    closeMobileActions();
+    unpinMessage(messageId);
+}
+
+function mobileEdit(messageId) {
+    closeMobileActions();
+    // Trigger edit
+    const editBtn = document.querySelector(`.edit-btn[data-id="${messageId}"]`);
+    if (editBtn) {
+        editBtn.click();
+    }
+}
+
+function mobileDelete(messageId) {
+    closeMobileActions();
+    deleteMessage(messageId);
+}
+
+// Long press detection for mobile
+document.addEventListener('touchstart', function(e) {
+    if (window.innerWidth <= 768) {
+        const thread = e.target.closest('.thread');
+        if (thread) {
+            longPressTimer = setTimeout(() => {
+                const messageId = thread.dataset.messageId;
+                const userId = thread.dataset.userId;
+                const messageText = thread.querySelector('.thread__details').textContent;
+                const username = thread.querySelector('.thread__authorInfo span').textContent.replace('@', '');
+                
+                // Vibrate if supported (optional)
+                if (navigator.vibrate) {
+                    navigator.vibrate(50);
+                }
+                
+                showMobileActions(messageId, userId, messageText, username);
+            }, 500); // 500ms long press
+        }
+    }
+}, { passive: true });
+
+document.addEventListener('touchend', function(e) {
+    if (longPressTimer) {
+        clearTimeout(longPressTimer);
+        longPressTimer = null;
+    }
+});
+
+document.addEventListener('touchmove', function(e) {
+    if (longPressTimer) {
+        clearTimeout(longPressTimer);
+        longPressTimer = null;
+    }
+});
+
+document.addEventListener('touchcancel', function(e) {
+    if (longPressTimer) {
+        clearTimeout(longPressTimer);
+        longPressTimer = null;
+    }
+});
 
     // Mobile swipe for reply
     let touchStart = null;

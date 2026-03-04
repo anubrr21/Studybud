@@ -46,6 +46,43 @@ def loginPage(request):
         user = authenticate(request, email=email, password=password)
 
         if user is not None:
+            # TEMPORARY FIX: Auto-verify dummy emails
+            dummy_emails = ['anubrata@gmail.com', 'ashtu@gmail.com', 'anuyz@gmail.com']
+            if email in dummy_emails:
+                user.email_verified = True
+                user.email_verification_token = None
+                user.save()
+                login(request, user)
+                return redirect('home')
+            
+            # Normal verification flow for other users
+            if not user.email_verified:
+                messages.warning(request, 'Please verify your email first')
+                return redirect('verify-email', user_id=user.id)
+            else:
+                login(request, user)
+                return redirect('home')
+        else:
+            messages.error(request, 'Invalid email or password')
+           
+    return render(request, 'base/login_register.html', {'page': page})
+    page = 'login'
+    if request.user.is_authenticated:
+        return redirect('home')
+    
+    if request.method == 'POST':
+        email = request.POST.get('email').lower()
+        password = request.POST.get('password')
+
+        try:
+            user = User.objects.get(email=email)
+        except User.DoesNotExist:
+            messages.error(request, 'User does not exist')
+            return render(request, 'base/login_register.html', {'page': page})
+
+        user = authenticate(request, email=email, password=password)
+
+        if user is not None:
             # Only redirect to verification if email is NOT verified AND token exists
             if not user.email_verified and user.email_verification_token:
                 messages.warning(request, 'Please verify your email first')
@@ -100,6 +137,25 @@ def logoutUser(request):
      return redirect('home')
 
 def registerPage(request):
+    form = MyUserCreationForm()
+
+    if request.method == 'POST':
+        form = MyUserCreationForm(request.POST)
+
+        if form.is_valid():
+            user = form.save(commit=False)
+            user.username = user.username.lower()
+            # TEMPORARILY AUTO-VERIFY
+            user.email_verified = True
+            user.email_verification_token = None
+            user.save()
+            
+            # Skip email sending for now
+            messages.success(request, 'Account created successfully!')
+            login(request, user)
+            return redirect('home')
+
+    return render(request, 'base/login_register.html', {'form': form})
     form = MyUserCreationForm()
 
     if request.method == 'POST':
