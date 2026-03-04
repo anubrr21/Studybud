@@ -527,32 +527,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             });
         });
-        
-        // Also check for any Django messages in the page source (less aggressive now)
-        // Removed the bodyText scanning as it was causing duplicates
-    }, 100); // Small delay to ensure DOM is fully loaded
+    }, 100);
 });
-
-// Password mismatch toast
-function checkPasswordMatch() {
-    const password1 = document.getElementById('id_password1');
-    const password2 = document.getElementById('id_password2');
-    
-    if (password1 && password2 && password2.value.length > 0) {
-        if (password1.value !== password2.value) {
-            showToast('The two password fields didn\'t match.', 'error', 4000);
-        }
-    }
-}
-
-// Add event listener for password2
-document.addEventListener('DOMContentLoaded', function() {
-    const password2 = document.getElementById('id_password2');
-    if (password2) {
-        password2.addEventListener('blur', checkPasswordMatch);
-    }
-});
-// ===== END OF FIXED TOAST CODE =====
 
 // Toggle password visibility
 function togglePassword(fieldId) {
@@ -567,6 +543,7 @@ function togglePassword(fieldId) {
 document.addEventListener('DOMContentLoaded', function() {
     const password1 = document.getElementById('id_password1');
     const password2 = document.getElementById('id_password2');
+    const registerForm = document.getElementById('registerForm');
     
     if (password1) {
         // Create strength indicator
@@ -609,6 +586,7 @@ document.addEventListener('DOMContentLoaded', function() {
             updateRequirements(password);
         });
         
+        // Visual indicator for password match (border color only, no toast)
         password2.addEventListener('input', function() {
             if (password1.value && this.value) {
                 if (password1.value === this.value) {
@@ -617,12 +595,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 } else {
                     this.style.borderColor = 'var(--color-error)';
                     this.style.borderWidth = '2px';
-                    
-                    // Show toast for password mismatch
-                    showToast('The two password fields didn\'t match.', 'error', 4000);
                 }
             }
         });
+        
+        // Only show toast on form submit if passwords don't match
+        if (registerForm) {
+            registerForm.addEventListener('submit', function(e) {
+                if (password1.value !== password2.value) {
+                    e.preventDefault(); // Prevent form submission
+                    showToast('The two password fields didn\'t match.', 'error', 4000);
+                    
+                    // Highlight both password fields
+                    password1.style.borderColor = 'var(--color-error)';
+                    password2.style.borderColor = 'var(--color-error)';
+                    password1.style.borderWidth = '2px';
+                    password2.style.borderWidth = '2px';
+                }
+            });
+        }
     }
 });
 
