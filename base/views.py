@@ -41,6 +41,40 @@ def loginPage(request):
             messages.error(request, 'Please fill in all fields')
             return render(request, 'base/login_register.html', {'page': page})
 
+        # Check if user exists
+        try:
+            if '@' in login_input:
+                user = User.objects.get(email=login_input)
+            else:
+                user = User.objects.get(username=login_input)
+        except User.DoesNotExist:
+            messages.error(request, 'This username/email is not registered')
+            return render(request, 'base/login_register.html', {'page': page})
+
+        # Check password
+        user = authenticate(request, email=user.email, password=password)
+
+        if user is not None:
+            login(request, user)
+            request.session['welcome_message'] = f'Welcome back, {user.username}!'
+            request.session['welcome_type'] = 'returning'
+            return redirect('home')
+        else:
+            messages.error(request, 'Incorrect password')
+           
+    return render(request, 'base/login_register.html', {'page': page})
+    page = 'login'
+    if request.user.is_authenticated:
+        return redirect('home')
+    
+    if request.method == 'POST':
+        login_input = request.POST.get('email', '').lower().strip()
+        password = request.POST.get('password', '')
+
+        if not login_input or not password:
+            messages.error(request, 'Please fill in all fields')
+            return render(request, 'base/login_register.html', {'page': page})
+
         # Try to find user by email or username
         try:
             if '@' in login_input:  # It's an email
