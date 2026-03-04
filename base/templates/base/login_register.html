@@ -484,11 +484,13 @@ function showToast(message, type = 'error', duration = 6000) {
     }, duration);
 }
 
-// Convert Django messages to toasts
+// ===== START OF NEW TOAST CODE =====
+// Check for Django messages and show as toasts
 document.addEventListener('DOMContentLoaded', function() {
-    // Look for Django messages in the page
-    const messages = document.querySelectorAll('.messages .message, .error-message, .success-message');
-    messages.forEach(msg => {
+    // Django messages are usually in a div with class 'messages'
+    const messageElements = document.querySelectorAll('.messages .message, .error-message, .success-message');
+    
+    messageElements.forEach(msg => {
         const text = msg.textContent.trim();
         if (text) {
             if (msg.classList.contains('success')) {
@@ -500,23 +502,38 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Also check for form errors in the page
-    const errorlist = document.querySelectorAll('.errorlist');
-    errorlist.forEach(el => {
-        const errors = el.querySelectorAll('li');
-        errors.forEach(err => {
-            showToast(err.textContent.trim(), 'error');
-        });
-        el.style.display = 'none';
+    // Also check for form errors
+    const errorlist = document.querySelectorAll('.errorlist li');
+    errorlist.forEach(err => {
+        showToast(err.textContent.trim(), 'error');
     });
     
-    // Check for login errors in session
-    const loginError = document.querySelector('#login-error');
-    if (loginError) {
-        showToast(loginError.value, 'error');
-        loginError.remove();
+    // Hide errorlists
+    document.querySelectorAll('.errorlist').forEach(el => {
+        el.style.display = 'none';
+    });
+});
+
+// Password mismatch toast
+function checkPasswordMatch() {
+    const password1 = document.getElementById('id_password1');
+    const password2 = document.getElementById('id_password2');
+    
+    if (password1 && password2 && password2.value.length > 0) {
+        if (password1.value !== password2.value) {
+            showToast('The two password fields didn\'t match.', 'error', 4000);
+        }
+    }
+}
+
+// Add event listener for password2
+document.addEventListener('DOMContentLoaded', function() {
+    const password2 = document.getElementById('id_password2');
+    if (password2) {
+        password2.addEventListener('blur', checkPasswordMatch);
     }
 });
+// ===== END OF NEW TOAST CODE =====
 
 // Toggle password visibility
 function togglePassword(fieldId) {
