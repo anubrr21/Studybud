@@ -11,6 +11,12 @@ cloudinary.config(
     api_secret=os.environ.get('CLOUDINARY_API_SECRET')
 )
 
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
+}
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY
@@ -33,7 +39,6 @@ INSTALLED_APPS = [
     'cloudinary_storage',
     'channels',
 ]
-
 AUTH_USER_MODEL = 'base.User'
 
 MIDDLEWARE = [
@@ -122,6 +127,7 @@ CHANNEL_LAYERS = {
 
 # MEDIA (Cloudinary)
 DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
+MEDIA_URL='/media/'
 
 
 
