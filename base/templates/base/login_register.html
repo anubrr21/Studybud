@@ -145,7 +145,145 @@
         color: var(--color-light);
         font-size: 1.4rem;
     }
+
+    /* Toast Notifications */
+    .toast-container {
+        position: fixed;
+        top: 2rem;
+        right: 2rem;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        pointer-events: none;
+        max-width: 400px;
+    }
+
+    .toast {
+        min-width: 300px;
+        padding: 1.5rem 2rem;
+        border-radius: 1rem;
+        background: var(--color-dark);
+        color: var(--color-light);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        animation: slideInRight 0.3s ease forwards;
+        pointer-events: auto;
+        border-left: 4px solid;
+    }
+
+    .toast.error {
+        border-left-color: var(--color-error);
+    }
+
+    .toast.success {
+        border-left-color: var(--color-success);
+    }
+
+    .toast.warning {
+        border-left-color: #ffa500;
+    }
+
+    .toast.info {
+        border-left-color: var(--color-main);
+    }
+
+    .toast-icon {
+        width: 2.4rem;
+        height: 2.4rem;
+        fill: currentColor;
+        flex-shrink: 0;
+    }
+
+    .toast-content {
+        flex: 1;
+    }
+
+    .toast-title {
+        font-weight: bold;
+        margin-bottom: 0.3rem;
+        color: var(--color-light);
+    }
+
+    .toast-message {
+        font-size: 1.3rem;
+        color: var(--color-light-gray);
+    }
+
+    .toast-close {
+        background: none;
+        border: none;
+        color: var(--color-light-gray);
+        cursor: pointer;
+        font-size: 1.8rem;
+        padding: 0.5rem;
+        flex-shrink: 0;
+    }
+
+    .toast-close:hover {
+        color: var(--color-main);
+    }
+
+    @keyframes slideInRight {
+        from {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes slideOutRight {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+    }
+
+    .toast.hide {
+        animation: slideOutRight 0.3s ease forwards;
+    }
+
+    /* Make auth layout scrollable */
+    .auth.layout {
+        min-height: 100vh;
+        overflow-y: auto;
+        padding: 2rem 0;
+    }
+
+    .container {
+        max-width: 120rem;
+        width: 90%;
+        margin: 0 auto;
+    }
+
+    .layout__box {
+        max-height: none;
+        overflow: visible;
+        margin: 2rem 0;
+    }
+
+    .layout__body {
+        max-height: none;
+        overflow: visible;
+    }
+
+    /* Hide Django's default messages */
+    .messages {
+        display: none;
+    }
 </style>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
 
 <main class="auth layout">
     {% if page == 'login' %}
@@ -253,6 +391,89 @@
 </main>
 
 <script>
+// Toast notification system
+function showToast(message, type = 'error') {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+    
+    // Set title based on type
+    let title = '';
+    let icon = '';
+    
+    switch(type) {
+        case 'error':
+            title = 'Error!';
+            icon = '<path d="M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z"/>';
+            break;
+        case 'success':
+            title = 'Success!';
+            icon = '<path d="M20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4C12.76,4 13.5,4.11 14.2,4.31L15.77,2.74C14.61,2.26 13.34,2 12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12M7.91,10.08L6.5,11.5L11,16L21,6L19.59,4.58L11,13.17L7.91,10.08Z"/>';
+            break;
+        case 'warning':
+            title = 'Warning!';
+            icon = '<path d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/>';
+            break;
+        default:
+            title = 'Info';
+            icon = '<path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M11,16.5L16.5,11L15.08,9.58L11,13.67L8.92,11.59L7.5,13L11,16.5Z"/>';
+    }
+    
+    // Create toast element
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `
+        <div class="toast-icon">
+            <svg viewBox="0 0 24 24">${icon}</svg>
+        </div>
+        <div class="toast-content">
+            <div class="toast-title">${title}</div>
+            <div class="toast-message">${message}</div>
+        </div>
+        <button class="toast-close" onclick="this.parentElement.classList.add('hide'); setTimeout(() => this.parentElement.remove(), 300);">&times;</button>
+    `;
+    
+    container.appendChild(toast);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (toast.parentElement) {
+            toast.classList.add('hide');
+            setTimeout(() => {
+                if (toast.parentElement) {
+                    toast.remove();
+                }
+            }, 300);
+        }
+    }, 5000);
+}
+
+// Convert Django messages to toasts
+document.addEventListener('DOMContentLoaded', function() {
+    // Look for Django messages in the page
+    const messages = document.querySelectorAll('.messages .message, .error-message, .success-message');
+    messages.forEach(msg => {
+        const text = msg.textContent.trim();
+        if (text) {
+            if (msg.classList.contains('success')) {
+                showToast(text, 'success');
+            } else {
+                showToast(text, 'error');
+            }
+            msg.style.display = 'none'; // Hide the original message
+        }
+    });
+    
+    // Also check for form errors in the page
+    const errorlist = document.querySelectorAll('.errorlist');
+    errorlist.forEach(el => {
+        const errors = el.querySelectorAll('li');
+        errors.forEach(err => {
+            showToast(err.textContent.trim(), 'error');
+        });
+        el.style.display = 'none';
+    });
+});
+
 // Toggle password visibility
 function togglePassword(fieldId) {
     const field = document.getElementById(fieldId);
