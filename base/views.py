@@ -145,13 +145,20 @@ def resend_verification(request, user_id):
 
 def home(request):
     q = request.GET.get('q') if request.GET.get('q') != None else ''
+    
+    # Get ALL rooms for count (unfiltered)
+    all_rooms = Room.objects.all()
+    total_room_count = all_rooms.count()
+    
+    # Get filtered rooms for display (but only latest 3)
     rooms = Room.objects.filter(
         Q(topic__name__icontains=q) |
         Q(name__icontains=q) |
         Q(description__icontains=q)
-    )
+    ).order_by('-created')[:3]  # Only get latest 3, ordered by newest first
+    
     topics = Topic.objects.all()[0:5]
-    room_count = rooms.count()
+    room_count = all_rooms.count()  # Use total count, not filtered count
     room_messages = Message.objects.filter(Q(room__topic__name__icontains=q)).order_by('-created')[:8]
     suggested_users = []
     
@@ -162,16 +169,15 @@ def home(request):
     welcome_type = request.session.pop('welcome_type', None)
     
     context = {
-        'rooms': rooms,
+        'rooms': rooms,  # This now has only 3 rooms
         'topics': topics,
-        'room_count': room_count,
+        'room_count': total_room_count,  # This is the total count
         'room_messages': room_messages,
         'suggested_users': suggested_users,
         'welcome_message': welcome_message,
         'welcome_type': welcome_type
     }
     return render(request, 'base/home.html', context)
-
 
 @login_required(login_url='login')
 def room(request, pk):
