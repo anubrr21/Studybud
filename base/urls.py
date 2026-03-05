@@ -51,4 +51,5 @@ urlpatterns = [
          auth_views.PasswordResetCompleteView.as_view(
              template_name='base/password_reset_complete.html'
          ), name='password_reset_complete'),
+    path('all-rooms/', views.all_rooms, name='all-rooms'),
 ]

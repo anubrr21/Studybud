@@ -30,6 +30,7 @@
               <a class="btn btn--main btn--pill" href="{% url 'activity' %}">Recent Activities</a>
             </div>
           </div>
+          
           <div class="roomList__header">
             <div>
               <h2>Study Room</h2>
@@ -45,7 +46,35 @@
               Create Room
             </a>
           </div>
+
+          <!-- Feed Component (Rooms List) -->
           {% include 'base/feed_component.html' %}
+
+          <!-- View All Rooms Button -->
+          <div style="text-align:center; margin-top:3rem; margin-bottom:2rem; padding:1rem 0;">
+            <a href="{% url 'all-rooms' %}" 
+               style="
+                 display:inline-flex;
+                 align-items:center;
+                 gap:1rem;
+                 padding:1.2rem 3rem;
+                 background:var(--color-main);
+                 color:var(--color-dark);
+                 border-radius:3rem;
+                 text-decoration:none;
+                 font-weight:bold;
+                 transition:all 0.3s ease;
+                 box-shadow:0 4px 10px rgba(113, 198, 221, 0.3);
+               "
+               onmouseover="this.style.opacity='0.9'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 15px rgba(113, 198, 221, 0.4)';"
+               onmouseout="this.style.opacity='1'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10px rgba(113, 198, 221, 0.3)';">
+              <span>View All Rooms</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+              </svg>
+            </a>
+          </div>
+
         </div>
         <!-- Room List End -->
 

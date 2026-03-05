@@ -1,0 +1,511 @@
+{% extends 'main.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* All Rooms Page Styles */
+    .all-rooms-container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    /* Header Section */
+    .all-rooms-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .all-rooms-header h1 {
+        font-size: 3.2rem;
+        color: var(--color-main);
+        margin-bottom: 1rem;
+    }
+
+    .all-rooms-header p {
+        font-size: 1.6rem;
+        color: var(--color-light-gray);
+    }
+
+    /* Search Section */
+    .search-section {
+        background: var(--color-dark);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        margin-bottom: 3rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .live-search {
+        position: relative;
+        margin-bottom: 2rem;
+    }
+
+    .live-search input {
+        width: 100%;
+        padding: 1.5rem 2rem 1.5rem 5rem;
+        background: var(--color-dark-medium);
+        border: 2px solid var(--color-dark-light);
+        border-radius: 3rem;
+        color: var(--color-light);
+        font-size: 1.6rem;
+        transition: all 0.3s ease;
+    }
+
+    .live-search input:focus {
+        border-color: var(--color-main);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(113, 198, 221, 0.2);
+    }
+
+    .live-search svg {
+        position: absolute;
+        left: 1.8rem;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 2rem;
+        height: 2rem;
+        fill: var(--color-light-gray);
+    }
+
+    .search-filters {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-chip {
+        padding: 0.8rem 1.5rem;
+        background: var(--color-dark-medium);
+        border: 1px solid var(--color-dark-light);
+        border-radius: 3rem;
+        color: var(--color-light-gray);
+        font-size: 1.3rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .filter-chip:hover {
+        background: var(--color-dark-light);
+        color: var(--color-light);
+    }
+
+    .filter-chip.active {
+        background: var(--color-main);
+        color: var(--color-dark);
+        border-color: var(--color-main);
+    }
+
+    .results-count {
+        margin-top: 1.5rem;
+        font-size: 1.4rem;
+        color: var(--color-light-gray);
+        text-align: right;
+    }
+
+    .results-count span {
+        color: var(--color-main);
+        font-weight: bold;
+        font-size: 1.8rem;
+    }
+
+    /* Grid Layout */
+    .rooms-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    /* Room Card */
+    .room-card {
+        background: var(--color-dark);
+        border-radius: 1.5rem;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border: 1px solid transparent;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .room-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--color-main);
+        box-shadow: 0 10px 25px rgba(113, 198, 221, 0.2);
+    }
+
+    .room-card__header {
+        padding: 1.5rem;
+        border-bottom: 1px solid var(--color-dark-light);
+    }
+
+    .room-card__host {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        text-decoration: none;
+        margin-bottom: 1rem;
+    }
+
+    .room-card__host img {
+        width: 3.5rem;
+        height: 3.5rem;
+        border-radius: 50%;
+        border: 2px solid var(--color-main);
+    }
+
+    .room-card__host-info {
+        flex: 1;
+    }
+
+    .room-card__host-info h4 {
+        color: var(--color-light);
+        font-size: 1.4rem;
+        margin-bottom: 0.2rem;
+    }
+
+    .room-card__host-info p {
+        color: var(--color-main);
+        font-size: 1.2rem;
+    }
+
+    .room-card__time {
+        color: var(--color-light-gray);
+        font-size: 1.2rem;
+    }
+
+    .room-card__content {
+        padding: 1.5rem;
+    }
+
+    .room-card__title {
+        font-size: 2rem;
+        color: var(--color-light);
+        text-decoration: none;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        display: block;
+        transition: color 0.2s ease;
+    }
+
+    .room-card__title:hover {
+        color: var(--color-main);
+    }
+
+    .room-card__topic {
+        display: inline-block;
+        padding: 0.4rem 1.2rem;
+        background: var(--color-dark-medium);
+        border-radius: 2rem;
+        color: var(--color-main);
+        font-size: 1.2rem;
+        margin-bottom: 1rem;
+    }
+
+    .room-card__description {
+        color: var(--color-light-gray);
+        font-size: 1.3rem;
+        line-height: 1.5;
+        margin-bottom: 1.5rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .room-card__footer {
+        padding: 1.5rem;
+        border-top: 1px solid var(--color-dark-light);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .room-card__stats {
+        display: flex;
+        gap: 1.5rem;
+    }
+
+    .room-card__stat {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: var(--color-light-gray);
+        font-size: 1.2rem;
+    }
+
+    .room-card__stat svg {
+        width: 1.6rem;
+        height: 1.6rem;
+        fill: var(--color-main);
+    }
+
+    .room-card__likes {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        cursor: pointer;
+    }
+
+    .room-card__likes .heart-icon {
+        font-size: 1.6rem;
+    }
+
+    .room-card__likes .like-count {
+        color: var(--color-light-gray);
+        font-size: 1.2rem;
+    }
+
+    /* No Results */
+    .no-results {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 5rem;
+        background: var(--color-dark);
+        border-radius: 1.5rem;
+    }
+
+    .no-results svg {
+        width: 6rem;
+        height: 6rem;
+        fill: var(--color-dark-light);
+        margin-bottom: 2rem;
+    }
+
+    .no-results h3 {
+        color: var(--color-light);
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    .no-results p {
+        color: var(--color-light-gray);
+        font-size: 1.4rem;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .all-rooms-container {
+            padding: 1rem;
+        }
+
+        .all-rooms-header h1 {
+            font-size: 2.4rem;
+        }
+
+        .rooms-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .search-filters {
+            justify-content: center;
+        }
+
+        .room-card:hover {
+            transform: none;
+        }
+    }
+
+    /* Loading Animation */
+    @keyframes pulse {
+        0% { opacity: 0.6; }
+        50% { opacity: 1; }
+        100% { opacity: 0.6; }
+    }
+
+    .loading {
+        animation: pulse 1.5s infinite;
+    }
+</style>
+
+<div class="all-rooms-container">
+    
+    <!-- Header -->
+    <div class="all-rooms-header">
+        <h1>Explore All Study Rooms</h1>
+        <p>Discover {{ room_count }} rooms to collaborate and learn together</p>
+    </div>
+
+    <!-- Search Section -->
+    <div class="search-section">
+        <div class="live-search">
+            <svg viewBox="0 0 24 24">
+                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+            </svg>
+            <input type="text" 
+                   id="liveSearch" 
+                   placeholder="Search by room name, topic, or host..." 
+                   value="{{ search_query }}"
+                   autocomplete="off">
+        </div>
+
+        <div class="search-filters" id="topicFilters">
+            <span class="filter-chip {% if not search_query %}active{% endif %}" data-topic="all">All</span>
+            {% for topic in topics %}
+            <span class="filter-chip" data-topic="{{ topic.name }}">{{ topic.name }}</span>
+            {% endfor %}
+        </div>
+
+        <div class="results-count">
+            Found <span id="roomCount">{{ room_count }}</span> rooms
+        </div>
+    </div>
+
+    <!-- Rooms Grid -->
+    <div class="rooms-grid" id="roomsGrid">
+        {% for room in rooms %}
+        <div class="room-card" data-topic="{{ room.topic.name }}" data-name="{{ room.name|lower }}" data-host="{{ room.host.username|lower }}">
+            <div class="room-card__header">
+                <a href="{% url 'user-profile' room.host.id %}" class="room-card__host">
+                    <img src="{{ room.host.avatar_url }}" alt="{{ room.host.username }}" />
+                         
+                    <div class="room-card__host-info">
+                        <h4>{{ room.host.username }}</h4>
+                        <p>Host</p>
+                    </div>
+                    <span class="room-card__time">{{ room.created|timesince }} ago</span>
+                </a>
+            </div>
+
+            <div class="room-card__content">
+                <a href="{% url 'room' room.id %}" class="room-card__title">
+                    {{ room.name }}
+                </a>
+                
+                <span class="room-card__topic">{{ room.topic.name }}</span>
+                
+                {% if room.description %}
+                <p class="room-card__description">{{ room.description|truncatechars:100 }}</p>
+                {% endif %}
+            </div>
+
+            <div class="room-card__footer">
+                <div class="room-card__stats">
+                    <span class="room-card__stat">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-1 .05 1.16.84 2 1.87 2 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                        </svg>
+                        {{ room.participants.count }}
+                    </span>
+                </div>
+
+                <div class="room-card__likes" onclick="likeRoom('{{ room.id }}', this)">
+                    <span class="heart-icon">
+                        {% if request.user in room.likes.all %}
+                            ❤️
+                        {% else %}
+                            🤍
+                        {% endif %}
+                    </span>
+                    <span class="like-count">{{ room.likes.count }}</span>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="no-results">
+            <svg viewBox="0 0 24 24">
+                <path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3zm7 17H5V8h14v12zm-7-8c-1.66 0-3-1.34-3-3H7c0 2.76 2.24 5 5 5s5-2.24 5-5h-2c0 1.66-1.34 3-3 3z"/>
+            </svg>
+            <h3>No rooms found</h3>
+            <p>Try adjusting your search or create a new room!</p>
+            <a href="{% url 'create-room' %}" class="btn btn--main" style="margin-top: 2rem;">Create Room</a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+// Live search functionality
+const searchInput = document.getElementById('liveSearch');
+const roomsGrid = document.getElementById('roomsGrid');
+const roomCards = document.querySelectorAll('.room-card');
+const filterChips = document.querySelectorAll('.filter-chip');
+const roomCountSpan = document.getElementById('roomCount');
+let searchTimeout;
+
+// Like function
+function likeRoom(roomId, element) {
+    fetch(`/like-room/${roomId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': '{{ csrf_token }}',
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const heartIcon = element.querySelector('.heart-icon');
+        heartIcon.innerHTML = data.liked ? '❤️' : '🤍';
+        element.querySelector('.like-count').innerHTML = data.total_likes;
+    });
+}
+
+// Filter rooms function
+function filterRooms() {
+    const searchTerm = searchInput.value.toLowerCase();
+    const activeTopic = document.querySelector('.filter-chip.active')?.dataset.topic || 'all';
+    
+    let visibleCount = 0;
+    
+    roomCards.forEach(card => {
+        const roomTopic = card.dataset.topic;
+        const roomName = card.dataset.name;
+        const roomHost = card.dataset.host;
+        
+        const matchesTopic = activeTopic === 'all' || roomTopic === activeTopic;
+        const matchesSearch = searchTerm === '' || 
+                             roomName.includes(searchTerm) || 
+                             roomTopic.includes(searchTerm) || 
+                             roomHost.includes(searchTerm);
+        
+        if (matchesTopic && matchesSearch) {
+            card.style.display = 'block';
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    
+    roomCountSpan.textContent = visibleCount;
+    
+    // Show no results message if needed
+    let noResultsMsg = document.querySelector('.no-results-message');
+    if (visibleCount === 0 && !document.querySelector('.no-results')) {
+        if (!noResultsMsg) {
+            noResultsMsg = document.createElement('div');
+            noResultsMsg.className = 'no-results no-results-message';
+            noResultsMsg.innerHTML = `
+                <svg viewBox="0 0 24 24">
+                    <path d="M19 6h-2c0-2.76-2.24-5-5-5S7 3.24 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.66 0 3 1.34 3 3H9c0-1.66 1.34-3 3-3zm7 17H5V8h14v12z"/>
+                </svg>
+                <h3>No rooms found</h3>
+                <p>Try adjusting your search or create a new room!</p>
+                <a href="{% url 'create-room' %}" class="btn btn--main" style="margin-top: 2rem;">Create Room</a>
+            `;
+            roomsGrid.appendChild(noResultsMsg);
+        }
+    } else if (noResultsMsg) {
+        noResultsMsg.remove();
+    }
+}
+
+// Debounced search
+searchInput.addEventListener('input', () => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(filterRooms, 300);
+});
+
+// Topic filter clicks
+filterChips.forEach(chip => {
+    chip.addEventListener('click', () => {
+        filterChips.forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        filterRooms();
+    });
+});
+
+// Initial filter
+filterRooms();
+</script>
+
+{% endblock %}
