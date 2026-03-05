@@ -1,6 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import BaseUserManager
+import base64
+from django.core.files.base import ContentFile
+from PIL import Image
+import io
 
 class CustomUserManager(BaseUserManager):
     def create_user(self, email, password=None, **extra_fields):
@@ -25,8 +29,7 @@ class User(AbstractUser):
     email_verified = models.BooleanField(default=False)
     email_verification_token = models.CharField(max_length=100, blank=True, null=True)
     bio = models.TextField(null=True)
-    avatar = models.ImageField(upload_to='avatars/', null=True, blank=True)
-
+    avatar = models.TextField(null=True, blank=True)
     followers = models.ManyToManyField(
         "self",
         symmetrical=False,
@@ -41,12 +44,28 @@ class User(AbstractUser):
 
     @property
     def avatar_url(self):
-        if self.avatar:
-            try:
-                return self.avatar.url
-            except:
-                pass
+        if self.avatar_base64:
+            return f"data:image/jpeg;base64,{self.avatar_base64}"
         return "/static/images/avatar.svg"
+    def save_avatar_from_file(self, file):
+        """Convert uploaded file to base64 and save"""
+        try:
+            # Open and resize image to save space
+            img = Image.open(file)
+            # Resize to max 300x300 to keep database size small
+            img.thumbnail((300, 300))
+            
+            # Convert to JPEG
+            buffer = io.BytesIO()
+            img.save(buffer, format='JPEG', quality=70)
+            img_str = base64.b64encode(buffer.getvalue()).decode('utf-8')
+            
+            self.avatar_base64 = img_str
+            self.save()
+            return True
+        except Exception as e:
+            print(f"Error saving avatar: {e}")
+            return False
 
 
 class Topic(models.Model):  # topic model for different topics of rooms
@@ -54,6 +73,7 @@ class Topic(models.Model):  # topic model for different topics of rooms
 
     def __str__(self):
         return self.name  # string represntation of the topic model
+    
 
 
 # creating a room first

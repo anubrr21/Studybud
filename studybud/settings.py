@@ -1,21 +1,9 @@
 from pathlib import Path
 import os
 import dj_database_url
-import cloudinary
-import cloudinary.uploader
-import cloudinary.api
 
-cloudinary.config(
-    cloud_name=os.environ.get('CLOUDINARY_CLOUD_NAME'),
-    api_key=os.environ.get('CLOUDINARY_API_KEY'),
-    api_secret=os.environ.get('CLOUDINARY_API_SECRET')
-)
 
-CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
-    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
-    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
-}
+
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -35,8 +23,6 @@ INSTALLED_APPS = [
     'base.apps.BaseConfig',
     'rest_framework',
     'corsheaders',
-    'cloudinary',
-    'cloudinary_storage',
     'channels',
 ]
 AUTH_USER_MODEL = 'base.User'
@@ -126,8 +112,7 @@ CHANNEL_LAYERS = {
 
 
 # MEDIA (Cloudinary)
-DEFAULT_FILE_STORAGE = "cloudinary_storage.storage.MediaCloudinaryStorage"
-MEDIA_URL='/media/'
+
 
 
 
