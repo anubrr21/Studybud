@@ -202,15 +202,19 @@
     }
 
     .room-card__description {
-        color: var(--color-light-gray);
-        font-size: 1.3rem;
-        line-height: 1.5;
-        margin-bottom: 1.5rem;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        overflow: hidden;
-    }
+    color: var(--color-light-gray);
+    font-size: 1.3rem;
+    line-height: 1.5;
+    margin-bottom: 1.5rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* Standard property for future compatibility */
+    line-clamp: 2;
+    box-orient: vertical;
+}
 
     .room-card__footer {
         padding: 1.5rem;
