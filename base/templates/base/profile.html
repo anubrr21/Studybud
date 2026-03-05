@@ -10,14 +10,10 @@
     <div class="roomList">
       <div class="profile">
 
-        <!-- Avatar -->
+        <!-- Avatar - FIXED: Always use avatar_url -->
         <div class="profile__avatar">
           <div class="avatar avatar--large active">
-            {% if user.avatar %}
-              <img src="{{ user.avatar_url }}" alt="Profile Picture" />
-            {% else %}
-              <img src="{% static 'images/avatar.svg' %}" alt="Default Avatar" />
-            {% endif %}
+            <img src="{{ user.avatar_url }}" alt="Profile Picture" />
           </div>
         </div>
 
@@ -35,14 +31,14 @@
               <strong>{{ user.following.count }}</strong> Following
             </span>
           </div>
-{% if mutual_followers %}
-  <div style="margin-top:8px; font-size:13px; color:gray;">
-    Followed by
-    {% for m in mutual_followers|slice:":2" %}
-      {{ m.username }}{% if not forloop.last %}, {% endif %}
-    {% endfor %}
-  </div>
-{% endif %}         
+          {% if mutual_followers %}
+            <div style="margin-top:8px; font-size:13px; color:gray;">
+              Followed by
+              {% for m in mutual_followers|slice:":2" %}
+                {{ m.username }}{% if not forloop.last %}, {% endif %}
+              {% endfor %}
+            </div>
+          {% endif %}         
 
           {% if request.user != user and request.user.is_authenticated %}
             <button 
@@ -180,7 +176,8 @@ function openModal(title, users) {
           color:white;
         ">
           <img src="${user.avatar}" 
-               style="width:40px;height:40px;border-radius:50%;margin-right:10px;" />
+               style="width:40px;height:40px;border-radius:50%;margin-right:10px;" 
+               onerror="this.src='/static/images/avatar.svg'" />
           <span>@${user.username}</span>
         </a>
       `;

@@ -28,7 +28,7 @@
     </svg>
   </a>
 
-  <!-- Suggested Users INSIDE sidebar -->
+  <!-- Suggested Users INSIDE sidebar - FIXED: use u.avatar_url -->
   {% if suggested_users %}
   <div style="margin-top:30px;">
     <h3 style="margin-bottom:10px;">Suggested Users</h3>
@@ -38,7 +38,8 @@
        style="display:flex;align-items:center;margin-bottom:10px;text-decoration:none;color:white;">
       
       <img src="{{ u.avatar_url }}"
-           style="width:32px;height:32px;border-radius:50%;margin-right:8px;" />
+           style="width:32px;height:32px;border-radius:50%;margin-right:8px;"
+           onerror="this.src='/static/images/avatar.svg'" />
       
       <span>@{{ u.username }}</span>
     </a>
