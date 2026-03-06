@@ -1,0 +1,456 @@
+{% extends 'main.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* Chats Page Styles */
+    .chats-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .chats-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 3rem;
+    }
+
+    .chats-header h1 {
+        font-size: 3.2rem;
+        color: var(--color-main);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .chats-header h1 svg {
+        width: 3.2rem;
+        height: 3.2rem;
+        fill: var(--color-main);
+    }
+
+    .unread-badge {
+        background: var(--color-main);
+        color: var(--color-dark);
+        font-size: 1.4rem;
+        font-weight: bold;
+        padding: 0.3rem 1rem;
+        border-radius: 2rem;
+        margin-left: 1rem;
+    }
+
+    /* Search Section */
+    .chats-search {
+        background: var(--color-dark);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .search-wrapper {
+        position: relative;
+    }
+
+    .search-wrapper input {
+        width: 100%;
+        padding: 1.5rem 2rem 1.5rem 5rem;
+        background: var(--color-dark-medium);
+        border: 2px solid var(--color-dark-light);
+        border-radius: 3rem;
+        color: var(--color-light);
+        font-size: 1.6rem;
+        transition: all 0.3s ease;
+    }
+
+    .search-wrapper input:focus {
+        border-color: var(--color-main);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(113, 198, 221, 0.2);
+    }
+
+    .search-wrapper svg {
+        position: absolute;
+        left: 1.8rem;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 2rem;
+        height: 2rem;
+        fill: var(--color-light-gray);
+    }
+
+    /* Chats Grid */
+    .chats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 2rem;
+    }
+
+    /* Chat Tile */
+    .chat-tile {
+        background: var(--color-dark);
+        border-radius: 1.5rem;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border: 1px solid transparent;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        position: relative;
+    }
+
+    .chat-tile:hover {
+        transform: translateY(-5px);
+        border-color: var(--color-main);
+        box-shadow: 0 10px 25px rgba(113, 198, 221, 0.2);
+    }
+
+    .chat-tile.unread {
+        border-left: 4px solid var(--color-main);
+    }
+
+    .chat-tile__header {
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        border-bottom: 1px solid var(--color-dark-light);
+    }
+
+    .chat-tile__avatar {
+        position: relative;
+    }
+
+    .chat-tile__avatar img {
+        width: 5rem;
+        height: 5rem;
+        border-radius: 50%;
+        border: 2px solid var(--color-main);
+    }
+
+    .online-status {
+        position: absolute;
+        bottom: 2px;
+        right: 2px;
+        width: 1.2rem;
+        height: 1.2rem;
+        border-radius: 50%;
+        background: #4caf50;
+        border: 2px solid var(--color-dark);
+    }
+
+    .chat-tile__info {
+        flex: 1;
+    }
+
+    .chat-tile__info h3 {
+        font-size: 1.8rem;
+        color: var(--color-light);
+        margin-bottom: 0.3rem;
+    }
+
+    .chat-tile__info p {
+        font-size: 1.2rem;
+        color: var(--color-light-gray);
+    }
+
+    .chat-tile__time {
+        font-size: 1.2rem;
+        color: var(--color-light-gray);
+    }
+
+    .chat-tile__content {
+        padding: 1.5rem;
+    }
+
+    .chat-tile__last-message {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+    }
+
+    .chat-tile__last-message-sender {
+        font-weight: bold;
+        color: var(--color-main);
+        font-size: 1.3rem;
+    }
+
+    .chat-tile__last-message-text {
+        color: var(--color-light-gray);
+        font-size: 1.3rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 200px;
+    }
+
+    .chat-tile__badge {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: var(--color-main);
+        color: var(--color-dark);
+        font-size: 1.2rem;
+        font-weight: bold;
+        padding: 0.3rem 0.8rem;
+        border-radius: 1rem;
+        min-width: 2rem;
+        text-align: center;
+    }
+
+    .chat-tile__typing {
+        color: var(--color-main);
+        font-style: italic;
+        font-size: 1.2rem;
+        margin-top: 0.5rem;
+    }
+
+    /* No Chats */
+    .no-chats {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 5rem;
+        background: var(--color-dark);
+        border-radius: 1.5rem;
+    }
+
+    .no-chats svg {
+        width: 6rem;
+        height: 6rem;
+        fill: var(--color-dark-light);
+        margin-bottom: 2rem;
+    }
+
+    .no-chats h3 {
+        color: var(--color-light);
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    .no-chats p {
+        color: var(--color-light-gray);
+        font-size: 1.4rem;
+        margin-bottom: 2rem;
+    }
+
+    .no-chats .btn {
+        display: inline-block;
+        padding: 1.2rem 3rem;
+        background: var(--color-main);
+        color: var(--color-dark);
+        border-radius: 3rem;
+        text-decoration: none;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+
+    .no-chats .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(113, 198, 221, 0.3);
+    }
+
+    /* Loading Animation */
+    .loading-skeleton {
+        animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+        0% { opacity: 0.6; }
+        50% { opacity: 1; }
+        100% { opacity: 0.6; }
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .chats-container {
+            padding: 1rem;
+        }
+
+        .chats-header h1 {
+            font-size: 2.4rem;
+        }
+
+        .chats-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .chat-tile:hover {
+            transform: none;
+        }
+    }
+</style>
+
+<div class="chats-container">
+    <!-- Header -->
+    <div class="chats-header">
+        <h1>
+            <svg viewBox="0 0 24 24">
+                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+            </svg>
+            Messages
+            {% if total_unread > 0 %}
+            <span class="unread-badge">{{ total_unread }}</span>
+            {% endif %}
+        </h1>
+    </div>
+
+    <!-- Search -->
+    <div class="chats-search">
+        <div class="search-wrapper">
+            <svg viewBox="0 0 24 24">
+                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+            </svg>
+            <input type="text" id="chatSearch" placeholder="Search by username, message, or date..." autocomplete="off">
+        </div>
+    </div>
+
+    <!-- Chats Grid -->
+    <div class="chats-grid" id="chatsGrid">
+        {% for chat_data in chats %}
+        <a href="{% url 'chat-detail' chat_data.chat.id %}" class="chat-tile {% if chat_data.unread_count > 0 %}unread{% endif %}" data-chat-id="{{ chat_data.chat.id }}">
+            {% if chat_data.unread_count > 0 %}
+            <span class="chat-tile__badge">{{ chat_data.unread_count }}</span>
+            {% endif %}
+            
+            <div class="chat-tile__header">
+                <div class="chat-tile__avatar">
+                    <img src="{{ chat_data.other_user.avatar_url }}" alt="{{ chat_data.other_user.username }}"/>
+                         
+                    <span class="online-status" style="display: none;"></span>
+                </div>
+                <div class="chat-tile__info">
+                    <h3>{{ chat_data.other_user.username }}</h3>
+                    <p>@{{ chat_data.other_user.username }}</p>
+                </div>
+                {% if chat_data.last_message %}
+                <span class="chat-tile__time">{{ chat_data.last_message.created|timesince }} ago</span>
+                {% endif %}
+            </div>
+            
+            <div class="chat-tile__content">
+                {% if chat_data.last_message %}
+                <div class="chat-tile__last-message">
+                    <span class="chat-tile__last-message-sender">
+                        {% if chat_data.last_message.sender == request.user %}You{% else %}{{ chat_data.last_message.sender.username }}{% endif %}:
+                    </span>
+                    <span class="chat-tile__last-message-text">
+                        {% if chat_data.last_message.message_type == 'text' %}
+                            {{ chat_data.last_message.content }}
+                        {% elif chat_data.last_message.message_type == 'image' %}
+                            📷 Image
+                        {% elif chat_data.last_message.message_type == 'file' %}
+                            📎 File
+                        {% endif %}
+                    </span>
+                </div>
+                {% else %}
+                <div class="chat-tile__last-message">
+                    <span class="chat-tile__last-message-text" style="color: var(--color-light-gray);">No messages yet</span>
+                </div>
+                {% endif %}
+                
+                <div class="chat-tile__typing" id="typing-{{ chat_data.chat.id }}" style="display: none;">
+                    <span>typing...</span>
+                </div>
+            </div>
+        </a>
+        {% empty %}
+        <div class="no-chats">
+            <svg viewBox="0 0 24 24">
+                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+            </svg>
+            <h3>No conversations yet</h3>
+            <p>Start chatting with other users by visiting their profiles!</p>
+            <a href="{% url 'home' %}" class="btn">Browse Rooms</a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<script>
+// Live search functionality
+const searchInput = document.getElementById('chatSearch');
+const chatTiles = document.querySelectorAll('.chat-tile');
+let searchTimeout;
+
+searchInput.addEventListener('input', () => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+        const searchTerm = searchInput.value.toLowerCase();
+        
+        chatTiles.forEach(tile => {
+            const username = tile.querySelector('h3').textContent.toLowerCase();
+            const lastMessage = tile.querySelector('.chat-tile__last-message-text')?.textContent.toLowerCase() || '';
+            
+            if (username.includes(searchTerm) || lastMessage.includes(searchTerm)) {
+                tile.style.display = 'block';
+            } else {
+                tile.style.display = 'none';
+            }
+        });
+    }, 300);
+});
+
+// WebSocket connections for online status
+const chatIds = [...document.querySelectorAll('.chat-tile')].map(tile => tile.dataset.chatId);
+const sockets = {};
+
+chatIds.forEach(chatId => {
+    if (chatId) {
+        const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+        const socket = new WebSocket(protocol + window.location.host + '/ws/chat/' + chatId + '/');
+        
+        socket.onmessage = function(e) {
+            const data = JSON.parse(e.data);
+            
+            if (data.type === 'user_online') {
+                const tile = document.querySelector(`.chat-tile[data-chat-id="${chatId}"]`);
+                const statusDot = tile?.querySelector('.online-status');
+                if (statusDot) {
+                    statusDot.style.display = 'block';
+                }
+            } else if (data.type === 'user_offline') {
+                const tile = document.querySelector(`.chat-tile[data-chat-id="${chatId}"]`);
+                const statusDot = tile?.querySelector('.online-status');
+                if (statusDot) {
+                    statusDot.style.display = 'none';
+                }
+            } else if (data.type === 'typing') {
+                const typingIndicator = document.getElementById(`typing-${chatId}`);
+                if (typingIndicator) {
+                    typingIndicator.style.display = data.is_typing ? 'block' : 'none';
+                }
+            }
+        };
+        
+        sockets[chatId] = socket;
+    }
+});
+
+// Update unread count in navbar periodically
+function updateUnreadCount() {
+    fetch('/api/unread-count/')
+        .then(res => res.json())
+        .then(data => {
+            const badge = document.querySelector('.unread-badge');
+            if (badge) {
+                if (data.unread_count > 0) {
+                    badge.textContent = data.unread_count;
+                    badge.style.display = 'inline-block';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        });
+}
+
+// Update every 30 seconds
+setInterval(updateUnreadCount, 30000);
+</script>
+
+{% endblock %}

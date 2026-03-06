@@ -52,4 +52,10 @@ urlpatterns = [
              template_name='base/password_reset_complete.html'
          ), name='password_reset_complete'),
     path('all-rooms/', views.all_rooms, name='all-rooms'),
+    path('chats/', views.chats_list, name='chats'),
+    path('chat/<int:chat_id>/', views.chat_detail, name='chat-detail'),
+    path('start-chat/<int:user_id>/', views.start_chat, name='start-chat'),
+    path('chat/<int:chat_id>/update-theme/', views.update_chat_theme, name='update-chat-theme'),
+    path('api/search-chats/', views.search_chats, name='search-chats'),
+    path('api/unread-count/', views.get_unread_count, name='unread-count'),
 ]

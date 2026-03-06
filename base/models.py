@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.contrib.auth.models import BaseUserManager
+from django.utils import timezone
+import json
 from PIL import Image
 import base64
 import io
@@ -152,3 +154,148 @@ class Notification(models.Model):
 
     def __str__(self):
         return f"{self.sender} {self.type} {self.room}"
+    
+
+class ChatTheme(models.Model):
+    """Theme settings for a chat between two users"""
+    name = models.CharField(max_length=100, default="Default")
+    background_image = models.ImageField(upload_to='chat_themes/', null=True, blank=True)
+    background_color = models.CharField(max_length=20, default="#2d2d39")  # Default dark theme
+    message_bubble_user = models.CharField(max_length=20, default="#71c6dd")  # User's messages
+    message_bubble_other = models.CharField(max_length=20, default="#3f4156")  # Other's messages
+    text_color = models.CharField(max_length=20, default="#e5e5e5")
+    timestamp_color = models.CharField(max_length=20, default="#b2bdbd")
+    created_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    is_public = models.BooleanField(default=False)  # Can others use this theme?
+    created = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return self.name
+
+class Chat(models.Model):
+    """Personal chat between two users"""
+    participants = models.ManyToManyField(User, related_name='personal_chats')
+    theme = models.ForeignKey(ChatTheme, on_delete=models.SET_NULL, null=True, blank=True)
+    custom_background = models.ImageField(upload_to='chat_backgrounds/', null=True, blank=True)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-updated']
+    
+    def __str__(self):
+        return f"Chat between {', '.join([p.username for p in self.participants.all()])}"
+    
+    def get_other_participant(self, user):
+        """Get the other participant in the chat"""
+        return self.participants.exclude(id=user.id).first()
+    
+    def get_last_message(self):
+        """Get the last message in the chat"""
+        return self.messages.first()
+
+class ChatMessage(models.Model):
+    """Individual messages in a personal chat"""
+    MESSAGE_TYPES = (
+        ('text', 'Text'),
+        ('image', 'Image'),
+        ('file', 'File'),
+        ('system', 'System'),
+    )
+    
+    chat = models.ForeignKey(Chat, on_delete=models.CASCADE, related_name='messages')
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
+    message_type = models.CharField(max_length=10, choices=MESSAGE_TYPES, default='text')
+    content = models.TextField()  # Text content or file URL
+    file = models.FileField(upload_to='chat_files/', null=True, blank=True)
+    file_name = models.CharField(max_length=255, null=True, blank=True)
+    file_size = models.IntegerField(null=True, blank=True)  # Size in bytes
+    file_type = models.CharField(max_length=100, null=True, blank=True)  # MIME type
+
+    thumbnail = models.FileField(upload_to='chat_thumbnails/', null=True, blank=True)
+    
+    # Reply feature
+    parent_message = models.ForeignKey('self', on_delete=models.SET_NULL, null=True, blank=True, related_name='replies')
+    reply_count = models.IntegerField(default=0)
+    
+    # Pin feature
+    is_pinned = models.BooleanField(default=False)
+    pinned_at = models.DateTimeField(null=True, blank=True)
+    
+    # Reactions
+    reactions = models.JSONField(default=dict, blank=True)  # {"👍": ["user1", "user2"], "❤️": ["user3"]}
+    
+    # Read receipts
+    read_by = models.ManyToManyField(User, related_name='read_messages', blank=True)
+    delivered_to = models.ManyToManyField(User, related_name='delivered_messages', blank=True)
+    
+    # Delete features
+    deleted_for_sender = models.BooleanField(default=False)
+    deleted_for_everyone = models.BooleanField(default=False)
+    deleted_at = models.DateTimeField(null=True, blank=True)
+    
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created']
+    
+    def __str__(self):
+        return f"{self.sender.username}: {self.content[:50]}"
+    
+    def save(self, *args, **kwargs):
+        if self.parent_message:
+            self.parent_message.reply_count = self.parent_message.replies.count()
+            self.parent_message.save()
+        super().save(*args, **kwargs)
+    
+    def add_reaction(self, user, reaction):
+        """Add a reaction to the message"""
+        if reaction not in self.reactions:
+            self.reactions[reaction] = []
+        if user.username not in self.reactions[reaction]:
+            self.reactions[reaction].append(user.username)
+        self.save()
+    
+    def remove_reaction(self, user, reaction):
+        """Remove a reaction from the message"""
+        if reaction in self.reactions and user.username in self.reactions[reaction]:
+            self.reactions[reaction].remove(user.username)
+            if not self.reactions[reaction]:
+                del self.reactions[reaction]
+            self.save()
+    
+    def mark_as_read(self, user):
+        """Mark message as read by user"""
+        if user not in self.read_by.all():
+            self.read_by.add(user)
+    
+    def mark_as_delivered(self, user):
+        """Mark message as delivered to user"""
+        if user not in self.delivered_to.all():
+            self.delivered_to.add(user)
+
+class ChatParticipant(models.Model):
+    """Additional participant info for each chat"""
+    chat = models.ForeignKey(Chat, on_delete=models.CASCADE, related_name='participant_info')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    last_read_message = models.ForeignKey(ChatMessage, on_delete=models.SET_NULL, null=True, blank=True)
+    muted = models.BooleanField(default=False)
+    pinned = models.BooleanField(default=False)  # Pin chat to top
+    archived = models.BooleanField(default=False)
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        unique_together = ['chat', 'user']
+    
+    def __str__(self):
+        return f"{self.user.username} in chat {self.chat.id}"
+    
+    def get_unread_count(self):
+        """Get number of unread messages for this user in this chat"""
+        if not self.last_read_message:
+            return self.chat.messages.exclude(sender=self.user).count()
+        return self.chat.messages.filter(
+            created__gt=self.last_read_message.created
+        ).exclude(sender=self.user).count()

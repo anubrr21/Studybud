@@ -2,7 +2,7 @@ from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.db.models import Q
+from django.db.models import Q,Count,Max
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from django.contrib.sites.shortcuts import get_current_site
@@ -12,13 +12,18 @@ from django.utils.encoding import force_bytes, force_str
 from django.core.mail import send_mail
 from django.conf import settings
 from .tokens import email_verification_token, generate_verification_code
-
 from django.contrib.auth import authenticate,login,logout
 from django.http import JsonResponse
-
-
+from .models import Chat, ChatMessage, ChatTheme, ChatParticipant
 from .models import Room,Topic,Message,User,Notification
 from .forms import RoomForm,UserForm,MyUserCreationForm
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+import os
+import mimetypes
+from PIL import Image
+import io
+
 
 
 def loginPage(request):
@@ -508,3 +513,275 @@ def all_rooms(request):
         'search_query': q,
     }
     return render(request, 'base/all_rooms.html', context)
+
+
+@login_required
+def chats_list(request):
+    """Display all personal chats for the user"""
+    # Get all chats where user is a participant
+    chats = Chat.objects.filter(participants=request.user).annotate(
+        last_message_time=Max('messages__created')
+    ).order_by('-last_message_time')
+    
+    # Get unread counts for each chat
+    chat_data = []
+    for chat in chats:
+        other_user = chat.get_other_participant(request.user)
+        last_message = chat.get_last_message()
+        participant_info = ChatParticipant.objects.filter(chat=chat, user=request.user).first()
+        unread_count = participant_info.get_unread_count() if participant_info else 0
+        
+        chat_data.append({
+            'chat': chat,
+            'other_user': other_user,
+            'last_message': last_message,
+            'unread_count': unread_count,
+            'last_message_time': chat.updated
+        })
+    
+    # Get total unread count for badge
+    total_unread = sum([c['unread_count'] for c in chat_data])
+    
+    context = {
+        'chats': chat_data,
+        'total_unread': total_unread
+    }
+    return render(request, 'base/chats.html', context)
+
+@login_required
+def chat_detail(request, chat_id):
+    """Display individual chat page"""
+    chat = get_object_or_404(Chat, id=chat_id)
+    
+    # Check if user is participant
+    if request.user not in chat.participants.all():
+        return redirect('chats')
+    
+    other_user = chat.get_other_participant(request.user)
+    
+    # Get all messages (excluding deleted ones)
+    messages = chat.messages.filter(
+        Q(deleted_for_everyone=False) &
+        (Q(deleted_for_sender=False) | Q(sender=request.user))
+    ).select_related('sender', 'parent_message')
+    
+    # Get pinned messages
+    pinned_messages = messages.filter(is_pinned=True).order_by('-pinned_at')
+    
+    # Mark messages as read
+    participant_info, _ = ChatParticipant.objects.get_or_create(
+        chat=chat,
+        user=request.user
+    )
+    
+    # Get or create default theme
+    if not chat.theme:
+        default_theme, _ = ChatTheme.objects.get_or_create(
+            name="Default",
+            defaults={
+                'background_color': '#2d2d39',
+                'message_bubble_user': '#71c6dd',
+                'message_bubble_other': '#3f4156',
+                'text_color': '#e5e5e5',
+                'timestamp_color': '#b2bdbd'
+            }
+        )
+        chat.theme = default_theme
+        chat.save()
+    
+    context = {
+        'chat': chat,
+        'other_user': other_user,
+        'messages': messages,
+        'pinned_messages': pinned_messages,
+        'participant_info': participant_info,
+        'themes': ChatTheme.objects.filter(Q(is_public=True) | Q(created_by=request.user))
+    }
+    return render(request, 'base/chat_detail.html', context)
+
+@login_required
+def start_chat(request, user_id):
+    """Start a new chat with another user"""
+    other_user = get_object_or_404(User, id=user_id)
+    
+    if other_user == request.user:
+        return redirect('user-profile', pk=user_id)
+    
+    # Check if chat already exists
+    existing_chat = Chat.objects.filter(
+        participants=request.user
+    ).filter(participants=other_user).first()
+    
+    if existing_chat:
+        return redirect('chat-detail', chat_id=existing_chat.id)
+    
+    # Create new chat
+    chat = Chat.objects.create()
+    chat.participants.add(request.user, other_user)
+    
+    # Create participant info for both users
+    ChatParticipant.objects.create(chat=chat, user=request.user)
+    ChatParticipant.objects.create(chat=chat, user=other_user)
+    
+    return redirect('chat-detail', chat_id=chat.id)
+
+@login_required
+def update_chat_theme(request, chat_id):
+    """Update chat theme/background"""
+    chat = get_object_or_404(Chat, id=chat_id)
+    
+    if request.user not in chat.participants.all():
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+    
+    if request.method == 'POST':
+        theme_id = request.POST.get('theme_id')
+        custom_bg = request.FILES.get('custom_background')
+        
+        if theme_id:
+            theme = get_object_or_404(ChatTheme, id=theme_id)
+            chat.theme = theme
+        elif custom_bg:
+            chat.custom_background = custom_bg
+        
+        chat.save()
+        
+        return JsonResponse({'success': True})
+    
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+@login_required
+def search_chats(request):
+    """API endpoint for searching chats"""
+    query = request.GET.get('q', '')
+    
+    if not query:
+        return JsonResponse({'chats': []})
+    
+    # Search in chat messages and participants
+    chats = Chat.objects.filter(
+        participants=request.user
+    ).filter(
+        Q(messages__content__icontains=query) |
+        Q(participants__username__icontains=query) |
+        Q(messages__created__date__icontains=query)
+    ).distinct()
+    
+    results = []
+    for chat in chats:
+        other_user = chat.get_other_participant(request.user)
+        last_message = chat.get_last_message()
+        
+        results.append({
+            'chat_id': chat.id,
+            'other_user': {
+                'id': other_user.id,
+                'username': other_user.username,
+                'avatar': other_user.avatar_url
+            },
+            'last_message': last_message.content if last_message else '',
+            'last_message_time': last_message.created.isoformat() if last_message else None,
+            'unread_count': chat.participant_info.get(request.user.id, {}).get('unread_count', 0)
+        })
+    
+    return JsonResponse({'chats': results})
+
+@login_required
+def get_unread_count(request):
+    """Get total unread messages count for badge"""
+    total_unread = 0
+    chats = Chat.objects.filter(participants=request.user)
+    
+    for chat in chats:
+        participant_info = ChatParticipant.objects.filter(chat=chat, user=request.user).first()
+        if participant_info:
+            total_unread += participant_info.get_unread_count()
+    
+    return JsonResponse({'unread_count': total_unread})
+
+@login_required
+def upload_chat_file(request, chat_id):
+    """Handle file uploads in chat"""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Method not allowed'}, status=405)
+    
+    chat = get_object_or_404(Chat, id=chat_id)
+    
+    # Check if user is participant
+    if request.user not in chat.participants.all():
+        return JsonResponse({'error': 'Unauthorized'}, status=403)
+    
+    file = request.FILES.get('file')
+    if not file:
+        return JsonResponse({'error': 'No file provided'}, status=400)
+    
+    # Get file info
+    file_name = file.name
+    file_size = file.size
+    file_type = file.content_type
+    
+    # Determine message type
+    message_type = 'file'
+    if file_type.startswith('image/'):
+        message_type = 'image'
+    
+    # Create message
+    message = ChatMessage.objects.create(
+        chat=chat,
+        sender=request.user,
+        message_type=message_type,
+        content=f"[{message_type.upper()}] {file_name}",
+        file=file,
+        file_name=file_name,
+        file_size=file_size,
+        file_type=file_type
+    )
+    
+    # Generate thumbnail for images
+    if message_type == 'image':
+        try:
+            # Open image
+            img = Image.open(file)
+            
+            # Create thumbnail
+            img.thumbnail((200, 200))
+            
+            # Save thumbnail
+            thumb_io = io.BytesIO()
+            img.save(thumb_io, format='JPEG', quality=70)
+            thumb_file = ContentFile(thumb_io.getvalue(), name=f'thumb_{file.name}.jpg')
+            
+            message.thumbnail.save(f'thumb_{file.name}.jpg', thumb_file, save=True)
+        except Exception as e:
+            print(f"Error creating thumbnail: {e}")
+    
+    # Notify via WebSocket
+    from channels.layers import get_channel_layer
+    from asgiref.sync import async_to_sync
+    
+    channel_layer = get_channel_layer()
+    async_to_sync(channel_layer.group_send)(
+        f'personal_chat_{chat_id}',
+        {
+            'type': 'chat_message',
+            'message_id': message.id,
+            'sender_id': message.sender.id,
+            'sender_username': message.sender.username,
+            'sender_avatar': message.sender.avatar_url,
+            'content': message.content,
+            'message_type': message.message_type,
+            'file_url': message.file.url if message.file else None,
+            'file_name': message.file_name,
+            'file_size': message.file_size,
+            'thumbnail_url': message.thumbnail.url if message.thumbnail else None,
+            'created': message.created.isoformat()
+        }
+    )
+    
+    return JsonResponse({
+        'success': True,
+        'message_id': message.id,
+        'file_url': message.file.url,
+        'file_name': file_name,
+        'file_size': file_size,
+        'message_type': message_type
+    })

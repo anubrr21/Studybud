@@ -316,3 +316,336 @@ class ChatConsumer(AsyncWebsocketConsumer):
             )
 
         return message
+    
+
+class PersonalChatConsumer(AsyncWebsocketConsumer):
+    async def connect(self):
+        self.chat_id = self.scope['url_route']['kwargs']['chat_id']
+        self.user = self.scope['user']
+        
+        if not self.user.is_authenticated:
+            await self.close()
+            return
+        
+        # Check if user is participant in this chat
+        if not await self.is_participant():
+            await self.close()
+            return
+        
+        self.chat_group_name = f'personal_chat_{self.chat_id}'
+        
+        await self.channel_layer.group_add(
+            self.chat_group_name,
+            self.channel_name
+        )
+        
+        await self.accept()
+        
+        # Send typing status
+        await self.channel_layer.group_send(
+            self.chat_group_name,
+            {
+                'type': 'user_online',
+                'user_id': self.user.id,
+                'username': self.user.username
+            }
+        )
+        
+        # Mark messages as delivered
+        await self.mark_messages_delivered()
+    
+    async def disconnect(self, close_code):
+        if hasattr(self, 'chat_group_name'):
+            await self.channel_layer.group_send(
+                self.chat_group_name,
+                {
+                    'type': 'user_offline',
+                    'user_id': self.user.id,
+                    'username': self.user.username
+                }
+            )
+            
+            await self.channel_layer.group_discard(
+                self.chat_group_name,
+                self.channel_name
+            )
+    
+    async def receive(self, text_data):
+        data = json.loads(text_data)
+        message_type = data.get('type', 'message')
+        
+        if message_type == 'message':
+            # Send message
+            message = await self.save_message(
+                data['content'],
+                parent_id=data.get('parent_id')
+            )
+            
+            await self.channel_layer.group_send(
+                self.chat_group_name,
+                {
+                    'type': 'chat_message',
+                    'message_id': message.id,
+                    'sender_id': message.sender.id,
+                    'sender_username': message.sender.username,
+                    'sender_avatar': message.sender.avatar_url,
+                    'content': message.content,
+                    'parent_id': message.parent_message.id if message.parent_message else None,
+                    'created': message.created.isoformat()
+                }
+            )
+            
+        elif message_type == 'typing':
+            await self.channel_layer.group_send(
+                self.chat_group_name,
+                {
+                    'type': 'user_typing',
+                    'user_id': self.user.id,
+                    'username': self.user.username,
+                    'is_typing': data['is_typing']
+                }
+            )
+            
+        elif message_type == 'read':
+            await self.mark_message_read(data['message_id'])
+            
+            await self.channel_layer.group_send(
+                self.chat_group_name,
+                {
+                    'type': 'message_read',
+                    'message_id': data['message_id'],
+                    'user_id': self.user.id
+                }
+            )
+            
+        elif message_type == 'reaction':
+            if data['action'] == 'add':
+                await self.add_reaction(data['message_id'], data['reaction'])
+            else:
+                await self.remove_reaction(data['message_id'], data['reaction'])
+            
+            await self.channel_layer.group_send(
+                self.chat_group_name,
+                {
+                    'type': 'message_reaction',
+                    'message_id': data['message_id'],
+                    'user_id': self.user.id,
+                    'reaction': data['reaction'],
+                    'action': data['action']
+                }
+            )
+            
+        elif message_type == 'pin':
+            await self.pin_message(data['message_id'])
+            
+            await self.channel_layer.group_send(
+                self.chat_group_name,
+                {
+                    'type': 'message_pinned',
+                    'message_id': data['message_id'],
+                    'is_pinned': True
+                }
+            )
+            
+        elif message_type == 'unpin':
+            await self.unpin_message(data['message_id'])
+            
+            await self.channel_layer.group_send(
+                self.chat_group_name,
+                {
+                    'type': 'message_pinned',
+                    'message_id': data['message_id'],
+                    'is_pinned': False
+                }
+            )
+            
+        elif message_type == 'delete':
+            delete_for = data.get('delete_for', 'everyone')
+            await self.delete_message(data['message_id'], delete_for)
+            
+            await self.channel_layer.group_send(
+                self.chat_group_name,
+                {
+                    'type': 'message_deleted',
+                    'message_id': data['message_id'],
+                    'deleted_for': delete_for,
+                    'user_id': self.user.id
+                }
+            )
+    
+    async def chat_message(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'new_message',
+            'message_id': event['message_id'],
+            'sender_id': event['sender_id'],
+            'sender_username': event['sender_username'],
+            'sender_avatar': event['sender_avatar'],
+            'content': event['content'],
+            'parent_id': event['parent_id'],
+            'created': event['created']
+        }))
+    
+    async def user_typing(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'typing',
+            'user_id': event['user_id'],
+            'username': event['username'],
+            'is_typing': event['is_typing']
+        }))
+    
+    async def user_online(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'user_online',
+            'user_id': event['user_id'],
+            'username': event['username']
+        }))
+    
+    async def user_offline(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'user_offline',
+            'user_id': event['user_id'],
+            'username': event['username']
+        }))
+    
+    async def message_read(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'message_read',
+            'message_id': event['message_id'],
+            'user_id': event['user_id']
+        }))
+    
+    async def message_reaction(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'message_reaction',
+            'message_id': event['message_id'],
+            'user_id': event['user_id'],
+            'reaction': event['reaction'],
+            'action': event['action']
+        }))
+    
+    async def message_pinned(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'message_pinned',
+            'message_id': event['message_id'],
+            'is_pinned': event['is_pinned']
+        }))
+    
+    async def message_deleted(self, event):
+        await self.send(text_data=json.dumps({
+            'type': 'message_deleted',
+            'message_id': event['message_id'],
+            'deleted_for': event['deleted_for'],
+            'user_id': event['user_id']
+        }))
+    
+    @database_sync_to_async
+    def is_participant(self):
+        Chat = apps.get_model('base', 'Chat')
+        try:
+            chat = Chat.objects.get(id=self.chat_id)
+            return self.user in chat.participants.all()
+        except Chat.DoesNotExist:
+            return False
+    
+    @database_sync_to_async
+    def save_message(self, content, parent_id=None):
+        Chat = apps.get_model('base', 'Chat')
+        ChatMessage = apps.get_model('base', 'ChatMessage')
+        ChatParticipant = apps.get_model('base', 'ChatParticipant')
+        
+        chat = Chat.objects.get(id=self.chat_id)
+        
+        parent_message = None
+        if parent_id:
+            try:
+                parent_message = ChatMessage.objects.get(id=parent_id)
+            except ChatMessage.DoesNotExist:
+                pass
+        
+        message = ChatMessage.objects.create(
+            chat=chat,
+            sender=self.user,
+            content=content,
+            parent_message=parent_message
+        )
+        
+        # Update chat's updated time
+        chat.save()
+        
+        # Mark as delivered to other participants
+        other_participants = chat.participants.exclude(id=self.user.id)
+        for participant in other_participants:
+            message.delivered_to.add(participant)
+        
+        return message
+    
+    @database_sync_to_async
+    def mark_messages_delivered(self):
+        Chat = apps.get_model('base', 'Chat')
+        ChatMessage = apps.get_model('base', 'ChatMessage')
+        
+        chat = Chat.objects.get(id=self.chat_id)
+        unread_messages = chat.messages.exclude(sender=self.user).exclude(delivered_to=self.user)
+        
+        for message in unread_messages:
+            message.delivered_to.add(self.user)
+    
+    @database_sync_to_async
+    def mark_message_read(self, message_id):
+        ChatMessage = apps.get_model('base', 'ChatMessage')
+        ChatParticipant = apps.get_model('base', 'ChatParticipant')
+        
+        message = ChatMessage.objects.get(id=message_id)
+        message.read_by.add(self.user)
+        
+        # Update last read message for participant
+        participant_info, _ = ChatParticipant.objects.get_or_create(
+            chat=message.chat,
+            user=self.user
+        )
+        participant_info.last_read_message = message
+        participant_info.save()
+    
+    @database_sync_to_async
+    def add_reaction(self, message_id, reaction):
+        ChatMessage = apps.get_model('base', 'ChatMessage')
+        message = ChatMessage.objects.get(id=message_id)
+        message.add_reaction(self.user, reaction)
+    
+    @database_sync_to_async
+    def remove_reaction(self, message_id, reaction):
+        ChatMessage = apps.get_model('base', 'ChatMessage')
+        message = ChatMessage.objects.get(id=message_id)
+        message.remove_reaction(self.user, reaction)
+    
+    @database_sync_to_async
+    def pin_message(self, message_id):
+        ChatMessage = apps.get_model('base', 'ChatMessage')
+        message = ChatMessage.objects.get(id=message_id)
+        message.is_pinned = True
+        message.pinned_at = timezone.now()
+        message.save()
+    
+    @database_sync_to_async
+    def unpin_message(self, message_id):
+        ChatMessage = apps.get_model('base', 'ChatMessage')
+        message = ChatMessage.objects.get(id=message_id)
+        message.is_pinned = False
+        message.pinned_at = None
+        message.save()
+    
+    @database_sync_to_async
+    def delete_message(self, message_id, delete_for):
+        ChatMessage = apps.get_model('base', 'ChatMessage')
+        message = ChatMessage.objects.get(id=message_id)
+        
+        if message.sender != self.user:
+            return
+        
+        if delete_for == 'everyone':
+            message.deleted_for_everyone = True
+            message.deleted_at = timezone.now()
+            message.save()
+        else:  # delete for me
+            message.deleted_for_sender = True
+            message.save()
