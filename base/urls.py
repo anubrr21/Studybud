@@ -58,4 +58,6 @@ urlpatterns = [
     path('chat/<int:chat_id>/update-theme/', views.update_chat_theme, name='update-chat-theme'),
     path('api/search-chats/', views.search_chats, name='search-chats'),
     path('api/unread-count/', views.get_unread_count, name='unread-count'),
+    path('api/search-users/', views.search_users, name='search-users'),
+    path('chat/<int:chat_id>/upload/', views.upload_chat_file, name='upload-chat-file'),
 ]

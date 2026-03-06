@@ -785,3 +785,25 @@ def upload_chat_file(request, chat_id):
         'file_size': file_size,
         'message_type': message_type
     })
+
+@login_required
+def search_users(request):
+    """Search for users to start a chat with"""
+    query = request.GET.get('q', '')
+    
+    users = User.objects.filter(
+        Q(username__icontains=query) |
+        Q(email__icontains=query)
+    ).exclude(id=request.user.id)[:20]  # Exclude self, limit to 20
+    
+    data = {
+        'users': [
+            {
+                'id': user.id,
+                'username': user.username,
+                'avatar': user.avatar_url
+            }
+            for user in users
+        ]
+    }
+    return JsonResponse(data)

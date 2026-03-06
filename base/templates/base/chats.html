@@ -41,6 +41,39 @@
         margin-left: 1rem;
     }
 
+    /* New Chat Button */
+    .new-chat-section {
+        margin-bottom: 2rem;
+    }
+
+    .new-chat-btn {
+        width: 100%;
+        padding: 1.2rem;
+        background: var(--color-main);
+        color: var(--color-dark);
+        border: none;
+        border-radius: 3rem;
+        font-size: 1.6rem;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        transition: all 0.3s ease;
+    }
+
+    .new-chat-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(113, 198, 221, 0.3);
+    }
+
+    .new-chat-btn svg {
+        width: 2rem;
+        height: 2rem;
+        fill: var(--color-dark);
+    }
+
     /* Search Section */
     .chats-search {
         background: var(--color-dark);
@@ -253,6 +286,111 @@
         box-shadow: 0 5px 15px rgba(113, 198, 221, 0.3);
     }
 
+    /* Modal Styles */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal.active {
+        display: flex;
+    }
+
+    .modal-content {
+        background: var(--color-dark);
+        border-radius: 1.5rem;
+        width: 90%;
+        max-width: 500px;
+        max-height: 80vh;
+        overflow-y: auto;
+        padding: 2rem;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .modal-header h2 {
+        color: var(--color-main);
+        font-size: 2rem;
+    }
+
+    .close-modal {
+        background: none;
+        border: none;
+        color: var(--color-light-gray);
+        font-size: 2.4rem;
+        cursor: pointer;
+    }
+
+    .close-modal:hover {
+        color: var(--color-main);
+    }
+
+    .search-users input {
+        width: 100%;
+        padding: 1rem;
+        background: var(--color-dark-medium);
+        border: 2px solid var(--color-dark-light);
+        border-radius: 2rem;
+        color: var(--color-light);
+        font-size: 1.4rem;
+        margin-bottom: 1rem;
+    }
+
+    .search-users input:focus {
+        border-color: var(--color-main);
+        outline: none;
+    }
+
+    .users-list {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .user-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem;
+        text-decoration: none;
+        color: var(--color-light);
+        border-bottom: 1px solid var(--color-dark-light);
+        transition: background 0.2s ease;
+    }
+
+    .user-item:hover {
+        background: var(--color-dark-medium);
+    }
+
+    .user-item img {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        border: 2px solid var(--color-main);
+    }
+
+    .user-item-info h4 {
+        font-size: 1.4rem;
+        margin-bottom: 0.2rem;
+    }
+
+    .user-item-info p {
+        color: var(--color-light-gray);
+        font-size: 1.2rem;
+    }
+
     /* Loading Animation */
     .loading-skeleton {
         animation: pulse 1.5s infinite;
@@ -299,13 +437,23 @@
         </h1>
     </div>
 
+    <!-- New Chat Button -->
+    <div class="new-chat-section">
+        <button class="new-chat-btn" onclick="openNewChatModal()">
+            <svg viewBox="0 0 24 24">
+                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+            </svg>
+            Start New Chat
+        </button>
+    </div>
+
     <!-- Search -->
     <div class="chats-search">
         <div class="search-wrapper">
             <svg viewBox="0 0 24 24">
                 <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
             </svg>
-            <input type="text" id="chatSearch" placeholder="Search by username, message, or date..." autocomplete="off">
+            <input type="text" id="chatSearch" placeholder="Search your chats by username or message..." autocomplete="off">
         </div>
     </div>
 
@@ -319,8 +467,10 @@
             
             <div class="chat-tile__header">
                 <div class="chat-tile__avatar">
-                    <img src="{{ chat_data.other_user.avatar_url }}" alt="{{ chat_data.other_user.username }}"/>
-                         
+                    <img src="{{ chat_data.other_user.avatar_url }}" 
+                         alt="{{ chat_data.other_user.username }}"
+                         data-default="{% static 'images/avatar.svg' %}"
+                         onerror="this.onerror=null; this.src=this.dataset.default;">
                     <span class="online-status" style="display: none;"></span>
                 </div>
                 <div class="chat-tile__info">
@@ -365,15 +515,32 @@
                 <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
             </svg>
             <h3>No conversations yet</h3>
-            <p>Start chatting with other users by visiting their profiles!</p>
-            <a href="{% url 'home' %}" class="btn">Browse Rooms</a>
+            <p>Start chatting with other users by clicking "Start New Chat" above!</p>
         </div>
         {% endfor %}
     </div>
 </div>
 
+<!-- New Chat Modal -->
+<div class="modal" id="newChatModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Start New Chat</h2>
+            <button class="close-modal" onclick="closeNewChatModal()">&times;</button>
+        </div>
+        
+        <div class="search-users">
+            <input type="text" id="userSearch" placeholder="Search users by username..." autocomplete="off">
+        </div>
+        
+        <div class="users-list" id="usersList">
+            <!-- Users will be loaded here -->
+        </div>
+    </div>
+</div>
+
 <script>
-// Live search functionality
+// Live search functionality for existing chats
 const searchInput = document.getElementById('chatSearch');
 const chatTiles = document.querySelectorAll('.chat-tile');
 let searchTimeout;
@@ -395,6 +562,59 @@ searchInput.addEventListener('input', () => {
         });
     }, 300);
 });
+
+// New Chat Modal Functions
+function openNewChatModal() {
+    document.getElementById('newChatModal').classList.add('active');
+    searchUsers('');
+}
+
+function closeNewChatModal() {
+    document.getElementById('newChatModal').classList.remove('active');
+    document.getElementById('usersList').innerHTML = '';
+    document.getElementById('userSearch').value = '';
+}
+
+function searchUsers(query) {
+    fetch(`/api/search-users/?q=${encodeURIComponent(query)}`)
+        .then(res => res.json())
+        .then(data => {
+            const usersList = document.getElementById('usersList');
+            usersList.innerHTML = '';
+            
+            if (data.users.length === 0) {
+                usersList.innerHTML = '<p style="color: var(--color-light-gray); text-align: center; padding: 2rem;">No users found</p>';
+                return;
+            }
+            
+            data.users.forEach(user => {
+                usersList.innerHTML += `
+                    <a href="/start-chat/${user.id}/" class="user-item">
+                        <img src="${user.avatar}" alt="${user.username}"
+                             data-default="{% static 'images/avatar.svg' %}"
+                             onerror="this.onerror=null; this.src=this.dataset.default;">
+                        <div class="user-item-info">
+                            <h4>${user.username}</h4>
+                            <p>@${user.username}</p>
+                        </div>
+                    </a>
+                `;
+            });
+        });
+}
+
+// Live search in modal
+document.getElementById('userSearch').addEventListener('input', function() {
+    searchUsers(this.value);
+});
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('newChatModal');
+    if (event.target === modal) {
+        closeNewChatModal();
+    }
+}
 
 // WebSocket connections for online status
 const chatIds = [...document.querySelectorAll('.chat-tile')].map(tile => tile.dataset.chatId);

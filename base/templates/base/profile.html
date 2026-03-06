@@ -41,28 +41,47 @@
           {% endif %}         
 
           {% if request.user != user and request.user.is_authenticated %}
+          <!-- Message and Follow Buttons Side by Side -->
+          <div style="display: flex; gap: 1rem; margin-top: 15px; justify-content: center;">
+            <!-- Message Button -->
+            <a href="{% url 'start-chat' user.id %}" 
+               class="btn btn--main"
+               style="padding:6px 14px; border-radius:20px; text-decoration:none; display: inline-flex; align-items: center; gap: 0.5rem;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="margin-right: 4px;">
+                    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+                </svg>
+                Message
+            </a>
+            
+            <!-- Follow Button -->
             <button 
                 id="follow-btn"
                 data-user="{{ user.id }}"
                 style="
-                  margin-top:15px;
                   padding:6px 14px;
                   border-radius:20px;
                   border:none;
                   background:#3f51b5;
                   color:white;
                   cursor:pointer;
+                  display: inline-flex;
+                  align-items: center;
+                  gap: 0.5rem;
                 ">
-              {% if request.user in user.followers.all %}
-                Unfollow
-              {% else %}
-                Follow
-              {% endif %}
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                </svg>
+                {% if request.user in user.followers.all %}
+                    Unfollow
+                {% else %}
+                    Follow
+                {% endif %}
             </button>
+          </div>
           {% endif %}
 
           {% if request.user == user %}
-            <a href="{% url 'update-user' %}" class="btn btn--main btn--pill" style="margin-top:15px;">
+            <a href="{% url 'update-user' %}" class="btn btn--main btn--pill" style="margin-top:15px; display: inline-block;">
               Edit Profile
             </a>
           {% endif %}
