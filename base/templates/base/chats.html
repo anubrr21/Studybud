@@ -220,6 +220,40 @@
         text-overflow: ellipsis;
         max-width: 200px;
     }
+    /* Diamond icon for chat tiles */
+.chat-tile__diamond {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    width: 2rem;
+    height: 2rem;
+    background: var(--color-main);
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+    z-index: 5;
+    opacity: 0.8;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.chat-tile__diamond::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: calc(100% - 4px);
+    height: calc(100% - 4px);
+    background: var(--color-dark);
+    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+}
+
+.chat-tile__diamond::after {
+    content: '💬';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1rem;
+    color: var(--color-main);
+}
 
     .chat-tile__badge {
         position: absolute;
@@ -467,6 +501,7 @@
             
             <div class="chat-tile__header">
                 <div class="chat-tile__avatar">
+                    <div class="chat-tile__diamond"></div>
                     <img src="{{ chat_data.other_user.avatar_url }}" 
                          alt="{{ chat_data.other_user.username }}"
                          data-default="{% static 'images/avatar.svg' %}"

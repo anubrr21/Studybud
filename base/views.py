@@ -515,38 +515,45 @@ def all_rooms(request):
     return render(request, 'base/all_rooms.html', context)
 
 
+
+# In your chats_list view
 @login_required
 def chats_list(request):
     """Display all personal chats for the user"""
-    # Get all chats where user is a participant
     chats = Chat.objects.filter(participants=request.user).annotate(
         last_message_time=Max('messages__created')
     ).order_by('-last_message_time')
     
-    # Get unread counts for each chat
     chat_data = []
+    total_unread_chats = 0  # Count unread CHATS, not messages
+    
     for chat in chats:
         other_user = chat.get_other_participant(request.user)
         last_message = chat.get_last_message()
         participant_info = ChatParticipant.objects.filter(chat=chat, user=request.user).first()
+        
+        # Get unread count for this chat
         unread_count = participant_info.get_unread_count() if participant_info else 0
+        
+        # If this chat has unread messages, count it as an unread chat
+        if unread_count > 0:
+            total_unread_chats += 1
         
         chat_data.append({
             'chat': chat,
             'other_user': other_user,
             'last_message': last_message,
             'unread_count': unread_count,
+            'has_unread': unread_count > 0,
             'last_message_time': chat.updated
         })
     
-    # Get total unread count for badge
-    total_unread = sum([c['unread_count'] for c in chat_data])
-    
     context = {
         'chats': chat_data,
-        'total_unread': total_unread
+        'total_unread_chats': total_unread_chats  # Change this
     }
     return render(request, 'base/chats.html', context)
+   
 
 @login_required
 def chat_detail(request, chat_id):
@@ -563,7 +570,7 @@ def chat_detail(request, chat_id):
     messages = chat.messages.filter(
         Q(deleted_for_everyone=False) &
         (Q(deleted_for_sender=False) | Q(sender=request.user))
-    ).select_related('sender', 'parent_message')
+    ).select_related('sender', 'parent_message').order_by('created')  # Add order_by
     
     # Get pinned messages
     pinned_messages = messages.filter(is_pinned=True).order_by('-pinned_at')
@@ -573,6 +580,12 @@ def chat_detail(request, chat_id):
         chat=chat,
         user=request.user
     )
+    
+    # Update last read message to the latest message
+    last_message = messages.last()
+    if last_message and last_message.sender != request.user:
+        participant_info.last_read_message = last_message
+        participant_info.save()
     
     # Get or create default theme
     if not chat.theme:
@@ -598,6 +611,7 @@ def chat_detail(request, chat_id):
         'themes': ChatTheme.objects.filter(Q(is_public=True) | Q(created_by=request.user))
     }
     return render(request, 'base/chat_detail.html', context)
+   
 
 @login_required
 def start_chat(request, user_id):

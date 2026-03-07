@@ -805,19 +805,22 @@
     <div class="chat-main">
         <!-- Chat Header -->
         <div class="chat-header">
-            <div class="chat-header-info">
-                <div class="chat-header-avatar">
-                    <img src="{{ other_user.avatar_url }}" 
-     alt="{{ other_user.username }}"
-     data-default="{% static 'images/avatar.svg' %}"
-     onerror="this.onerror=null; this.src=this.dataset.default;">
-                    <span class="online-status" id="headerOnlineStatus" style="display: none;"></span>
-                </div>
-                <div class="chat-header-text">
-                    <h2>{{ other_user.username }}</h2>
-                    <p id="typingStatus" style="display: none;">typing...</p>
-                </div>
-            </div>
+           <!-- Chat Header - Make username clickable -->
+          <div class="chat-header-info">
+    <a href="{% url 'user-profile' other_user.id %}" class="chat-header-avatar-link" style="display: flex; align-items: center; gap: 1.5rem; text-decoration: none; color: inherit;">
+        <div class="chat-header-avatar">
+            <img src="{{ other_user.avatar_url }}" alt="{{ other_user.username }}"
+                 data-default="{% static 'images/avatar.svg' %}"
+                 onerror="this.onerror=null; this.src=this.dataset.default;">
+            <span class="online-status" id="headerOnlineStatus" style="display: none;"></span>
+        </div>
+        <div class="chat-header-text">
+            <h2>{{ other_user.username }}</h2>
+            <p id="typingStatus" style="display: none;">typing...</p>
+            <p id="lastSeen" class="last-seen"></p>
+        </div>
+    </a>
+</div>
             <div class="chat-header-actions">
                 <button class="chat-header-btn" onclick="openThemeModal()" title="Change Theme">
                     <svg viewBox="0 0 24 24">
@@ -828,100 +831,107 @@
         </div>
 
         <!-- Messages Container -->
-        <div class="messages-container" id="messagesContainer" 
-             {% if chat.custom_background %}style="background-image: url('{{ chat.custom_background.url }}');"{% endif %}>
+       <!-- Messages Container - FIXED -->
+<div class="messages-container" id="messagesContainer" 
+     {% if chat.custom_background %}style="background-image: url('{{ chat.custom_background.url }}');"{% endif %}>
+    
+    {% for message in messages %}
+    <div class="message-wrapper {% if message.sender == request.user %}own-message{% endif %}" 
+         id="message-{{ message.id }}" data-message-id="{{ message.id }}">
+        
+        {% if message.parent_message %}
+        <div class="reply-indicator" onclick="scrollToMessage('{{ message.parent_message.id }}')">
+            <strong>↪ Reply to @{{ message.parent_message.sender.username }}</strong>: {{ message.parent_message.content|truncatechars:50 }}
+        </div>
+        {% endif %}
+        
+        <div class="message-bubble">
+            {% if message.sender != request.user %}
+            <div class="message-sender">{{ message.sender.username }}</div>
+            {% endif %}
             
-            {% for message in messages %}
-            <div class="message-wrapper {% if message.sender == request.user %}own-message{% endif %}" 
-                 id="message-{{ message.id }}" data-message-id="{{ message.id }}">
+            <div class="message-content">
+                {% if message.deleted_for_everyone %}
+                <span class="message-deleted">This message was deleted</span>
+                {% elif message.message_type == 'image' and message.file %}
+                    <div class="message-image">
+                        <img src="{% if message.thumbnail %}{{ message.thumbnail.url }}{% else %}{{ message.file.url }}{% endif %}" 
+                             onclick="window.open('{{ message.file.url }}', '_blank')"
+                             alt="{{ message.file_name }}">
+                        <div class="file-name">{{ message.file_name }}</div>
+                    </div>
+                {% elif message.message_type == 'file' and message.file %}
+                    <div class="message-file" onclick="window.open('{{ message.file.url }}', '_blank')">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 18H6V4h7v5h5v11z"/>
+                        </svg>
+                        <span class="file-name">{{ message.file_name }}</span>
+                        <span class="file-size">{{ message.file_size|filesizeformat }}</span>
+                    </div>
+                {% else %}
+                    {{ message.content }}
+                {% endif %}
+            </div>
+            
+            <div class="message-time">{{ message.created|time:"H:i" }}</div>
+            
+            {% if not message.deleted_for_everyone %}
+            <!-- Reactions -->
+            <div class="message-reactions" id="reactions-{{ message.id }}">
+                {% for reaction, users in message.reactions.items %}
+                <span class="reaction-badge {% if request.user.username in users %}active{% endif %}" 
+                      onclick="toggleReaction('{{ message.id }}', '{{ reaction }}')">
+                    {{ reaction }} <span class="reaction-count">{{ users|length }}</span>
+                </span>
+                {% endfor %}
+            </div>
+            
+            <!-- Message Actions -->
+            <div class="message-actions">
+                <button class="message-action-btn" onclick="replyToMessage('{{ message.id }}', '{{ message.sender.username }}', '{{ message.content|escapejs }}')" title="Reply">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/>
+                    </svg>
+                </button>
                 
-                {% if message.parent_message %}
-                <div class="reply-indicator" onclick="scrollToMessage('{{ message.parent_message.id }}')">
-                    <strong>↪ Reply to @{{ message.parent_message.sender.username }}</strong>: {{ message.parent_message.content|truncatechars:50 }}
-                </div>
+                <button class="message-action-btn" onclick="showReactionPicker('{{ message.id }}')" title="React">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/>
+                    </svg>
+                </button>
+                
+                {% if not message.is_pinned %}
+                <button class="message-action-btn" onclick="pinMessage('{{ message.id }}')" title="Pin">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5v6h2v-6h5v-2l-2-2z"/>
+                    </svg>
+                </button>
+                {% else %}
+                <button class="message-action-btn" onclick="unpinMessage('{{ message.id }}')" title="Unpin" style="background: var(--color-main);">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5v6h2v-6h5v-2l-2-2z"/>
+                    </svg>
+                </button>
                 {% endif %}
                 
-                <div class="message-bubble">
-                    {% if message.sender != request.user %}
-                    <div class="message-sender">{{ message.sender.username }}</div>
-                    {% endif %}
-                    
-                    <div class="message-content">
-                        {% if message.deleted_for_everyone %}
-                        <span class="message-deleted">This message was deleted</span>
-                        {% elif message.message_type == 'image' and message.file %}
-                            <div class="message-image">
-                                <img src="{% if message.thumbnail %}{{ message.thumbnail.url }}{% else %}{{ message.file.url }}{% endif %}" 
-                                     onclick="window.open('{{ message.file.url }}', '_blank')"
-                                     alt="{{ message.file_name }}">
-                                <div class="file-name">{{ message.file_name }}</div>
-                            </div>
-                        {% elif message.message_type == 'file' and message.file %}
-                            <div class="message-file" onclick="window.open('{{ message.file.url }}', '_blank')">
-                                <svg viewBox="0 0 24 24">
-                                    <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 18H6V4h7v5h5v11z"/>
-                                </svg>
-                                <span class="file-name">{{ message.file_name }}</span>
-                                <span class="file-size">{{ message.file_size|filesizeformat }}</span>
-                            </div>
-                        {% else %}
-                            {{ message.content }}
-                        {% endif %}
-                    </div>
-                    
-                    <div class="message-time">{{ message.created|time:"H:i" }}</div>
-                    
-                    {% if not message.deleted_for_everyone %}
-                    <!-- Reactions -->
-                    <div class="message-reactions" id="reactions-{{ message.id }}">
-                        {% for reaction, users in message.reactions.items %}
-                        <span class="reaction-badge {% if request.user.username in users %}active{% endif %}" 
-                              onclick="toggleReaction('{{ message.id }}', '{{ reaction }}')">
-                            {{ reaction }} <span class="reaction-count">{{ users|length }}</span>
-                        </span>
-                        {% endfor %}
-                    </div>
-                    
-                    <!-- Message Actions -->
-                    <div class="message-actions">
-                        <button class="message-action-btn" onclick="replyToMessage('{{ message.id }}', '{{ message.sender.username }}', '{{ message.content|escapejs }}')" title="Reply">
-                            <svg viewBox="0 0 24 24">
-                                <path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/>
-                            </svg>
-                        </button>
-                        
-                        {% if not message.is_pinned %}
-                        <button class="message-action-btn" onclick="pinMessage('{{ message.id }}')" title="Pin">
-                            <svg viewBox="0 0 24 24">
-                                <path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5v6h2v-6h5v-2l-2-2z"/>
-                            </svg>
-                        </button>
-                        {% else %}
-                        <button class="message-action-btn" onclick="unpinMessage('{{ message.id }}')" title="Unpin" style="background: var(--color-main);">
-                            <svg viewBox="0 0 24 24">
-                                <path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5v6h2v-6h5v-2l-2-2z"/>
-                            </svg>
-                        </button>
-                        {% endif %}
-                        
-                        {% if message.sender == request.user %}
-                        <button class="message-action-btn" onclick="deleteMessage('{{ message.id }}', 'me')" title="Delete for me">
-                            <svg viewBox="0 0 24 24">
-                                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-                            </svg>
-                        </button>
-                        <button class="message-action-btn" onclick="deleteMessage('{{ message.id }}', 'everyone')" title="Delete for everyone">
-                            <svg viewBox="0 0 24 24">
-                                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zm2.46-7.12l1.41-1.41L12 12.59l2.12-2.12 1.41 1.41L13.41 14l2.12 2.12-1.41 1.41L12 15.41l-2.12 2.12-1.41-1.41L10.59 14l-2.13-2.12zM15.5 4l-1-1h-5l-1 1H5v2h14V4z"/>
-                            </svg>
-                        </button>
-                        {% endif %}
-                    </div>
-                    {% endif %}
-                </div>
+                {% if message.sender == request.user %}
+                <button class="message-action-btn" onclick="deleteMessage('{{ message.id }}', 'me')" title="Delete for me">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
+                    </svg>
+                </button>
+                <button class="message-action-btn" onclick="deleteMessage('{{ message.id }}', 'everyone')" title="Delete for everyone">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zm2.46-7.12l1.41-1.41L12 12.59l2.12-2.12 1.41 1.41L13.41 14l2.12 2.12-1.41 1.41L12 15.41l-2.12 2.12-1.41-1.41L10.59 14l-2.13-2.12zM15.5 4l-1-1h-5l-1 1H5v2h14V4z"/>
+                    </svg>
+                </button>
+                {% endif %}
             </div>
-            {% endfor %}
+            {% endif %}
         </div>
+    </div>
+    {% endfor %}
+</div>
 
         <!-- Typing Indicator -->
         <div class="typing-indicator" id="typingIndicator" style="display: none;">
@@ -1091,6 +1101,14 @@ socket.onmessage = function(e) {
     }
 };
 
+// Send message with Enter key
+document.getElementById('messageInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        sendMessage();
+    }
+});
+
 // Send message
 function sendMessage() {
     const input = document.getElementById('messageInput');
@@ -1108,12 +1126,21 @@ function sendMessage() {
     cancelReply();
 }
 
+
 // Add message to chat
 function addMessageToChat(data) {
     const container = document.getElementById('messagesContainer');
     const messageHtml = createMessageHtml(data);
     container.insertAdjacentHTML('beforeend', messageHtml);
     container.scrollTop = container.scrollHeight;
+    
+    // Mark as read if it's from other user
+    if (data.sender_id !== parseInt("{{ request.user.id }}")) {
+        markMessageAsRead(data.message_id);
+    }
+    
+    // Update unread count in sidebar
+    updateChatUnreadCount();
 }
 
 // Create message HTML

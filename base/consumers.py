@@ -4,6 +4,10 @@ from channels.db import database_sync_to_async
 from django.apps import apps
 from django.utils import timezone
 from django.contrib.auth import get_user_model
+from collections import defaultdict
+
+# Online users tracking
+online_users = defaultdict(set)  # {chat_id: set of user_ids}
 
 class ChatConsumer(AsyncWebsocketConsumer):
 
@@ -42,11 +46,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
             parent_info = None
             if message.parent_message:
-             parent_info = {
-                'id': message.parent_message.id,
-                'username': message.parent_message.user.username,
-                'body': message.parent_message.body[:50] + ('...' if len(message.parent_message.body) > 50 else '')
-            }
+                parent_info = {
+                    'id': message.parent_message.id,
+                    'username': message.parent_message.user.username,
+                    'body': message.parent_message.body[:50] + ('...' if len(message.parent_message.body) > 50 else '')
+                }
             
             # Send the new message to everyone
             await self.channel_layer.group_send(
@@ -59,7 +63,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                     'message_id': message.id,
                     'avatar': message.user.avatar_url,
                     'parent_id': message.parent_message.id if message.parent_message else None,
-                    'parent_info':parent_info,
+                    'parent_info': parent_info,
                     'reply_count': message.reply_count,
                     'is_pinned': message.is_pinned,
                 }
@@ -69,41 +73,43 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.send_participants_update()
             
         elif message_type == 'pin_message':
-         message_id = data['message_id']
-         success = await self.pin_message(user, message_id)
-         if success:
-           await self.send_pinned_messages()
-        # Also send a message update to refresh the pin icon
-           await self.channel_layer.group_send(
-            self.room_group_name,
-            {
-                'type': 'pin_status_update',
-                'message_id': message_id,
-                'is_pinned': True
-            }
-        )
+            message_id = data['message_id']
+            success = await self.pin_message(user, message_id)
+            if success:
+                await self.send_pinned_messages()
+                # Also send a message update to refresh the pin icon
+                await self.channel_layer.group_send(
+                    self.room_group_name,
+                    {
+                        'type': 'pin_status_update',
+                        'message_id': message_id,
+                        'is_pinned': True
+                    }
+                )
                 
         elif message_type == 'unpin_message':
-         message_id = data['message_id']
-         success = await self.unpin_message(user, message_id)
-         if success:
-          await self.send_pinned_messages()
-        # Also send a message update to refresh the pin icon
-          await self.channel_layer.group_send(
-            self.room_group_name,
-            {
-                'type': 'pin_status_update',
-                'message_id': message_id,
-                'is_pinned': False
-            }
-        )
+            message_id = data['message_id']
+            success = await self.unpin_message(user, message_id)
+            if success:
+                await self.send_pinned_messages()
+                # Also send a message update to refresh the pin icon
+                await self.channel_layer.group_send(
+                    self.room_group_name,
+                    {
+                        'type': 'pin_status_update',
+                        'message_id': message_id,
+                        'is_pinned': False
+                    }
+                )
+    
     async def pin_status_update(self, event):
-     """Send pin status update to WebSocket"""
-     await self.send(text_data=json.dumps({
-        'type': 'pin_status_update',
-        'message_id': event['message_id'],
-        'is_pinned': event['is_pinned']
-    }))
+        """Send pin status update to WebSocket"""
+        await self.send(text_data=json.dumps({
+            'type': 'pin_status_update',
+            'message_id': event['message_id'],
+            'is_pinned': event['is_pinned']
+        }))
+    
     async def chat_message(self, event):
         await self.send(text_data=json.dumps({
             'type': 'new_message',
@@ -113,7 +119,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'message_id': event['message_id'],
             'avatar': event['avatar'],
             'parent_id': event['parent_id'],
-            'parent_info':event['parent_info'],
+            'parent_info': event['parent_info'],
             'reply_count': event['reply_count'],
             'is_pinned': event['is_pinned'],
             'current_user_id': self.scope["user"].id,
@@ -312,11 +318,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 sender=user,
                 room=room,
                 message=message,
-                type='comment'  # Make sure this field name matches your model
+                type='comment'
             )
 
         return message
-    
+
 
 class PersonalChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
@@ -341,13 +347,17 @@ class PersonalChatConsumer(AsyncWebsocketConsumer):
         
         await self.accept()
         
-        # Send typing status
+        # Add user to online users
+        online_users[self.chat_id].add(self.user.id)
+        
+        # Send online status to all participants with the full list
         await self.channel_layer.group_send(
             self.chat_group_name,
             {
                 'type': 'user_online',
                 'user_id': self.user.id,
-                'username': self.user.username
+                'username': self.user.username,
+                'online_users': list(online_users[self.chat_id])
             }
         )
         
@@ -356,14 +366,20 @@ class PersonalChatConsumer(AsyncWebsocketConsumer):
     
     async def disconnect(self, close_code):
         if hasattr(self, 'chat_group_name'):
-            await self.channel_layer.group_send(
-                self.chat_group_name,
-                {
-                    'type': 'user_offline',
-                    'user_id': self.user.id,
-                    'username': self.user.username
-                }
-            )
+            # Remove user from online users
+            if hasattr(self, 'chat_id') and self.user.id in online_users[self.chat_id]:
+                online_users[self.chat_id].remove(self.user.id)
+                
+                # Send offline status with updated online users list
+                await self.channel_layer.group_send(
+                    self.chat_group_name,
+                    {
+                        'type': 'user_offline',
+                        'user_id': self.user.id,
+                        'username': self.user.username,
+                        'online_users': list(online_users[self.chat_id])
+                    }
+                )
             
             await self.channel_layer.group_discard(
                 self.chat_group_name,
@@ -390,6 +406,10 @@ class PersonalChatConsumer(AsyncWebsocketConsumer):
                     'sender_username': message.sender.username,
                     'sender_avatar': message.sender.avatar_url,
                     'content': message.content,
+                    'message_type': message.message_type,
+                    'file_url': message.file.url if hasattr(message, 'file') and message.file else None,
+                    'file_name': message.file_name if hasattr(message, 'file_name') else None,
+                    'file_size': message.file_size if hasattr(message, 'file_size') else None,
                     'parent_id': message.parent_message.id if message.parent_message else None,
                     'created': message.created.isoformat()
                 }
@@ -420,20 +440,21 @@ class PersonalChatConsumer(AsyncWebsocketConsumer):
             
         elif message_type == 'reaction':
             if data['action'] == 'add':
-                await self.add_reaction(data['message_id'], data['reaction'])
+                success = await self.add_reaction(data['message_id'], data['reaction'])
             else:
-                await self.remove_reaction(data['message_id'], data['reaction'])
+                success = await self.remove_reaction(data['message_id'], data['reaction'])
             
-            await self.channel_layer.group_send(
-                self.chat_group_name,
-                {
-                    'type': 'message_reaction',
-                    'message_id': data['message_id'],
-                    'user_id': self.user.id,
-                    'reaction': data['reaction'],
-                    'action': data['action']
-                }
-            )
+            if success:
+                await self.channel_layer.group_send(
+                    self.chat_group_name,
+                    {
+                        'type': 'message_reaction',
+                        'message_id': data['message_id'],
+                        'user_id': self.user.id,
+                        'reaction': data['reaction'],
+                        'action': data['action']
+                    }
+                )
             
         elif message_type == 'pin':
             await self.pin_message(data['message_id'])
@@ -481,7 +502,11 @@ class PersonalChatConsumer(AsyncWebsocketConsumer):
             'sender_username': event['sender_username'],
             'sender_avatar': event['sender_avatar'],
             'content': event['content'],
-            'parent_id': event['parent_id'],
+            'message_type': event.get('message_type', 'text'),
+            'file_url': event.get('file_url'),
+            'file_name': event.get('file_name'),
+            'file_size': event.get('file_size'),
+            'parent_id': event.get('parent_id'),
             'created': event['created']
         }))
     
@@ -497,14 +522,16 @@ class PersonalChatConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             'type': 'user_online',
             'user_id': event['user_id'],
-            'username': event['username']
+            'username': event['username'],
+            'online_users': event.get('online_users', [])
         }))
     
     async def user_offline(self, event):
         await self.send(text_data=json.dumps({
             'type': 'user_offline',
             'user_id': event['user_id'],
-            'username': event['username']
+            'username': event['username'],
+            'online_users': event.get('online_users', [])
         }))
     
     async def message_read(self, event):
@@ -609,14 +636,24 @@ class PersonalChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def add_reaction(self, message_id, reaction):
         ChatMessage = apps.get_model('base', 'ChatMessage')
-        message = ChatMessage.objects.get(id=message_id)
-        message.add_reaction(self.user, reaction)
+        try:
+            message = ChatMessage.objects.get(id=message_id)
+            message.add_reaction(self.user, reaction)
+            return True
+        except Exception as e:
+            print(f"Error adding reaction: {e}")
+            return False
     
     @database_sync_to_async
     def remove_reaction(self, message_id, reaction):
         ChatMessage = apps.get_model('base', 'ChatMessage')
-        message = ChatMessage.objects.get(id=message_id)
-        message.remove_reaction(self.user, reaction)
+        try:
+            message = ChatMessage.objects.get(id=message_id)
+            message.remove_reaction(self.user, reaction)
+            return True
+        except Exception as e:
+            print(f"Error removing reaction: {e}")
+            return False
     
     @database_sync_to_async
     def pin_message(self, message_id):
