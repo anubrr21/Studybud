@@ -1714,4 +1714,7 @@ a {
 .toast.hide {
     animation: slideOut 0.3s ease forwards;
 }
+.messages {
+    display: none;
+}
 
