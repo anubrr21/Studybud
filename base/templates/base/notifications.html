@@ -1,99 +1,809 @@
 {% extends 'main.html' %}
+{% load static %}
+
 {% block content %}
+<style>
+    /* Notifications Page Styles */
+    .notifications-container {
+        max-width: 800px;
+        margin: 2rem auto;
+    }
 
-<main class="layout">
-  <div class="container">
+    .notifications-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
 
-    <div class="layout__box">
+    .notifications-header h1 {
+        font-size: 2.8rem;
+        color: var(--color-main);
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
 
-      <div class="layout__boxHeader">
-        <div class="layout__boxTitle">
-          <h3>Notifications</h3>
-        </div>
-      </div>
+    .notifications-header h1 svg {
+        width: 3.2rem;
+        height: 3.2rem;
+        fill: var(--color-main);
+    }
 
-      <!-- Scrollable Body -->
-      <div class="layout__body notifications-scroll">
+    .notifications-actions {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
 
-        {% if notifications %}
+    .btn-filter, .btn-mark-read {
+        padding: 1rem 2rem;
+        border-radius: 3rem;
+        font-size: 1.4rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: none;
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
 
-          {% for notification in notifications %}
+    .btn-filter {
+        background: var(--color-dark-medium);
+        color: var(--color-light);
+    }
 
-            {% if notification.type == "follow" %}
-              {% url 'user-profile' notification.sender.id as notif_url %}
-            {% elif notification.type == "comment" %}
-              {% url 'room' notification.room.id as notif_url %}
-            {% elif notification.type == "join" %}
-              {% url 'room' notification.room.id as notif_url %}
-            {% elif notification.type == "like" %}
-              {% url 'room' notification.room.id as notif_url %}
-            {% endif %}
+    .btn-filter:hover {
+        background: var(--color-dark-light);
+    }
 
-            <a href="{{ notif_url }}" class="activity-link">
+    .btn-mark-read {
+        background: var(--color-main);
+        color: var(--color-dark);
+    }
 
-              <div class="activities__box {% if not notification.is_read %}unread{% endif %}">
+    .btn-mark-read:hover {
+        opacity: 0.9;
+        transform: translateY(-2px);
+    }
 
-                <!-- Header -->
-                <div class="activities__boxHeader roomListRoom__header">
+    /* Search and Filter Bar */
+    .filter-bar {
+        background: var(--color-dark);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
 
-                  <div class="avatar avatar--small">
-                    <img src="{{ notification.sender.avatar_url }}" />
-                  </div>
+    .search-wrapper {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
 
-                  <p>
-                    <strong>@{{ notification.sender.username }}</strong>
+    .search-wrapper input {
+        width: 100%;
+        padding: 1.5rem 2rem 1.5rem 5rem;
+        background: var(--color-dark-medium);
+        border: 2px solid var(--color-dark-light);
+        border-radius: 3rem;
+        color: var(--color-light);
+        font-size: 1.6rem;
+        transition: all 0.3s ease;
+    }
 
-                    {% if notification.type == "follow" %}
-                      started following you
-                    {% elif notification.type == "comment" %}
-                      commented in 
-                      "<span class="highlight">{{ notification.room.name }}</span>"
-                    {% elif notification.type == "join" %}
-                      joined 
-                      "<span class="highlight">{{ notification.room.name }}</span>"
-                    {% elif notification.type == "like" %}
-                      liked 
-                      "<span class="highlight">{{ notification.room.name }}</span>"
-                    {% endif %}
+    .search-wrapper input:focus {
+        border-color: var(--color-main);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(113, 198, 221, 0.2);
+    }
 
-                    <span>{{ notification.created|timesince }} ago</span>
-                  </p>
+    .search-wrapper svg {
+        position: absolute;
+        left: 1.8rem;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 2rem;
+        height: 2rem;
+        fill: var(--color-light-gray);
+    }
 
-                </div>
+    .filter-options {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        align-items: center;
+    }
 
-                <!-- Comment Preview -->
-                {% if notification.type == "comment" %}
-                  {% with notification.room.message_set.last as last_message %}
-                    {% if last_message %}
-                      <div class="activities__boxRoomContent">
-                        {{ last_message.body|truncatechars:100 }}
-                      </div>
-                    {% endif %}
-                  {% endwith %}
-                {% endif %}
+    .filter-chip {
+        padding: 0.8rem 1.5rem;
+        background: var(--color-dark-medium);
+        border: 1px solid var(--color-dark-light);
+        border-radius: 3rem;
+        color: var(--color-light-gray);
+        font-size: 1.3rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
 
-              </div>
+    .filter-chip:hover {
+        background: var(--color-dark-light);
+        color: var(--color-light);
+    }
 
+    .filter-chip.active {
+        background: var(--color-main);
+        color: var(--color-dark);
+        border-color: var(--color-main);
+    }
+
+    .filter-chip svg {
+        width: 1.6rem;
+        height: 1.6rem;
+        fill: currentColor;
+    }
+
+    .date-picker {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: var(--color-dark-medium);
+        border-radius: 3rem;
+        padding: 0.5rem;
+    }
+
+    .date-input {
+        background: var(--color-dark);
+        border: 1px solid var(--color-dark-light);
+        border-radius: 2rem;
+        padding: 0.8rem 1.2rem;
+        color: var(--color-light);
+        font-size: 1.3rem;
+    }
+
+    .date-input:focus {
+        border-color: var(--color-main);
+        outline: none;
+    }
+
+    .results-count {
+        margin-top: 1rem;
+        font-size: 1.4rem;
+        color: var(--color-light-gray);
+        text-align: right;
+    }
+
+    .results-count span {
+        color: var(--color-main);
+        font-weight: bold;
+        font-size: 1.8rem;
+    }
+
+    /* Notifications List */
+    .notifications-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+
+    .notification-card {
+        background: var(--color-dark);
+        border-radius: 1.5rem;
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        border: 1px solid transparent;
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        position: relative;
+        animation: slideIn 0.3s ease;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .notification-card:hover {
+        transform: translateX(5px);
+        border-color: var(--color-main);
+        box-shadow: 0 5px 15px rgba(113, 198, 221, 0.2);
+    }
+
+    .notification-card.unread {
+        border-left: 4px solid var(--color-main);
+        background: var(--color-dark-medium);
+    }
+
+    .notification-card.unread::before {
+        content: '';
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        width: 1rem;
+        height: 1rem;
+        background: var(--color-main);
+        border-radius: 50%;
+    }
+
+    .notification-header {
+        display: flex;
+        gap: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .notification-avatar {
+        position: relative;
+    }
+
+    .notification-avatar img {
+        width: 5rem;
+        height: 5rem;
+        border-radius: 50%;
+        border: 2px solid var(--color-main);
+    }
+
+    .notification-type-icon {
+        position: absolute;
+        bottom: -2px;
+        right: -2px;
+        width: 2rem;
+        height: 2rem;
+        background: var(--color-main);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid var(--color-dark);
+    }
+
+    .notification-type-icon svg {
+        width: 1.2rem;
+        height: 1.2rem;
+        fill: var(--color-dark);
+    }
+
+    .notification-content {
+        flex: 1;
+    }
+
+    .notification-title {
+        font-size: 1.6rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .notification-title strong {
+        color: var(--color-main);
+    }
+
+    .notification-title .highlight {
+        color: var(--color-main);
+        font-weight: 600;
+    }
+
+    .notification-meta {
+        display: flex;
+        gap: 1.5rem;
+        font-size: 1.2rem;
+        color: var(--color-light-gray);
+        margin-top: 0.5rem;
+    }
+
+    .notification-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .notification-meta-item svg {
+        width: 1.4rem;
+        height: 1.4rem;
+        fill: var(--color-light-gray);
+    }
+
+    .notification-preview {
+        margin-top: 1rem;
+        padding: 1rem;
+        background: var(--color-dark-medium);
+        border-radius: 1rem;
+        color: var(--color-light-gray);
+        font-size: 1.3rem;
+        border-left: 3px solid var(--color-main);
+    }
+
+    /* Empty State */
+    .empty-state {
+        text-align: center;
+        padding: 5rem;
+        background: var(--color-dark);
+        border-radius: 1.5rem;
+    }
+
+    .empty-state svg {
+        width: 8rem;
+        height: 8rem;
+        fill: var(--color-dark-light);
+        margin-bottom: 2rem;
+    }
+
+    .empty-state h3 {
+        color: var(--color-light);
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state p {
+        color: var(--color-light-gray);
+        font-size: 1.4rem;
+        margin-bottom: 2rem;
+    }
+
+    /* Loading Animation */
+    .loading-skeleton {
+        animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+        0% { opacity: 0.6; }
+        50% { opacity: 1; }
+        100% { opacity: 0.6; }
+    }
+
+    /* Date Filter Modal */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        z-index: 1000;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .modal.active {
+        display: flex;
+    }
+
+    .modal-content {
+        background: var(--color-dark);
+        border-radius: 1.5rem;
+        width: 90%;
+        max-width: 400px;
+        padding: 2rem;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+    }
+
+    .modal-header h2 {
+        color: var(--color-main);
+        font-size: 2rem;
+    }
+
+    .close-modal {
+        background: none;
+        border: none;
+        color: var(--color-light-gray);
+        font-size: 2.4rem;
+        cursor: pointer;
+    }
+
+    .close-modal:hover {
+        color: var(--color-main);
+    }
+
+    .calendar {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 0.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .calendar-day {
+        text-align: center;
+        padding: 1rem;
+        background: var(--color-dark-medium);
+        border-radius: 0.8rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+
+    .calendar-day:hover {
+        background: var(--color-main);
+        color: var(--color-dark);
+    }
+
+    .calendar-day.selected {
+        background: var(--color-main);
+        color: var(--color-dark);
+    }
+
+    .calendar-weekday {
+        text-align: center;
+        padding: 0.5rem;
+        color: var(--color-light-gray);
+        font-size: 1.2rem;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .notifications-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .notifications-actions {
+            width: 100%;
+            justify-content: space-between;
+        }
+
+        .filter-options {
+            overflow-x: auto;
+            padding-bottom: 1rem;
+            flex-wrap: nowrap;
+        }
+
+        .filter-chip {
+            white-space: nowrap;
+        }
+
+        .notification-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .notification-meta {
+            flex-wrap: wrap;
+        }
+    }
+</style>
+
+<div class="notifications-container">
+    <!-- Header -->
+    <div class="notifications-header">
+        <h1>
+            <svg viewBox="0 0 24 24">
+                <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.93 6 11v5l-2 2v1h16v-1l-2-2z"/>
+            </svg>
+            Notifications
+            <span class="unread-badge" id="unreadCount" style="display: none;">0</span>
+        </h1>
+        <div class="notifications-actions">
+            <button class="btn-filter" onclick="toggleDateFilter()">
+                <svg viewBox="0 0 24 24">
+                    <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V9h14v10z"/>
+                </svg>
+                Filter by Date
+            </button>
+            <a href="{% url 'mark-notifications-read' %}" class="btn-mark-read">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+                </svg>
+                Mark all as read
             </a>
-
-          {% endfor %}
-
-        {% else %}
-          <p style="padding:15px;">No notifications yet.</p>
-        {% endif %}
-
-        <div style="text-align:center; padding:15px;">
-          <a href="{% url 'mark-notifications-read' %}" 
-             style="font-weight:600;">
-            Mark all as read
-          </a>
         </div>
-
-      </div>
-
     </div>
 
-  </div>
-</main>
+    <!-- Search and Filter Bar -->
+    <div class="filter-bar">
+        <div class="search-wrapper">
+            <svg viewBox="0 0 24 24">
+                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+            </svg>
+            <input type="text" id="searchInput" placeholder="Search by username, room name, or date..." autocomplete="off">
+        </div>
+
+        <div class="filter-options">
+            <span class="filter-chip active" data-filter="all" onclick="filterNotifications('all')">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+                </svg>
+                All
+            </span>
+            <span class="filter-chip" data-filter="comment" onclick="filterNotifications('comment')">
+                <svg viewBox="0 0 24 24">
+                    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+                </svg>
+                Comments
+            </span>
+            <span class="filter-chip" data-filter="like" onclick="filterNotifications('like')">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                </svg>
+                Likes
+            </span>
+            <span class="filter-chip" data-filter="follow" onclick="filterNotifications('follow')">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                </svg>
+                Follows
+            </span>
+            <span class="filter-chip" data-filter="join" onclick="filterNotifications('join')">
+                <svg viewBox="0 0 24 24">
+                    <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-1 .05 1.16.84 2 1.87 2 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                </svg>
+                Joins
+            </span>
+        </div>
+
+        <div class="results-count">
+            Found <span id="notificationCount">{{ notifications|length }}</span> notifications
+        </div>
+    </div>
+
+    <!-- Notifications List -->
+    <div class="notifications-list" id="notificationsList">
+        {% for notification in notifications %}
+        <a href="
+            {% if notification.type == 'follow' %}
+                {% url 'user-profile' notification.sender.id %}
+            {% elif notification.type == 'comment' or notification.type == 'join' or notification.type == 'like' %}
+                {% url 'room' notification.room.id %}
+            {% endif %}"
+           class="notification-card {% if not notification.is_read %}unread{% endif %}"
+           data-type="{{ notification.type }}"
+           data-username="{{ notification.sender.username|lower }}"
+           data-room="{% if notification.room %}{{ notification.room.name|lower }}{% endif %}"
+           data-date="{{ notification.created|date:'Y-m-d' }}"
+           data-content="{% if notification.type == 'comment' and notification.room %}{{ notification.room.message_set.last.body|lower }}{% endif %}">
+
+            <div class="notification-header">
+                <div class="notification-avatar">
+                    <img src="{{ notification.sender.avatar_url }}" alt="{{ notification.sender.username }}" />
+                         
+                    <span class="notification-type-icon">
+                        {% if notification.type == 'follow' %}
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                        </svg>
+                        {% elif notification.type == 'comment' %}
+                        <svg viewBox="0 0 24 24">
+                            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+                        </svg>
+                        {% elif notification.type == 'like' %}
+                        <svg viewBox="0 0 24 24">
+                            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                        </svg>
+                        {% elif notification.type == 'join' %}
+                        <svg viewBox="0 0 24 24">
+                            <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-1 .05 1.16.84 2 1.87 2 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                        </svg>
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="notification-content">
+                    <div class="notification-title">
+                        <strong>@{{ notification.sender.username }}</strong>
+                        {% if notification.type == "follow" %}
+                            started following you
+                        {% elif notification.type == "comment" %}
+                            commented in 
+                            "<span class="highlight">{{ notification.room.name }}</span>"
+                        {% elif notification.type == "join" %}
+                            joined 
+                            "<span class="highlight">{{ notification.room.name }}</span>"
+                        {% elif notification.type == "like" %}
+                            liked 
+                            "<span class="highlight">{{ notification.room.name }}</span>"
+                        {% endif %}
+                    </div>
+                    <div class="notification-meta">
+                        <span class="notification-meta-item">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/>
+                            </svg>
+                            {{ notification.created|timesince }} ago
+                        </span>
+                        <span class="notification-meta-item">
+                            <svg viewBox="0 0 24 24">
+                                <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V9h14v10z"/>
+                            </svg>
+                            {{ notification.created|date:"M d, Y" }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comment Preview -->
+            {% if notification.type == "comment" and notification.room %}
+                {% with notification.room.message_set.last as last_message %}
+                    {% if last_message %}
+                        <div class="notification-preview">
+                            {{ last_message.body|truncatechars:100 }}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+            {% endif %}
+        </a>
+        {% empty %}
+        <div class="empty-state">
+            <svg viewBox="0 0 24 24">
+                <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.93 6 11v5l-2 2v1h16v-1l-2-2z"/>
+            </svg>
+            <h3>No notifications yet</h3>
+            <p>When you get notifications, they'll appear here.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- Date Filter Modal -->
+<div class="modal" id="dateFilterModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Select Date</h2>
+            <button class="close-modal" onclick="closeDateFilter()">&times;</button>
+        </div>
+        <div class="calendar" id="calendar">
+            <!-- Calendar will be populated by JavaScript -->
+        </div>
+        <div style="display: flex; gap: 1rem; justify-content: center;">
+            <button class="btn-filter" onclick="clearDateFilter()">Clear</button>
+            <button class="btn-mark-read" onclick="applyDateFilter()">Apply</button>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentFilter = 'all';
+let currentDateFilter = null;
+let searchTimeout;
+
+// Live search functionality
+const searchInput = document.getElementById('searchInput');
+const notificationCards = document.querySelectorAll('.notification-card');
+const notificationCountSpan = document.getElementById('notificationCount');
+
+searchInput.addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(filterNotifications, 300);
+});
+
+// Filter by type
+function filterNotifications(type) {
+    currentFilter = type;
+    
+    // Update active chip
+    document.querySelectorAll('.filter-chip').forEach(chip => {
+        chip.classList.remove('active');
+        if (chip.dataset.filter === type) {
+            chip.classList.add('active');
+        }
+    });
+    
+    applyFilters();
+}
+
+// Apply all filters
+function applyFilters() {
+    const searchTerm = searchInput.value.toLowerCase();
+    let visibleCount = 0;
+    
+    notificationCards.forEach(card => {
+        const cardType = card.dataset.type;
+        const cardUsername = card.dataset.username;
+        const cardRoom = card.dataset.room || '';
+        const cardDate = card.dataset.date;
+        const cardContent = card.dataset.content || '';
+        
+        const matchesType = currentFilter === 'all' || cardType === currentFilter;
+        const matchesSearch = searchTerm === '' || 
+                             cardUsername.includes(searchTerm) || 
+                             cardRoom.includes(searchTerm) || 
+                             cardContent.includes(searchTerm) ||
+                             cardDate.includes(searchTerm);
+        const matchesDate = !currentDateFilter || cardDate === currentDateFilter;
+        
+        if (matchesType && matchesSearch && matchesDate) {
+            card.style.display = 'block';
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    
+    notificationCountSpan.textContent = visibleCount;
+}
+
+// Date filter functions
+function toggleDateFilter() {
+    populateCalendar();
+    document.getElementById('dateFilterModal').classList.add('active');
+}
+
+function closeDateFilter() {
+    document.getElementById('dateFilterModal').classList.remove('active');
+}
+
+function clearDateFilter() {
+    currentDateFilter = null;
+    closeDateFilter();
+    applyFilters();
+}
+
+function applyDateFilter() {
+    const selectedDay = document.querySelector('.calendar-day.selected');
+    if (selectedDay) {
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(selectedDay.textContent).padStart(2, '0');
+        currentDateFilter = `${year}-${month}-${day}`;
+    }
+    closeDateFilter();
+    applyFilters();
+}
+
+function populateCalendar() {
+    const calendar = document.getElementById('calendar');
+    const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
+    const firstDay = new Date(new Date().getFullYear(), new Date().getMonth(), 1).getDay();
+    
+    let html = '';
+    
+    // Weekday headers
+    const weekdays = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+    weekdays.forEach(day => {
+        html += `<div class="calendar-weekday">${day}</div>`;
+    });
+    
+    // Empty cells for days before month starts
+    for (let i = 0; i < firstDay; i++) {
+        html += '<div></div>';
+    }
+    
+    // Calendar days
+    for (let d = 1; d <= daysInMonth; d++) {
+        html += `<div class="calendar-day" onclick="selectDay(this)">${d}</div>`;
+    }
+    
+    calendar.innerHTML = html;
+}
+
+function selectDay(element) {
+    document.querySelectorAll('.calendar-day').forEach(day => {
+        day.classList.remove('selected');
+    });
+    element.classList.add('selected');
+}
+
+// Initialize filters on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Update unread count in header
+    const unreadCount = document.querySelectorAll('.notification-card.unread').length;
+    const unreadBadge = document.getElementById('unreadCount');
+    if (unreadCount > 0) {
+        unreadBadge.textContent = unreadCount;
+        unreadBadge.style.display = 'inline';
+    }
+});
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('dateFilterModal');
+    if (event.target === modal) {
+        closeDateFilter();
+    }
+}
+</script>
 
 {% endblock %}
