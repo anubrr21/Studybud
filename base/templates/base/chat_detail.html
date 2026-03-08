@@ -859,8 +859,11 @@
         </div>
 
         <!-- Messages Container - FIXED: REMOVED 'reversed' to maintain correct order (oldest at top, newest at bottom) -->
-        <div class="messages-container" id="messagesContainer" 
-             {% if chat.custom_background %}style="background-image: url('{{ chat.custom_background.url }}');"{% endif %}>
+        <!-- Messages Container -->
+<div class="messages-container" id="messagesContainer" 
+     {% if chat.custom_background %}style="background-image: url('{{ chat.custom_background.url }}'); background-size: cover; background-position: center; background-repeat: no-repeat;"
+     {% elif chat.theme and chat.theme.background_color %}style="background-color: {{ chat.theme.background_color }};"
+     {% endif %}>
             
             {% for message in messages %}
             <div class="message-wrapper {% if message.sender == request.user %}own-message{% endif %}" 
