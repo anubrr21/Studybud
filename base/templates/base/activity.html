@@ -487,28 +487,30 @@
              data-message="{{ message.body|lower }}"
              data-date="{{ message.created|date:'Y-m-d' }}">
             
-            <div class="activity-card__header">
-                <div class="activity-card__avatar">
-                    <img src="{{ message.user.avatar_url }}" alt="{{ message.user.username }}" />
-                         
-                    <span class="activity-type-icon">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
-                        </svg>
-                    </span>
-                </div>
-                <div class="activity-card__info">
-                    <div class="activity-card__username">
-                        <strong>@{{ message.user.username }}</strong>
-                    </div>
-                    <div class="activity-card__time">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/>
-                        </svg>
-                        {{ message.created|timesince }} ago
-                    </div>
-                </div>
-            </div>
+    <div class="activity-card__header">
+    <a href="{% url 'user-profile' message.user.id %}" style="display: flex; align-items: center; gap: 1.5rem; text-decoration: none; color: inherit; width: 100%;">
+        <div class="activity-card__avatar">
+    
+        <img src="{{ message.user.avatar_url }}" alt="{{ message.user.username }}" />
+             
+        <span class="activity-type-icon">
+            <svg viewBox="0 0 24 24">
+                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+            </svg>
+        </span>
+    </div>
+    <div class="activity-card__info">
+        <div class="activity-card__username">
+            <strong>@{{ message.user.username }}</strong>
+        </div>
+        <div class="activity-card__time">
+            <svg viewBox="0 0 24 24">
+                <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/>
+            </svg>
+            {{ message.created|timesince }} ago
+        </div>
+    </div>
+</div>
 
             <div class="activity-card__content">
                 <div class="activity-card__room">
