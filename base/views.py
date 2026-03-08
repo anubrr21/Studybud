@@ -610,6 +610,7 @@ def chat_detail(request, chat_id):
         'participant_info': participant_info,
         'themes': ChatTheme.objects.filter(Q(is_public=True) | Q(created_by=request.user))
     }
+    ensure_default_themes()
     return render(request, 'base/chat_detail.html', context)
    
 
@@ -638,7 +639,6 @@ def start_chat(request, user_id):
     ChatParticipant.objects.create(chat=chat, user=other_user)
     
     return redirect('chat-detail', chat_id=chat.id)
-
 @login_required
 def update_chat_theme(request, chat_id):
     """Update chat theme/background"""
@@ -652,14 +652,24 @@ def update_chat_theme(request, chat_id):
         custom_bg = request.FILES.get('custom_background')
         
         if theme_id:
-            theme = get_object_or_404(ChatTheme, id=theme_id)
-            chat.theme = theme
+            try:
+                theme = get_object_or_404(ChatTheme, id=theme_id)
+                chat.theme = theme
+                chat.custom_background = None  # Clear custom background if theme selected
+                chat.save()
+                return JsonResponse({'success': True})
+            except:
+                return JsonResponse({'error': 'Theme not found'}, status=404)
+                
         elif custom_bg:
+            # Delete old custom background if exists
+            if chat.custom_background:
+                chat.custom_background.delete(save=False)
+            
             chat.custom_background = custom_bg
-        
-        chat.save()
-        
-        return JsonResponse({'success': True})
+            chat.theme = None  # Clear theme if custom background uploaded
+            chat.save()
+            return JsonResponse({'success': True, 'url': chat.custom_background.url})
     
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
@@ -700,19 +710,19 @@ def search_chats(request):
     return JsonResponse({'chats': results})
 
 @login_required
-def get_unread_count(request):
-    """Get total unread messages count for badge"""
-    total_unread = 0
+def get_unread_chats_count(request):
+    """Get total number of chats with unread messages"""
+    total_unread_chats = 0
     chats = Chat.objects.filter(participants=request.user)
     
     for chat in chats:
         participant_info = ChatParticipant.objects.filter(chat=chat, user=request.user).first()
-        if participant_info:
-            total_unread += participant_info.get_unread_count()
+        if participant_info and participant_info.get_unread_count() > 0:
+            total_unread_chats += 1
     
-    return JsonResponse({'unread_count': total_unread})
-
+    return JsonResponse({'unread_chats_count': total_unread_chats})
 @login_required
+
 def upload_chat_file(request, chat_id):
     """Handle file uploads in chat"""
     if request.method != 'POST':
@@ -821,3 +831,46 @@ def search_users(request):
         ]
     }
     return JsonResponse(data)
+
+
+
+def ensure_default_themes():
+    """Create default themes if they don't exist"""
+    default_themes = [
+        {
+            'name': 'Dark',
+            'background_color': '#2d2d39',
+            'message_bubble_user': '#71c6dd',
+            'message_bubble_other': '#3f4156',
+            'is_public': True
+        },
+        {
+            'name': 'Light',
+            'background_color': '#f5f5f5',
+            'message_bubble_user': '#0084ff',
+            'message_bubble_other': '#e4e6eb',
+            'text_color': '#000000',
+            'timestamp_color': '#65676b',
+            'is_public': True
+        },
+        {
+            'name': 'Midnight',
+            'background_color': '#1a1a2e',
+            'message_bubble_user': '#0f3460',
+            'message_bubble_other': '#16213e',
+            'is_public': True
+        },
+        {
+            'name': 'Forest',
+            'background_color': '#1e3c2c',
+            'message_bubble_user': '#2d6a4f',
+            'message_bubble_other': '#40916c',
+            'is_public': True
+        }
+    ]
+    
+    for theme_data in default_themes:
+        ChatTheme.objects.get_or_create(
+            name=theme_data['name'],
+            defaults=theme_data
+        )
