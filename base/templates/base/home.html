@@ -1,6 +1,23 @@
 {% extends 'main.html' %}
 
 {% block content %}
+<style>
+    /* Adjust Recent Activities box position */
+    .layout--3 > .container > div:last-child {
+        margin-top: 2rem; /* Adds space at the top */
+        align-self: flex-start;
+    }
+    
+    /* Optional: Add a subtle shadow to make it pop */
+    .activities {
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        transition: transform 0.3s ease;
+    }
+    
+    .activities:hover {
+        transform: translateY(-2px);
+    }
+</style>
     <main class="layout layout--3">
       <div class="container">
         {% if welcome_message %}

@@ -1,72 +1,637 @@
 {% extends 'main.html' %}
+{% load static %}
+
 {% block content %}
+<style>
+    /* Activities Page Styles */
+    .activities-page-container {
+        max-width: 1200px;
+        margin: 2rem auto;
+        padding: 0 2rem;
+    }
 
-<main class="layout">
-  <div class="container">
+    .activities-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 3rem;
+        flex-wrap: wrap;
+        gap: 2rem;
+    }
 
-    <div class="layout__box">
+    .activities-header h1 {
+        font-size: 3.2rem;
+        color: var(--color-main);
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
 
-      <div class="layout__boxHeader">
-        <div class="layout__boxTitle">
-          <a href="{% url 'home' %}">
-            <svg width="32" height="32" viewBox="0 0 32 32">
-              <path d="M13.723 2.286l-13.723 13.714 13.719 13.714 1.616-1.611-10.96-10.96h27.625v-2.286h-27.625l10.965-10.965-1.616-1.607z"></path>
+    .activities-header h1 svg {
+        width: 4rem;
+        height: 4rem;
+        fill: var(--color-main);
+    }
+
+    .activities-stats {
+        display: flex;
+        gap: 2rem;
+        background: var(--color-dark);
+        padding: 1rem 2rem;
+        border-radius: 4rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        color: var(--color-light-gray);
+        font-size: 1.4rem;
+    }
+
+    .stat-item span {
+        color: var(--color-main);
+        font-weight: bold;
+        font-size: 1.8rem;
+    }
+
+    /* Search Section */
+    .activities-search {
+        background: var(--color-dark);
+        border-radius: 2rem;
+        padding: 2rem;
+        margin-bottom: 3rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .search-wrapper {
+        position: relative;
+        margin-bottom: 1.5rem;
+    }
+
+    .search-wrapper input {
+        width: 100%;
+        padding: 1.5rem 2rem 1.5rem 5rem;
+        background: var(--color-dark-medium);
+        border: 2px solid var(--color-dark-light);
+        border-radius: 4rem;
+        color: var(--color-light);
+        font-size: 1.6rem;
+        transition: all 0.3s ease;
+    }
+
+    .search-wrapper input:focus {
+        border-color: var(--color-main);
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(113, 198, 221, 0.2);
+    }
+
+    .search-wrapper svg {
+        position: absolute;
+        left: 1.8rem;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 2rem;
+        height: 2rem;
+        fill: var(--color-light-gray);
+    }
+
+    .filter-options {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-chip {
+        padding: 0.8rem 1.5rem;
+        background: var(--color-dark-medium);
+        border: 1px solid var(--color-dark-light);
+        border-radius: 3rem;
+        color: var(--color-light-gray);
+        font-size: 1.3rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .filter-chip:hover {
+        background: var(--color-dark-light);
+        color: var(--color-light);
+    }
+
+    .filter-chip.active {
+        background: var(--color-main);
+        color: var(--color-dark);
+        border-color: var(--color-main);
+    }
+
+    .filter-chip svg {
+        width: 1.6rem;
+        height: 1.6rem;
+        fill: currentColor;
+    }
+
+    .results-count {
+        margin-top: 1rem;
+        font-size: 1.4rem;
+        color: var(--color-light-gray);
+        text-align: right;
+    }
+
+    .results-count span {
+        color: var(--color-main);
+        font-weight: bold;
+        font-size: 1.8rem;
+    }
+
+    /* Activities Grid */
+    .activities-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 2rem;
+        margin-top: 2rem;
+    }
+
+    /* Activity Card */
+    .activity-card {
+        background: var(--color-dark);
+        border-radius: 1.5rem;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        border: 1px solid transparent;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        animation: fadeIn 0.3s ease;
+        height: fit-content;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .activity-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--color-main);
+        box-shadow: 0 10px 25px rgba(113, 198, 221, 0.2);
+    }
+
+    .activity-card__header {
+        padding: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        border-bottom: 1px solid var(--color-dark-light);
+    }
+
+    .activity-card__avatar {
+        position: relative;
+    }
+
+    .activity-card__avatar img {
+        width: 5rem;
+        height: 5rem;
+        border-radius: 50%;
+        border: 2px solid var(--color-main);
+    }
+
+    .activity-type-icon {
+        position: absolute;
+        bottom: -2px;
+        right: -2px;
+        width: 2rem;
+        height: 2rem;
+        background: var(--color-main);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 2px solid var(--color-dark);
+    }
+
+    .activity-type-icon svg {
+        width: 1.2rem;
+        height: 1.2rem;
+        fill: var(--color-dark);
+    }
+
+    .activity-card__info {
+        flex: 1;
+    }
+
+    .activity-card__username {
+        font-size: 1.6rem;
+        color: var(--color-light);
+        margin-bottom: 0.3rem;
+    }
+
+    .activity-card__username strong {
+        color: var(--color-main);
+    }
+
+    .activity-card__time {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 1.2rem;
+        color: var(--color-light-gray);
+    }
+
+    .activity-card__time svg {
+        width: 1.4rem;
+        height: 1.4rem;
+        fill: var(--color-light-gray);
+    }
+
+    .activity-card__content {
+        padding: 1.5rem;
+    }
+
+    .activity-card__room {
+        font-size: 1.3rem;
+        color: var(--color-light-gray);
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .activity-card__room svg {
+        width: 1.6rem;
+        height: 1.6rem;
+        fill: var(--color-main);
+    }
+
+    .activity-card__room a {
+        color: var(--color-main);
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    .activity-card__room a:hover {
+        text-decoration: underline;
+    }
+
+    .activity-card__message {
+        background: var(--color-dark-medium);
+        padding: 1.5rem;
+        border-radius: 1rem;
+        color: var(--color-light);
+        font-size: 1.4rem;
+        line-height: 1.6;
+        border-left: 3px solid var(--color-main);
+        margin-top: 1rem;
+    }
+
+    .activity-card__message-preview {
+        display: -webkit-box;
+        -webkit-line-clamp: 3;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .activity-card__footer {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid var(--color-dark-light);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 1.2rem;
+        color: var(--color-light-gray);
+    }
+
+    .activity-card__room-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .activity-card__topic {
+        padding: 0.3rem 1rem;
+        background: var(--color-dark-medium);
+        border-radius: 2rem;
+        color: var(--color-main);
+    }
+
+    /* Empty State */
+    .empty-state {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 5rem;
+        background: var(--color-dark);
+        border-radius: 2rem;
+    }
+
+    .empty-state svg {
+        width: 8rem;
+        height: 8rem;
+        fill: var(--color-dark-light);
+        margin-bottom: 2rem;
+    }
+
+    .empty-state h3 {
+        color: var(--color-light);
+        font-size: 2rem;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state p {
+        color: var(--color-light-gray);
+        font-size: 1.4rem;
+        margin-bottom: 2rem;
+    }
+
+    /* Loading Skeleton */
+    .skeleton {
+        animation: pulse 1.5s infinite;
+    }
+
+    @keyframes pulse {
+        0% { opacity: 0.6; }
+        50% { opacity: 1; }
+        100% { opacity: 0.6; }
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .activities-page-container {
+            padding: 1rem;
+        }
+
+        .activities-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .activities-header h1 {
+            font-size: 2.4rem;
+        }
+
+        .activities-stats {
+            width: 100%;
+            justify-content: space-around;
+        }
+
+        .filter-options {
+            overflow-x: auto;
+            padding-bottom: 1rem;
+            flex-wrap: nowrap;
+        }
+
+        .filter-chip {
+            white-space: nowrap;
+        }
+
+        .activities-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+
+        .activity-card:hover {
+            transform: none;
+        }
+    }
+
+    /* Tablet Responsive */
+    @media (min-width: 769px) and (max-width: 1024px) {
+        .activities-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
+</style>
+
+<div class="activities-page-container">
+    <!-- Header with Stats -->
+    <div class="activities-header">
+        <h1>
+            <svg viewBox="0 0 24 24">
+                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
             </svg>
-          </a>
-          <h3>Recent Activities</h3>
+            Recent Activities
+        </h1>
+        <div class="activities-stats">
+            <div class="stat-item">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+                </svg>
+                <span id="totalActivities">{{ room_messages|length }}</span> Activities
+            </div>
+            <div class="stat-item">
+                <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                    <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-1 .05 1.16.84 2 1.87 2 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>
+                </svg>
+                <span>{{ unique_users }}</span> Users
+            </div>
         </div>
-      </div>
-
-      <div class="layout__body" style="display:flex; flex-direction:column; height:70vh;">
-
-  <!-- SEARCH BAR (fixed at top) -->
-  <form method="GET" action="{% url 'activity' %}" style="margin-bottom:15px;">
-    <input type="text"
-           name="q"
-           value="{{ search_query }}"
-           placeholder="Search by username, room, message..."
-           style="width:100%;padding:10px;border-radius:8px;border:none;">
-  </form>
-
-  <!-- SCROLLABLE ACTIVITY SECTION -->
-  <div style="flex:1; overflow-y:auto; padding-right:5px;">
-
-    {% for message in room_messages %}
-    <div class="activities__box">
-
-      <div class="activities__boxHeader roomListRoom__header">
-        <a href="{% url 'user-profile' message.user.id %}" class="roomListRoom__author">
-          <div class="avatar avatar--small">
-            <img src="{{message.user.avatar_url}}" />
-          </div>
-          <p>
-            @{{message.user.username}}
-            <span>{{message.created|timesince}} ago</span>
-          </p>
-        </a>
-      </div>
-
-      <div class="activities__boxContent">
-        <p>
-          replied to post
-          “<a href="{% url 'room' message.room.id %}">
-            {{message.room}}
-          </a>”
-        </p>
-
-        <div class="activities__boxRoomContent">
-          {{message.body}}
-        </div>
-      </div>
-
     </div>
-    {% endfor %}
 
-  </div>
+    <!-- Search and Filter Section -->
+    <div class="activities-search">
+        <div class="search-wrapper">
+            <svg viewBox="0 0 24 24">
+                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
+            </svg>
+            <input type="text" id="searchInput" placeholder="Search by username, room, or message..." autocomplete="off" value="{{ search_query }}">
+        </div>
+
+        <div class="filter-options">
+            <span class="filter-chip active" data-filter="all" onclick="filterActivities('all')">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+                </svg>
+                All
+            </span>
+            <span class="filter-chip" data-filter="today" onclick="filterActivities('today')">
+                <svg viewBox="0 0 24 24">
+                    <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V9h14v10z"/>
+                </svg>
+                Today
+            </span>
+            <span class="filter-chip" data-filter="week" onclick="filterActivities('week')">
+                <svg viewBox="0 0 24 24">
+                    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+                </svg>
+                This Week
+            </span>
+            <span class="filter-chip" data-filter="month" onclick="filterActivities('month')">
+                <svg viewBox="0 0 24 24">
+                    <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2z"/>
+                </svg>
+                This Month
+            </span>
+        </div>
+
+        <div class="results-count">
+            Found <span id="activityCount">{{ room_messages|length }}</span> activities
+        </div>
+    </div>
+
+    <!-- Activities Grid -->
+    <div class="activities-grid" id="activitiesGrid">
+        {% for message in room_messages %}
+        <div class="activity-card" 
+             data-username="{{ message.user.username|lower }}"
+             data-room="{{ message.room.name|lower }}"
+             data-message="{{ message.body|lower }}"
+             data-date="{{ message.created|date:'Y-m-d' }}">
+            
+            <div class="activity-card__header">
+                <div class="activity-card__avatar">
+                    <img src="{{ message.user.avatar_url }}" alt="{{ message.user.username }}" />
+                         
+                    <span class="activity-type-icon">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+                        </svg>
+                    </span>
+                </div>
+                <div class="activity-card__info">
+                    <div class="activity-card__username">
+                        <strong>@{{ message.user.username }}</strong>
+                    </div>
+                    <div class="activity-card__time">
+                        <svg viewBox="0 0 24 24">
+                            <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/>
+                        </svg>
+                        {{ message.created|timesince }} ago
+                    </div>
+                </div>
+            </div>
+
+            <div class="activity-card__content">
+                <div class="activity-card__room">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+                    </svg>
+                    in 
+                    <a href="{% url 'room' message.room.id %}">
+                        {{ message.room.name }}
+                    </a>
+                </div>
+
+                <div class="activity-card__message">
+                    <div class="activity-card__message-preview">
+                        {{ message.body }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="activity-card__footer">
+                <div class="activity-card__room-info">
+                    <span>{{ message.room.participants.count }} participants</span>
+                    <span class="activity-card__topic">{{ message.room.topic.name }}</span>
+                </div>
+                <span>{{ message.created|date:"M d, Y" }}</span>
+            </div>
+        </div>
+        {% empty %}
+        <div class="empty-state">
+            <svg viewBox="0 0 24 24">
+                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+            </svg>
+            <h3>No activities yet</h3>
+            <p>When users post messages, they'll appear here.</p>
+            <a href="{% url 'home' %}" class="btn btn--main">Browse Rooms</a>
+        </div>
+        {% endfor %}
+    </div>
 </div>
-    </div>
 
-  </div>
-</main>
+<script>
+let currentFilter = 'all';
+let searchTimeout;
+
+// Live search functionality
+const searchInput = document.getElementById('searchInput');
+const activityCards = document.querySelectorAll('.activity-card');
+const activityCountSpan = document.getElementById('activityCount');
+
+searchInput.addEventListener('input', function() {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(applyFilters, 300);
+});
+
+// Filter by time period
+function filterActivities(filter) {
+    currentFilter = filter;
+    
+    // Update active chip
+    document.querySelectorAll('.filter-chip').forEach(chip => {
+        chip.classList.remove('active');
+        if (chip.dataset.filter === filter) {
+            chip.classList.add('active');
+        }
+    });
+    
+    applyFilters();
+}
+
+// Apply all filters
+function applyFilters() {
+    const searchTerm = searchInput.value.toLowerCase();
+    const today = new Date();
+    const oneWeekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+    const oneMonthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+    
+    let visibleCount = 0;
+    
+    activityCards.forEach(card => {
+        const username = card.dataset.username;
+        const room = card.dataset.room;
+        const message = card.dataset.message;
+        const dateStr = card.dataset.date;
+        const cardDate = new Date(dateStr);
+        
+        // Search filter
+        const matchesSearch = searchTerm === '' || 
+                             username.includes(searchTerm) || 
+                             room.includes(searchTerm) || 
+                             message.includes(searchTerm) ||
+                             dateStr.includes(searchTerm);
+        
+        // Time filter
+        let matchesTime = true;
+        if (currentFilter === 'today') {
+            matchesTime = cardDate.toDateString() === today.toDateString();
+        } else if (currentFilter === 'week') {
+            matchesTime = cardDate >= oneWeekAgo;
+        } else if (currentFilter === 'month') {
+            matchesTime = cardDate >= oneMonthAgo;
+        }
+        
+        if (matchesSearch && matchesTime) {
+            card.style.display = 'block';
+            visibleCount++;
+        } else {
+            card.style.display = 'none';
+        }
+    });
+    
+    activityCountSpan.textContent = visibleCount;
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // If there's a search query from URL, set it
+    const urlParams = new URLSearchParams(window.location.search);
+    const query = urlParams.get('q');
+    if (query && searchInput) {
+        searchInput.value = query;
+        applyFilters();
+    }
+});
+</script>
 
 {% endblock %}
