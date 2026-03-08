@@ -834,37 +834,381 @@ def search_users(request):
 
 
 
+# In chat_detail view, ensure default themes exist
 def ensure_default_themes():
     """Create default themes if they don't exist"""
     default_themes = [
+        # Original Dark Theme (Your default)
         {
-            'name': 'Dark',
+            'name': 'StudyBud Dark',
             'background_color': '#2d2d39',
             'message_bubble_user': '#71c6dd',
             'message_bubble_other': '#3f4156',
+            'text_color': '#e5e5e5',
+            'timestamp_color': '#b2bdbd',
             'is_public': True
         },
+        
+        # Ocean Blue Theme
         {
-            'name': 'Light',
-            'background_color': '#f5f5f5',
-            'message_bubble_user': '#0084ff',
-            'message_bubble_other': '#e4e6eb',
-            'text_color': '#000000',
-            'timestamp_color': '#65676b',
+            'name': 'Ocean Blue',
+            'background_color': '#1e3c72',  # Deep ocean gradient start
+            'message_bubble_user': '#00b4d8',  # Bright cyan
+            'message_bubble_other': '#023e8a',  # Deep blue
+            'text_color': '#ffffff',
+            'timestamp_color': '#caf0f8',
             'is_public': True
         },
+        
+        # Sunset Theme
         {
-            'name': 'Midnight',
-            'background_color': '#1a1a2e',
-            'message_bubble_user': '#0f3460',
-            'message_bubble_other': '#16213e',
+            'name': 'Sunset',
+            'background_color': '#ff6b6b',  # Coral
+            'message_bubble_user': '#feca57',  # Yellow
+            'message_bubble_other': '#ff9f4a',  # Orange
+            'text_color': '#2d3436',
+            'timestamp_color': '#636e72',
             'is_public': True
         },
+        
+        # Forest Green Theme
         {
             'name': 'Forest',
-            'background_color': '#1e3c2c',
-            'message_bubble_user': '#2d6a4f',
-            'message_bubble_other': '#40916c',
+            'background_color': '#134e5e',  # Dark teal
+            'message_bubble_user': '#71c6dd',  # Light teal
+            'message_bubble_other': '#0b3b4b',  # Dark teal
+            'text_color': '#e0f2fe',
+            'timestamp_color': '#a5d8ff',
+            'is_public': True
+        },
+        
+        # Midnight Purple Theme
+        {
+            'name': 'Midnight Purple',
+            'background_color': '#2c0e37',  # Deep purple
+            'message_bubble_user': '#ff6f91',  # Pink
+            'message_bubble_other': '#4a1d5e',  # Medium purple
+            'text_color': '#ffd3e0',
+            'timestamp_color': '#ffb3c6',
+            'is_public': True
+        },
+        
+        # Coffee Theme
+        {
+            'name': 'Coffee',
+            'background_color': '#3e2723',  # Dark brown
+            'message_bubble_user': '#d7ccc8',  # Light beige
+            'message_bubble_other': '#5d4037',  # Medium brown
+            'text_color': '#efebe9',
+            'timestamp_color': '#bcaaa4',
+            'is_public': True
+        },
+        
+        # Mint Theme
+        {
+            'name': 'Fresh Mint',
+            'background_color': '#004d40',  # Dark mint
+            'message_bubble_user': '#80cbc4',  # Light mint
+            'message_bubble_other': '#009688',  # Medium mint
+            'text_color': '#e0f2f1',
+            'timestamp_color': '#b2dfdb',
+            'is_public': True
+        },
+        
+        # Lavender Theme
+        {
+            'name': 'Lavender Dreams',
+            'background_color': '#4a1d5e',  # Deep purple
+            'message_bubble_user': '#e1bee7',  # Light lavender
+            'message_bubble_other': '#7b1fa2',  # Medium purple
+            'text_color': '#f3e5f5',
+            'timestamp_color': '#ce93d8',
+            'is_public': True
+        },
+        
+        # Autumn Theme
+        {
+            'name': 'Autumn Leaves',
+            'background_color': '#8b4513',  # Saddle brown
+            'message_bubble_user': '#f4a460',  # Sandy brown
+            'message_bubble_other': '#cd853f',  # Peru
+            'text_color': '#fff8e7',
+            'timestamp_color': '#deb887',
+            'is_public': True
+        },
+        
+        # Cyberpunk Theme
+        {
+            'name': 'Cyberpunk',
+            'background_color': '#0d0221',  # Very dark purple
+            'message_bubble_user': '#00ff9f',  # Neon green
+            'message_bubble_other': '#b829fd',  # Neon purple
+            'text_color': '#ffffff',
+            'timestamp_color': '#c77dff',
+            'is_public': True
+        },
+        
+        # Sakura Theme
+        {
+            'name': 'Sakura',
+            'background_color': '#fce4ec',  # Light pink
+            'message_bubble_user': '#f06292',  # Medium pink
+            'message_bubble_other': '#f48fb1',  # Light pink
+            'text_color': '#4a4a4a',
+            'timestamp_color': '#9e9e9e',
+            'is_public': True
+        },
+        
+        # Matrix Theme
+        {
+            'name': 'Matrix',
+            'background_color': '#0f0f0f',  # Almost black
+            'message_bubble_user': '#00ff41',  # Matrix green
+            'message_bubble_other': '#008f11',  # Dark green
+            'text_color': '#00ff41',
+            'timestamp_color': '#008f11',
+            'is_public': True
+        },
+        
+        # Royal Theme
+        {
+            'name': 'Royal',
+            'background_color': '#1a237e',  # Indigo
+            'message_bubble_user': '#ffd700',  # Gold
+            'message_bubble_other': '#0d47a1',  # Dark blue
+            'text_color': '#ffffff',
+            'timestamp_color': '#c5cae9',
+            'is_public': True
+        },
+        
+        # Rose Gold Theme
+        {
+            'name': 'Rose Gold',
+            'background_color': '#4a1c2c',  # Dark rose
+            'message_bubble_user': '#f7cac9',  # Rose gold
+            'message_bubble_other': '#b76e79',  # Rose gold dark
+            'text_color': '#fff0f3',
+            'timestamp_color': '#ffc2c7',
+            'is_public': True
+        },
+        
+        # Northern Lights Theme
+        {
+            'name': 'Northern Lights',
+            'background_color': '#0a1929',  # Dark blue
+            'message_bubble_user': '#64ffda',  # Teal
+            'message_bubble_other': '#2979ff',  # Blue
+            'text_color': '#e3f2fd',
+            'timestamp_color': '#80deea',
+            'is_public': True
+        },
+        
+        # Desert Theme
+        {
+            'name': 'Desert Sands',
+            'background_color': '#cc9c6b',  # Sand
+            'message_bubble_user': '#f4e3b1',  # Light sand
+            'message_bubble_other': '#b77b4a',  # Dark sand
+            'text_color': '#3e2a1f',
+            'timestamp_color': '#5d3a1a',
+            'is_public': True
+        },
+        
+        # Galaxy Theme
+        {
+            'name': 'Galaxy',
+            'background_color': '#0b0c2b',  # Deep space
+            'message_bubble_user': '#9c4dca',  # Purple
+            'message_bubble_other': '#2d1b45',  # Dark purple
+            'text_color': '#ffffff',
+            'timestamp_color': '#8b5cf6',
+            'is_public': True
+        },
+        
+        # Candy Theme
+        {
+            'name': 'Candy Shop',
+            'background_color': '#ffb6c1',  # Light pink
+            'message_bubble_user': '#ff69b4',  # Hot pink
+            'message_bubble_other': '#ff1493',  # Deep pink
+            'text_color': '#4a0e4e',
+            'timestamp_color': '#ff85a2',
+            'is_public': True
+        },
+        
+        # Monochrome Theme
+        {
+            'name': 'Monochrome',
+            'background_color': '#1e1e1e',  # Dark gray
+            'message_bubble_user': '#bdbdbd',  # Light gray
+            'message_bubble_other': '#616161',  # Medium gray
+            'text_color': '#ffffff',
+            'timestamp_color': '#9e9e9e',
+            'is_public': True
+        },
+        
+        # Ocean Sunset Theme
+        {
+            'name': 'Ocean Sunset',
+            'background_color': '#2b4162',  # Dark blue
+            'message_bubble_user': '#f4a261',  # Orange
+            'message_bubble_other': '#385f71',  # Blue-gray
+            'text_color': '#f8f0e5',
+            'timestamp_color': '#d4a5a5',
+            'is_public': True
+        },
+        
+        # Emerald Theme
+        {
+            'name': 'Emerald City',
+            'background_color': '#1a3b2e',  # Dark green
+            'message_bubble_user': '#50c878',  # Emerald
+            'message_bubble_other': '#2e7d32',  # Forest green
+            'text_color': '#e8f5e9',
+            'timestamp_color': '#a5d6a7',
+            'is_public': True
+        },
+        
+        # Twilight Theme
+        {
+            'name': 'Twilight',
+            'background_color': '#2c3a5e',  # Dark blue-purple
+            'message_bubble_user': '#c7b9ff',  # Light purple
+            'message_bubble_other': '#4a3f6b',  # Medium purple
+            'text_color': '#f0e6ff',
+            'timestamp_color': '#b1a7d4',
+            'is_public': True
+        },
+        
+        # Tropical Theme
+        {
+            'name': 'Tropical',
+            'background_color': '#05445E',  # Deep blue
+            'message_bubble_user': '#FADB67',  # Yellow
+            'message_bubble_other': '#189AB4',  # Medium blue
+            'text_color': '#FFFFFF',
+            'timestamp_color': '#D4F1F9',
+            'is_public': True
+        },
+        
+        # Halloween Theme
+        {
+            'name': 'Halloween',
+            'background_color': '#1c1107',  # Almost black
+            'message_bubble_user': '#f5821f',  # Pumpkin orange
+            'message_bubble_other': '#6f4e37',  # Brown
+            'text_color': '#ffb347',
+            'timestamp_color': '#ff8c42',
+            'is_public': True
+        },
+        
+        # Christmas Theme
+        {
+            'name': 'Christmas',
+            'background_color': '#0b3b2c',  # Dark green
+            'message_bubble_user': '#e63946',  # Red
+            'message_bubble_other': '#f4f1de',  # Cream
+            'text_color': '#ffffff',
+            'timestamp_color': '#b8b5a7',
+            'is_public': True
+        },
+        
+        # Neon Theme
+        {
+            'name': 'Neon Nights',
+            'background_color': '#0f0f1e',  # Dark blue-black
+            'message_bubble_user': '#ff00ff',  # Magenta
+            'message_bubble_other': '#00ffff',  # Cyan
+            'text_color': '#ffffff',
+            'timestamp_color': '#ffff00',
+            'is_public': True
+        },
+        
+        # Earth Theme
+        {
+            'name': 'Earth Tones',
+            'background_color': '#5d4a36',  # Brown
+            'message_bubble_user': '#bc8f4b',  # Bronze
+            'message_bubble_other': '#7d5535',  # Dark brown
+            'text_color': '#f2e3c9',
+            'timestamp_color': '#c4a484',
+            'is_public': True
+        },
+        
+        # Ocean Depth Theme
+        {
+            'name': 'Ocean Depth',
+            'background_color': '#03045e',  # Deep navy
+            'message_bubble_user': '#00b4d8',  # Light blue
+            'message_bubble_other': '#0077b6',  # Medium blue
+            'text_color': '#caf0f8',
+            'timestamp_color': '#90e0ef',
+            'is_public': True
+        },
+        
+        # Berry Theme
+        {
+            'name': 'Berry Blast',
+            'background_color': '#4a0e4e',  # Dark purple
+            'message_bubble_user': '#ff1493',  # Hot pink
+            'message_bubble_other': '#8a2be2',  # Blue violet
+            'text_color': '#ffc0cb',
+            'timestamp_color': '#dda0dd',
+            'is_public': True
+        },
+        
+        # Lavender Gray Theme
+        {
+            'name': 'Lavender Gray',
+            'background_color': '#383544',  # Dark lavender
+            'message_bubble_user': '#b39ddb',  # Light lavender
+            'message_bubble_other': '#5e548e',  # Medium lavender
+            'text_color': '#f3e5f5',
+            'timestamp_color': '#d1c4e9',
+            'is_public': True
+        },
+        
+        # Sunrise Theme
+        {
+            'name': 'Sunrise',
+            'background_color': '#f12711',  # Red
+            'message_bubble_user': '#f5af19',  # Orange
+            'message_bubble_other': '#f37335',  # Orange-red
+            'text_color': '#ffffff',
+            'timestamp_color': '#fdc830',
+            'is_public': True
+        },
+        
+        # Underwater Theme
+        {
+            'name': 'Underwater',
+            'background_color': '#073b4c',  # Deep teal
+            'message_bubble_user': '#06d6a0',  # Mint
+            'message_bubble_other': '#118ab2',  # Blue
+            'text_color': '#ffffff',
+            'timestamp_color': '#8ecae6',
+            'is_public': True
+        },
+        
+        # Romantic Theme
+        {
+            'name': 'Romantic',
+            'background_color': '#590d22',  # Deep burgundy
+            'message_bubble_user': '#ff758f',  # Pink
+            'message_bubble_other': '#c9184a',  # Red-pink
+            'text_color': '#fff0f3',
+            'timestamp_color': '#ffb3c6',
+            'is_public': True
+        },
+        
+        # Mint Chocolate Theme
+        {
+            'name': 'Mint Chocolate',
+            'background_color': '#3c280d',  # Brown
+            'message_bubble_user': '#98fb98',  # Mint green
+            'message_bubble_other': '#8b4513',  # Saddle brown
+            'text_color': '#f0fff0',
+            'timestamp_color': '#90ee90',
             'is_public': True
         }
     ]
