@@ -23,8 +23,12 @@ import os
 import mimetypes
 from PIL import Image
 import io
+from .emails import send_verification_email, send_password_reset_email
+from django.contrib.auth.views import PasswordResetView
 
-
+# ============================================
+# AUTHENTICATION VIEWS
+# ============================================
 
 def loginPage(request):
     page = 'login'
@@ -82,15 +86,43 @@ def registerPage(request):
             user.username = user.username.lower()
             user.email = user.email.lower()
             
-            # Auto-verify users for now (email not working)
-            user.email_verified = True
-            user.email_verification_token = None
-            user.save()
+            # List of dummy email addresses that should be auto-verified
+            dummy_emails = [
+                'anubrata@gmail.com',
+                'ashtu@gmail.com', 
+                'annnnyyz@gmail.com',
+                'anuyz@gmail.com',
+                # Add any other dummy emails you've used
+            ]
             
-            login(request, user)
-            request.session['welcome_message'] = f'Welcome, {user.username}!'
-            request.session['welcome_type'] = 'new'
-            return redirect('home')
+            # Check if it's a dummy email
+            if user.email in dummy_emails:
+                # Auto-verify dummy accounts
+                user.email_verified = True
+                user.email_verification_token = None
+                user.save()
+                login(request, user)
+                messages.success(request, f'Welcome, {user.username}!')
+                return redirect('home')
+            else:
+                # Real email - require verification
+                user.email_verified = False
+                user.save()
+                
+                # Generate verification code
+                verification_code = generate_verification_code()
+                user.email_verification_token = verification_code
+                user.save()
+                
+                # Send verification email via Resend
+                result = send_verification_email(user, verification_code)
+                
+                if result['success']:
+                    messages.success(request, 'Account created! Please check your email for verification code.')
+                else:
+                    messages.warning(request, 'Account created but verification email could not be sent. You can request a new code.')
+                
+                return redirect('verify-email', user_id=user.id)
         else:
             # Form is invalid - show errors
             for field, errors in form.errors.items():
@@ -136,17 +168,52 @@ def resend_verification(request, user_id):
         messages.error(request, 'Invalid user')
         return redirect('login')
     
+    # Generate new code
     verification_code = generate_verification_code()
     user.email_verification_token = verification_code
     user.save()
     
-    subject = 'Verify your StudyBud account'
-    message = f'Your new verification code is: {verification_code}'
-    send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email], fail_silently=False)
+    # Send verification email via Resend
+    result = send_verification_email(user, verification_code)
     
-    messages.success(request, 'Verification code resent!')
+    if result['success']:
+        messages.success(request, 'Verification code resent! Please check your email.')
+    else:
+        messages.error(request, 'Failed to send verification code. Please try again.')
+    
     return redirect('verify-email', user_id=user.id)
 
+
+# ============================================
+# CUSTOM PASSWORD RESET VIEW
+# ============================================
+
+class CustomPasswordResetView(PasswordResetView):
+    template_name = 'base/password_reset.html'
+    email_template_name = 'base/password_reset_email.html'
+    subject_template_name = 'base/password_reset_subject.txt'
+    
+    def form_valid(self, form):
+        # Get the user
+        email = form.cleaned_data['email']
+        users = User.objects.filter(email=email)
+        
+        if users.exists():
+            user = users.first()
+            # Generate reset link
+            uid = urlsafe_base64_encode(force_bytes(user.pk))
+            token = self.token_generator.make_token(user)
+            reset_link = f"{self.request.scheme}://{get_current_site(self.request).domain}/password-reset-confirm/{uid}/{token}/"
+            
+            # Send via Resend
+            send_password_reset_email(user, reset_link)
+            
+        return redirect('password_reset_done')
+
+
+# ============================================
+# HOME AND ROOM VIEWS
+# ============================================
 
 def home(request):
     q = request.GET.get('q') if request.GET.get('q') != None else ''
@@ -173,16 +240,21 @@ def home(request):
     welcome_message = request.session.pop('welcome_message', None)
     welcome_type = request.session.pop('welcome_type', None)
     
+    # Get unique users count for activity page
+    unique_users = Message.objects.values('user').distinct().count()
+    
     context = {
-        'rooms': rooms,  # This now has only 3 rooms
+        'rooms': rooms,
         'topics': topics,
-        'room_count': total_room_count,  # This is the total count
+        'room_count': total_room_count,
         'room_messages': room_messages,
         'suggested_users': suggested_users,
         'welcome_message': welcome_message,
-        'welcome_type': welcome_type
+        'welcome_type': welcome_type,
+        'unique_users': unique_users,
     }
     return render(request, 'base/home.html', context)
+
 
 @login_required(login_url='login')
 def room(request, pk):
@@ -228,6 +300,10 @@ def room(request, pk):
     return render(request, 'base/room.html', context)
 
 
+# ============================================
+# USER PROFILE VIEWS
+# ============================================
+
 def userProfile(request, pk):
     user = User.objects.get(id=pk)
     rooms = user.room_set.all()
@@ -251,6 +327,22 @@ def userProfile(request, pk):
     }
     return render(request, 'base/profile.html', context)
 
+
+@login_required(login_url='login')
+def updateUser(request):
+    user = request.user
+    form = UserForm(instance=user)
+    if request.method == 'POST':
+        form = UserForm(request.POST, request.FILES, instance=user)
+        if form.is_valid():
+            form.save()
+            return redirect('user-profile', pk=user.id)
+    return render(request, 'base/update-user.html', {'form': form})
+
+
+# ============================================
+# ROOM CRUD VIEWS
+# ============================================
 
 @login_required(login_url='login')
 def createRoom(request):
@@ -312,17 +404,9 @@ def deleteMessage(request, pk):
     return render(request, 'base/delete.html', {'obj': message})
 
 
-@login_required(login_url='login')
-def updateUser(request):
-    user = request.user
-    form = UserForm(instance=user)
-    if request.method == 'POST':
-        form = UserForm(request.POST, request.FILES, instance=user)
-        if form.is_valid():
-            form.save()
-            return redirect('user-profile', pk=user.id)
-    return render(request, 'base/update-user.html', {'form': form})
-
+# ============================================
+# TOPICS AND ACTIVITY VIEWS
+# ============================================
 
 def topicsPage(request):
     q = request.GET.get('q') if request.GET.get('q') != None else ''
@@ -337,11 +421,43 @@ def activityPage(request):
         Q(room__name__icontains=q) |
         Q(body__icontains=q)
     ).order_by('-created')
+    
+    # Get unique users count
+    unique_users = room_messages.values('user').distinct().count()
+    
     return render(request, 'base/activity.html', {
         'room_messages': room_messages,
-        'search_query': q
+        'search_query': q,
+        'unique_users': unique_users,
     })
 
+
+def all_rooms(request):
+    q = request.GET.get('q') if request.GET.get('q') != None else ''
+    
+    # Filter rooms based on search
+    rooms = Room.objects.filter(
+        Q(topic__name__icontains=q) |
+        Q(name__icontains=q) |
+        Q(description__icontains=q) |
+        Q(host__username__icontains=q)
+    )
+    
+    topics = Topic.objects.all()
+    room_count = rooms.count()
+    
+    context = {
+        'rooms': rooms,
+        'topics': topics,
+        'room_count': room_count,
+        'search_query': q,
+    }
+    return render(request, 'base/all_rooms.html', context)
+
+
+# ============================================
+# LIKE AND NOTIFICATION VIEWS
+# ============================================
 
 @login_required(login_url='login')
 def toggle_like(request, pk):
@@ -379,6 +495,10 @@ def mark_notifications_read(request):
     request.user.notifications.update(is_read=True)
     return redirect(request.META.get('HTTP_REFERER', 'home'))
 
+
+# ============================================
+# FOLLOW SYSTEM VIEWS
+# ============================================
 
 @login_required(login_url='login')
 def toggle_follow(request, pk):
@@ -430,6 +550,10 @@ def profile_following(request, pk):
     return JsonResponse({"users": data})
 
 
+# ============================================
+# MESSAGE EDIT/DELETE VIEWS
+# ============================================
+
 @login_required(login_url='login')
 def edit_message(request, pk):
     message = Message.objects.get(id=pk)
@@ -465,6 +589,10 @@ def delete_account(request):
     return render(request, 'base/delete_account.html')
 
 
+# ============================================
+# PIN MESSAGE VIEWS
+# ============================================
+
 @login_required
 def pin_message(request, message_id):
     message = get_object_or_404(Message, id=message_id)
@@ -492,31 +620,11 @@ def unpin_message(request, message_id):
     room.pinned_messages.remove(message)
     return redirect('room', pk=room.id)
 
-def all_rooms(request):
-    q = request.GET.get('q') if request.GET.get('q') != None else ''
-    
-    # Filter rooms based on search
-    rooms = Room.objects.filter(
-        Q(topic__name__icontains=q) |
-        Q(name__icontains=q) |
-        Q(description__icontains=q) |
-        Q(host__username__icontains=q)
-    )
-    
-    topics = Topic.objects.all()
-    room_count = rooms.count()
-    
-    context = {
-        'rooms': rooms,
-        'topics': topics,
-        'room_count': room_count,
-        'search_query': q,
-    }
-    return render(request, 'base/all_rooms.html', context)
 
+# ============================================
+# CHAT SYSTEM VIEWS
+# ============================================
 
-
-# In your chats_list view
 @login_required
 def chats_list(request):
     """Display all personal chats for the user"""
@@ -550,7 +658,7 @@ def chats_list(request):
     
     context = {
         'chats': chat_data,
-        'total_unread_chats': total_unread_chats  # Change this
+        'total_unread_chats': total_unread_chats
     }
     return render(request, 'base/chats.html', context)
    
@@ -570,7 +678,7 @@ def chat_detail(request, chat_id):
     messages = chat.messages.filter(
         Q(deleted_for_everyone=False) &
         (Q(deleted_for_sender=False) | Q(sender=request.user))
-    ).select_related('sender', 'parent_message').order_by('created')  # Add order_by
+    ).select_related('sender', 'parent_message').order_by('created')
     
     # Get pinned messages
     pinned_messages = messages.filter(is_pinned=True).order_by('-pinned_at')
@@ -602,6 +710,9 @@ def chat_detail(request, chat_id):
         chat.theme = default_theme
         chat.save()
     
+    # Ensure default themes exist
+    ensure_default_themes()
+    
     context = {
         'chat': chat,
         'other_user': other_user,
@@ -610,7 +721,6 @@ def chat_detail(request, chat_id):
         'participant_info': participant_info,
         'themes': ChatTheme.objects.filter(Q(is_public=True) | Q(created_by=request.user))
     }
-    ensure_default_themes()
     return render(request, 'base/chat_detail.html', context)
    
 
@@ -639,6 +749,8 @@ def start_chat(request, user_id):
     ChatParticipant.objects.create(chat=chat, user=other_user)
     
     return redirect('chat-detail', chat_id=chat.id)
+
+
 @login_required
 def update_chat_theme(request, chat_id):
     """Update chat theme/background"""
@@ -673,6 +785,11 @@ def update_chat_theme(request, chat_id):
     
     return JsonResponse({'error': 'Invalid request'}, status=400)
 
+
+# ============================================
+# CHAT API ENDPOINTS
+# ============================================
+
 @login_required
 def search_chats(request):
     """API endpoint for searching chats"""
@@ -704,10 +821,11 @@ def search_chats(request):
             },
             'last_message': last_message.content if last_message else '',
             'last_message_time': last_message.created.isoformat() if last_message else None,
-            'unread_count': chat.participant_info.get(request.user.id, {}).get('unread_count', 0)
+            'unread_count': 0  # Will be updated separately
         })
     
     return JsonResponse({'chats': results})
+
 
 @login_required
 def get_unread_chats_count(request):
@@ -721,8 +839,9 @@ def get_unread_chats_count(request):
             total_unread_chats += 1
     
     return JsonResponse({'unread_chats_count': total_unread_chats})
-@login_required
 
+
+@login_required
 def upload_chat_file(request, chat_id):
     """Handle file uploads in chat"""
     if request.method != 'POST':
@@ -737,6 +856,10 @@ def upload_chat_file(request, chat_id):
     file = request.FILES.get('file')
     if not file:
         return JsonResponse({'error': 'No file provided'}, status=400)
+    
+    # Check file size (max 10MB)
+    if file.size > 10 * 1024 * 1024:
+        return JsonResponse({'error': 'File too large. Max size 10MB.'}, status=400)
     
     # Get file info
     file_name = file.name
@@ -810,6 +933,7 @@ def upload_chat_file(request, chat_id):
         'message_type': message_type
     })
 
+
 @login_required
 def search_users(request):
     """Search for users to start a chat with"""
@@ -833,8 +957,10 @@ def search_users(request):
     return JsonResponse(data)
 
 
+# ============================================
+# CHAT THEME HELPER FUNCTION
+# ============================================
 
-# In chat_detail view, ensure default themes exist
 def ensure_default_themes():
     """Create default themes if they don't exist"""
     default_themes = [
@@ -852,9 +978,9 @@ def ensure_default_themes():
         # Ocean Blue Theme
         {
             'name': 'Ocean Blue',
-            'background_color': '#1e3c72',  # Deep ocean gradient start
-            'message_bubble_user': '#00b4d8',  # Bright cyan
-            'message_bubble_other': '#023e8a',  # Deep blue
+            'background_color': '#1e3c72',
+            'message_bubble_user': '#00b4d8',
+            'message_bubble_other': '#023e8a',
             'text_color': '#ffffff',
             'timestamp_color': '#caf0f8',
             'is_public': True
@@ -863,9 +989,9 @@ def ensure_default_themes():
         # Sunset Theme
         {
             'name': 'Sunset',
-            'background_color': '#ff6b6b',  # Coral
-            'message_bubble_user': '#feca57',  # Yellow
-            'message_bubble_other': '#ff9f4a',  # Orange
+            'background_color': '#ff6b6b',
+            'message_bubble_user': '#feca57',
+            'message_bubble_other': '#ff9f4a',
             'text_color': '#2d3436',
             'timestamp_color': '#636e72',
             'is_public': True
@@ -874,9 +1000,9 @@ def ensure_default_themes():
         # Forest Green Theme
         {
             'name': 'Forest',
-            'background_color': '#134e5e',  # Dark teal
-            'message_bubble_user': '#71c6dd',  # Light teal
-            'message_bubble_other': '#0b3b4b',  # Dark teal
+            'background_color': '#134e5e',
+            'message_bubble_user': '#71c6dd',
+            'message_bubble_other': '#0b3b4b',
             'text_color': '#e0f2fe',
             'timestamp_color': '#a5d8ff',
             'is_public': True
@@ -885,86 +1011,31 @@ def ensure_default_themes():
         # Midnight Purple Theme
         {
             'name': 'Midnight Purple',
-            'background_color': '#2c0e37',  # Deep purple
-            'message_bubble_user': '#ff6f91',  # Pink
-            'message_bubble_other': '#4a1d5e',  # Medium purple
+            'background_color': '#2c0e37',
+            'message_bubble_user': '#ff6f91',
+            'message_bubble_other': '#4a1d5e',
             'text_color': '#ffd3e0',
             'timestamp_color': '#ffb3c6',
-            'is_public': True
-        },
-        
-        # Coffee Theme
-        {
-            'name': 'Coffee',
-            'background_color': '#3e2723',  # Dark brown
-            'message_bubble_user': '#d7ccc8',  # Light beige
-            'message_bubble_other': '#5d4037',  # Medium brown
-            'text_color': '#efebe9',
-            'timestamp_color': '#bcaaa4',
-            'is_public': True
-        },
-        
-        # Mint Theme
-        {
-            'name': 'Fresh Mint',
-            'background_color': '#004d40',  # Dark mint
-            'message_bubble_user': '#80cbc4',  # Light mint
-            'message_bubble_other': '#009688',  # Medium mint
-            'text_color': '#e0f2f1',
-            'timestamp_color': '#b2dfdb',
-            'is_public': True
-        },
-        
-        # Lavender Theme
-        {
-            'name': 'Lavender Dreams',
-            'background_color': '#4a1d5e',  # Deep purple
-            'message_bubble_user': '#e1bee7',  # Light lavender
-            'message_bubble_other': '#7b1fa2',  # Medium purple
-            'text_color': '#f3e5f5',
-            'timestamp_color': '#ce93d8',
-            'is_public': True
-        },
-        
-        # Autumn Theme
-        {
-            'name': 'Autumn Leaves',
-            'background_color': '#8b4513',  # Saddle brown
-            'message_bubble_user': '#f4a460',  # Sandy brown
-            'message_bubble_other': '#cd853f',  # Peru
-            'text_color': '#fff8e7',
-            'timestamp_color': '#deb887',
             'is_public': True
         },
         
         # Cyberpunk Theme
         {
             'name': 'Cyberpunk',
-            'background_color': '#0d0221',  # Very dark purple
-            'message_bubble_user': '#00ff9f',  # Neon green
-            'message_bubble_other': '#b829fd',  # Neon purple
+            'background_color': '#0d0221',
+            'message_bubble_user': '#00ff9f',
+            'message_bubble_other': '#b829fd',
             'text_color': '#ffffff',
             'timestamp_color': '#c77dff',
-            'is_public': True
-        },
-        
-        # Sakura Theme
-        {
-            'name': 'Sakura',
-            'background_color': '#fce4ec',  # Light pink
-            'message_bubble_user': '#f06292',  # Medium pink
-            'message_bubble_other': '#f48fb1',  # Light pink
-            'text_color': '#4a4a4a',
-            'timestamp_color': '#9e9e9e',
             'is_public': True
         },
         
         # Matrix Theme
         {
             'name': 'Matrix',
-            'background_color': '#0f0f0f',  # Almost black
-            'message_bubble_user': '#00ff41',  # Matrix green
-            'message_bubble_other': '#008f11',  # Dark green
+            'background_color': '#0f0f0f',
+            'message_bubble_user': '#00ff41',
+            'message_bubble_other': '#008f11',
             'text_color': '#00ff41',
             'timestamp_color': '#008f11',
             'is_public': True
@@ -973,242 +1044,33 @@ def ensure_default_themes():
         # Royal Theme
         {
             'name': 'Royal',
-            'background_color': '#1a237e',  # Indigo
-            'message_bubble_user': '#ffd700',  # Gold
-            'message_bubble_other': '#0d47a1',  # Dark blue
+            'background_color': '#1a237e',
+            'message_bubble_user': '#ffd700',
+            'message_bubble_other': '#0d47a1',
             'text_color': '#ffffff',
             'timestamp_color': '#c5cae9',
-            'is_public': True
-        },
-        
-        # Rose Gold Theme
-        {
-            'name': 'Rose Gold',
-            'background_color': '#4a1c2c',  # Dark rose
-            'message_bubble_user': '#f7cac9',  # Rose gold
-            'message_bubble_other': '#b76e79',  # Rose gold dark
-            'text_color': '#fff0f3',
-            'timestamp_color': '#ffc2c7',
             'is_public': True
         },
         
         # Northern Lights Theme
         {
             'name': 'Northern Lights',
-            'background_color': '#0a1929',  # Dark blue
-            'message_bubble_user': '#64ffda',  # Teal
-            'message_bubble_other': '#2979ff',  # Blue
+            'background_color': '#0a1929',
+            'message_bubble_user': '#64ffda',
+            'message_bubble_other': '#2979ff',
             'text_color': '#e3f2fd',
             'timestamp_color': '#80deea',
-            'is_public': True
-        },
-        
-        # Desert Theme
-        {
-            'name': 'Desert Sands',
-            'background_color': '#cc9c6b',  # Sand
-            'message_bubble_user': '#f4e3b1',  # Light sand
-            'message_bubble_other': '#b77b4a',  # Dark sand
-            'text_color': '#3e2a1f',
-            'timestamp_color': '#5d3a1a',
             'is_public': True
         },
         
         # Galaxy Theme
         {
             'name': 'Galaxy',
-            'background_color': '#0b0c2b',  # Deep space
-            'message_bubble_user': '#9c4dca',  # Purple
-            'message_bubble_other': '#2d1b45',  # Dark purple
+            'background_color': '#0b0c2b',
+            'message_bubble_user': '#9c4dca',
+            'message_bubble_other': '#2d1b45',
             'text_color': '#ffffff',
             'timestamp_color': '#8b5cf6',
-            'is_public': True
-        },
-        
-        # Candy Theme
-        {
-            'name': 'Candy Shop',
-            'background_color': '#ffb6c1',  # Light pink
-            'message_bubble_user': '#ff69b4',  # Hot pink
-            'message_bubble_other': '#ff1493',  # Deep pink
-            'text_color': '#4a0e4e',
-            'timestamp_color': '#ff85a2',
-            'is_public': True
-        },
-        
-        # Monochrome Theme
-        {
-            'name': 'Monochrome',
-            'background_color': '#1e1e1e',  # Dark gray
-            'message_bubble_user': '#bdbdbd',  # Light gray
-            'message_bubble_other': '#616161',  # Medium gray
-            'text_color': '#ffffff',
-            'timestamp_color': '#9e9e9e',
-            'is_public': True
-        },
-        
-        # Ocean Sunset Theme
-        {
-            'name': 'Ocean Sunset',
-            'background_color': '#2b4162',  # Dark blue
-            'message_bubble_user': '#f4a261',  # Orange
-            'message_bubble_other': '#385f71',  # Blue-gray
-            'text_color': '#f8f0e5',
-            'timestamp_color': '#d4a5a5',
-            'is_public': True
-        },
-        
-        # Emerald Theme
-        {
-            'name': 'Emerald City',
-            'background_color': '#1a3b2e',  # Dark green
-            'message_bubble_user': '#50c878',  # Emerald
-            'message_bubble_other': '#2e7d32',  # Forest green
-            'text_color': '#e8f5e9',
-            'timestamp_color': '#a5d6a7',
-            'is_public': True
-        },
-        
-        # Twilight Theme
-        {
-            'name': 'Twilight',
-            'background_color': '#2c3a5e',  # Dark blue-purple
-            'message_bubble_user': '#c7b9ff',  # Light purple
-            'message_bubble_other': '#4a3f6b',  # Medium purple
-            'text_color': '#f0e6ff',
-            'timestamp_color': '#b1a7d4',
-            'is_public': True
-        },
-        
-        # Tropical Theme
-        {
-            'name': 'Tropical',
-            'background_color': '#05445E',  # Deep blue
-            'message_bubble_user': '#FADB67',  # Yellow
-            'message_bubble_other': '#189AB4',  # Medium blue
-            'text_color': '#FFFFFF',
-            'timestamp_color': '#D4F1F9',
-            'is_public': True
-        },
-        
-        # Halloween Theme
-        {
-            'name': 'Halloween',
-            'background_color': '#1c1107',  # Almost black
-            'message_bubble_user': '#f5821f',  # Pumpkin orange
-            'message_bubble_other': '#6f4e37',  # Brown
-            'text_color': '#ffb347',
-            'timestamp_color': '#ff8c42',
-            'is_public': True
-        },
-        
-        # Christmas Theme
-        {
-            'name': 'Christmas',
-            'background_color': '#0b3b2c',  # Dark green
-            'message_bubble_user': '#e63946',  # Red
-            'message_bubble_other': '#f4f1de',  # Cream
-            'text_color': '#ffffff',
-            'timestamp_color': '#b8b5a7',
-            'is_public': True
-        },
-        
-        # Neon Theme
-        {
-            'name': 'Neon Nights',
-            'background_color': '#0f0f1e',  # Dark blue-black
-            'message_bubble_user': '#ff00ff',  # Magenta
-            'message_bubble_other': '#00ffff',  # Cyan
-            'text_color': '#ffffff',
-            'timestamp_color': '#ffff00',
-            'is_public': True
-        },
-        
-        # Earth Theme
-        {
-            'name': 'Earth Tones',
-            'background_color': '#5d4a36',  # Brown
-            'message_bubble_user': '#bc8f4b',  # Bronze
-            'message_bubble_other': '#7d5535',  # Dark brown
-            'text_color': '#f2e3c9',
-            'timestamp_color': '#c4a484',
-            'is_public': True
-        },
-        
-        # Ocean Depth Theme
-        {
-            'name': 'Ocean Depth',
-            'background_color': '#03045e',  # Deep navy
-            'message_bubble_user': '#00b4d8',  # Light blue
-            'message_bubble_other': '#0077b6',  # Medium blue
-            'text_color': '#caf0f8',
-            'timestamp_color': '#90e0ef',
-            'is_public': True
-        },
-        
-        # Berry Theme
-        {
-            'name': 'Berry Blast',
-            'background_color': '#4a0e4e',  # Dark purple
-            'message_bubble_user': '#ff1493',  # Hot pink
-            'message_bubble_other': '#8a2be2',  # Blue violet
-            'text_color': '#ffc0cb',
-            'timestamp_color': '#dda0dd',
-            'is_public': True
-        },
-        
-        # Lavender Gray Theme
-        {
-            'name': 'Lavender Gray',
-            'background_color': '#383544',  # Dark lavender
-            'message_bubble_user': '#b39ddb',  # Light lavender
-            'message_bubble_other': '#5e548e',  # Medium lavender
-            'text_color': '#f3e5f5',
-            'timestamp_color': '#d1c4e9',
-            'is_public': True
-        },
-        
-        # Sunrise Theme
-        {
-            'name': 'Sunrise',
-            'background_color': '#f12711',  # Red
-            'message_bubble_user': '#f5af19',  # Orange
-            'message_bubble_other': '#f37335',  # Orange-red
-            'text_color': '#ffffff',
-            'timestamp_color': '#fdc830',
-            'is_public': True
-        },
-        
-        # Underwater Theme
-        {
-            'name': 'Underwater',
-            'background_color': '#073b4c',  # Deep teal
-            'message_bubble_user': '#06d6a0',  # Mint
-            'message_bubble_other': '#118ab2',  # Blue
-            'text_color': '#ffffff',
-            'timestamp_color': '#8ecae6',
-            'is_public': True
-        },
-        
-        # Romantic Theme
-        {
-            'name': 'Romantic',
-            'background_color': '#590d22',  # Deep burgundy
-            'message_bubble_user': '#ff758f',  # Pink
-            'message_bubble_other': '#c9184a',  # Red-pink
-            'text_color': '#fff0f3',
-            'timestamp_color': '#ffb3c6',
-            'is_public': True
-        },
-        
-        # Mint Chocolate Theme
-        {
-            'name': 'Mint Chocolate',
-            'background_color': '#3c280d',  # Brown
-            'message_bubble_user': '#98fb98',  # Mint green
-            'message_bubble_other': '#8b4513',  # Saddle brown
-            'text_color': '#f0fff0',
-            'timestamp_color': '#90ee90',
             'is_public': True
         }
     ]
