@@ -128,7 +128,7 @@
         <!-- Messages Link with Unread Badge -->
         <a href="{% url 'chats' %}" style="display: flex; align-items: center; justify-content: space-between;">
           <span>Messages</span>
-          <span id="nav-unread-badge" style="background: var(--color-main); color: var(--color-dark); padding: 0.2rem 0.6rem; border-radius: 1rem; font-size: 1.2rem; display: none;">0</span>
+          <span id="nav-unread-chats-badge" style="background: var(--color-main); color: var(--color-dark); padding: 0.2rem 0.6rem; border-radius: 1rem; font-size: 1.2rem; display: none;">0</span>
         </a>
         
         <a href="{% url 'update-user' %}">Settings</a>
@@ -163,7 +163,7 @@
 
     // Update navbar unread count for messages
     function updateNavUnreadCount() {
-        fetch('/api/unread-count/')
+        fetch('/api/unread-chats-count/')
             .then(res => res.json())
             .then(data => {
                 const badge = document.getElementById('nav-unread-badge');

@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 from django.contrib.auth import views as auth_views
+from django.views.generic.base import RedirectView
 
 urlpatterns = [
     path('login/', views.loginPage, name="login"),
@@ -58,4 +59,6 @@ urlpatterns = [
     path('api/unread-chats-count/', views.get_unread_chats_count, name='unread-chats-count'),
     path('api/search-users/', views.search_users, name='search-users'),
     path('chat/<int:chat_id>/upload/', views.upload_chat_file, name='upload-chat-file'),
+    path('favicon.ico', RedirectView.as_view(url='/static/images/avatar.svg', permanent=True)),
+    path('assets/favicon.ico', RedirectView.as_view(url='/static/images/avatar.svg', permanent=True)),
 ]

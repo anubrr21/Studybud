@@ -75,7 +75,7 @@ def send_verification_email(user, verification_code):
     <body>
         <div class="container">
             <div class="header">
-                <div class="logo">StudyBuddy</div>
+                <div class="logo">StudyBud</div>
                 <p style="color: #e5e5e5;">Welcome to the community!</p>
             </div>
             <p style="color: #e5e5e5;">Hello @{user.username},</p>
@@ -85,7 +85,7 @@ def send_verification_email(user, verification_code):
             <p style="color: #e5e5e5;">This code will expire in 24 hours.</p>
             <div class="footer">
                 <p>If you didn't request this, please ignore this email.</p>
-                <p>&copy; 2024 StudyBuddy. All rights reserved.</p>
+                <p>&copy; 2026 StudyBuddy. All rights reserved.</p>
             </div>
         </div>
     </body>
@@ -151,7 +151,7 @@ def send_password_reset_email(user, reset_link):
     <body>
         <div class="container">
             <div class="header">
-                <div class="logo">StudyBuddy</div>
+                <div class="logo">StudyBud</div>
                 <p style="color: #e5e5e5;">Password Reset Request</p>
             </div>
             <p style="color: #e5e5e5;">Hello @{user.username},</p>
@@ -162,7 +162,7 @@ def send_password_reset_email(user, reset_link):
             <p style="color: #e5e5e5;">If you didn't request this, please ignore this email.</p>
             <p style="color: #e5e5e5;">This link will expire in 24 hours.</p>
             <div class="footer">
-                <p>&copy; 2024 StudyBuddy. All rights reserved.</p>
+                <p>&copy; 2026 StudyBuddy. All rights reserved.</p>
             </div>
         </div>
     </body>

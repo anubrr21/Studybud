@@ -102,7 +102,9 @@ def registerPage(request):
                 user.email_verification_token = None
                 user.save()
                 login(request, user)
-                messages.success(request, f'Welcome, {user.username}!')
+                # Use session for welcome message instead of messages
+                request.session['welcome_message'] = f'Welcome, {user.username}!'
+                request.session['welcome_type'] = 'new'
                 return redirect('home')
             else:
                 # Real email - require verification
