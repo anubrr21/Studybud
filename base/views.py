@@ -22,6 +22,8 @@ from django.core.files.base import ContentFile
 from django.shortcuts import render
 import os
 import mimetypes
+import subprocess
+import sys
 from PIL import Image
 import io
 from .emails import send_verification_email, send_password_reset_email
@@ -1107,3 +1109,48 @@ def terms_of_service(request):
 def help_center(request):
     """Help Center page"""
     return render(request, 'base/help_center.html')
+
+def debug_brevo_api(request):
+    """Run the Brevo test script and show output"""
+    import os
+    import requests
+    
+    output = []
+    output.append("<h1>🔍 Brevo API Debug</h1>")
+    
+    api_key = os.environ.get('BREVO_SMTP_KEY')
+    
+    output.append(f"<h2>Environment Variable:</h2>")
+    output.append(f"<p>BREVO_SMTP_KEY: {'✅ Found' if api_key else '❌ NOT FOUND'}</p>")
+    
+    if api_key:
+        output.append(f"<p>Length: {len(api_key)} characters</p>")
+        output.append(f"<p>Starts with: {api_key[:20]}...</p>")
+        output.append(f"<p>Ends with: ...{api_key[-10:]}</p>")
+        output.append(f"<p>Format: {'✅ xsmtpsib prefix' if api_key.startswith('xsmtpsib') else '❌ wrong prefix'}</p>")
+        
+        # Test API
+        output.append("<h2>Testing API Connection:</h2>")
+        headers = {
+            "api-key": api_key.strip(),
+            "accept": "application/json"
+        }
+        
+        try:
+            response = requests.get(
+                "https://api.brevo.com/v3/account",
+                headers=headers,
+                timeout=10
+            )
+            
+            if response.status_code == 200:
+                output.append("<p style='color:green'>✅ API key is VALID!</p>")
+                data = response.json()
+                output.append(f"<p>Account: {data.get('email', 'N/A')}</p>")
+            else:
+                output.append(f"<p style='color:red'>❌ API key INVALID! Status: {response.status_code}</p>")
+                output.append(f"<p>Response: {response.text}</p>")
+        except Exception as e:
+            output.append(f"<p style='color:red'>❌ Error: {e}</p>")
+    
+    return HttpResponse(''.join(output))
