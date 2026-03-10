@@ -1,22 +1,16 @@
 from pathlib import Path
 import os
 import dj_database_url
-# Email Configuration with Resend
-import resend
 
-RESEND_API_KEY = os.environ.get('RESEND_API_KEY')
-
-# Configure Resend
-resend.api_key = RESEND_API_KEY
 
 # Email settings for Django
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.resend.com'
+EMAIL_HOST = 'smtp-relay.brevo.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'resend'  # This is the username for Resend SMTP
-EMAIL_HOST_PASSWORD = RESEND_API_KEY
-DEFAULT_FROM_EMAIL = 'no-reply_studybud@resend.dev'  # Use your verified domain later
+EMAIL_HOST_USER = 'a48b92001@smtp-brevo.com'  # This is the username for Resend SMTP
+EMAIL_HOST_PASSWORD = os.environ.get('BREVO_SMTP_KEY')
+DEFAULT_FROM_EMAIL = 'StudyBud <no-reply@studybud.com>'  # Use your verified domain later
 
 
 
