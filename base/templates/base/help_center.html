@@ -1,0 +1,332 @@
+{% extends 'main.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* Same base styles */
+    .static-page-container {
+        max-width: 800px;
+        margin: 3rem auto;
+        padding: 2rem;
+        background: var(--color-dark);
+        border-radius: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .static-page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .static-page-header h1 {
+        font-size: 3.2rem;
+        color: var(--color-main);
+        margin-bottom: 1rem;
+    }
+
+    .static-page-header p {
+        color: var(--color-light-gray);
+        font-size: 1.6rem;
+    }
+
+    .help-search {
+        background: var(--color-dark-medium);
+        border-radius: 4rem;
+        padding: 1rem 2rem;
+        margin: 2rem 0;
+        display: flex;
+        align-items: center;
+    }
+
+    .help-search input {
+        flex: 1;
+        background: none;
+        border: none;
+        color: var(--color-light);
+        font-size: 1.6rem;
+        padding: 1rem;
+    }
+
+    .help-search input:focus {
+        outline: none;
+    }
+
+    .help-search button {
+        background: var(--color-main);
+        border: none;
+        border-radius: 3rem;
+        padding: 1rem 2rem;
+        color: var(--color-dark);
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .faq-section {
+        margin: 3rem 0;
+    }
+
+    .faq-category {
+        margin-bottom: 2rem;
+    }
+
+    .faq-category h2 {
+        color: var(--color-main);
+        font-size: 2rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .faq-item {
+        background: var(--color-dark-medium);
+        border-radius: 1rem;
+        margin-bottom: 1rem;
+        overflow: hidden;
+    }
+
+    .faq-question {
+        padding: 1.5rem;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: 600;
+        color: var(--color-light);
+    }
+
+    .faq-question:hover {
+        background: var(--color-dark-light);
+    }
+
+    .faq-answer {
+        padding: 1.5rem;
+        background: var(--color-dark);
+        color: var(--color-light-gray);
+        display: none;
+        border-top: 1px solid var(--color-dark-light);
+    }
+
+    .faq-item.active .faq-answer {
+        display: block;
+    }
+
+    .contact-options {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 2rem;
+        margin: 3rem 0;
+    }
+
+    .contact-card {
+        background: var(--color-dark-medium);
+        padding: 2rem;
+        border-radius: 1rem;
+        text-align: center;
+    }
+
+    .contact-card svg {
+        width: 4rem;
+        height: 4rem;
+        fill: var(--color-main);
+        margin-bottom: 1rem;
+    }
+
+    .contact-card h3 {
+        color: var(--color-light);
+        margin-bottom: 0.5rem;
+    }
+
+    .contact-card p {
+        color: var(--color-light-gray);
+        margin-bottom: 1rem;
+    }
+
+    .contact-card a {
+        color: var(--color-main);
+        text-decoration: none;
+    }
+
+    .contact-card a:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="static-page-container">
+    <div class="static-page-header">
+        <h1>🆘 Help Center</h1>
+        <p>How can we help you today?</p>
+    </div>
+
+    <div class="help-search">
+        <input type="text" placeholder="Search for answers..." id="helpSearch">
+        <button onclick="searchHelp()">Search</button>
+    </div>
+
+    <div class="faq-section">
+        <h2 style="color: var(--color-main); margin-bottom: 2rem;">Frequently Asked Questions</h2>
+
+        <div class="faq-category">
+            <h2>📝 Account & Profile</h2>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    How do I create an account?
+                    <span>▼</span>
+                </div>
+                <div class="faq-answer">
+                    Click "Sign Up" in the top right, enter your email and username, and choose a password. You'll receive a verification code to confirm your email.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    How do I reset my password?
+                    <span>▼</span>
+                </div>
+                <div class="faq-answer">
+                    Click "Forgot Password?" on the login page. Enter your email, and we'll send you a reset link. Click it to create a new password.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    How do I change my profile picture?
+                    <span>▼</span>
+                </div>
+                <div class="faq-answer">
+                    Go to your profile, click "Edit Profile," then upload a new image. We recommend square images for best results.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-category">
+            <h2>💬 Rooms & Messaging</h2>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    How do I create a study room?
+                    <span>▼</span>
+                </div>
+                <div class="faq-answer">
+                    Click the "+ Create Room" button on the homepage. Choose a topic, name your room, and add a description. You're ready to go!
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    How do I send a private message?
+                    <span>▼</span>
+                </div>
+                <div class="faq-answer">
+                    Visit any user's profile and click the "Message" button. This starts a private chat between you two.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    Can I delete messages?
+                    <span>▼</span>
+                </div>
+                <div class="faq-answer">
+                    Yes! Hover over any message you sent to see delete options. You can delete for yourself or for everyone.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-category">
+            <h2>🔔 Notifications</h2>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    What notifications will I receive?
+                    <span>▼</span>
+                </div>
+                <div class="faq-answer">
+                    You'll be notified when someone follows you, likes your room, comments in your room, or sends you a message.
+                </div>
+            </div>
+
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    How do I mark notifications as read?
+                    <span>▼</span>
+                </div>
+                <div class="faq-answer">
+                    Click the bell icon to see notifications. Clicking any notification marks it as read. Use "Mark all as read" button.
+                </div>
+            </div>
+        </div>
+
+        <div class="faq-category">
+            <h2>🎨 Chat Themes</h2>
+            
+            <div class="faq-item">
+                <div class="faq-question" onclick="toggleFAQ(this)">
+                    How do I change chat theme?
+                    <span>▼</span>
+                </div>
+                <div class="faq-answer">
+                    In any private chat, click the theme button in the top right. Choose from 30+ beautiful themes!
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h2 style="color: var(--color-main); margin: 3rem 0 2rem;">📞 Still Need Help?</h2>
+
+    <div class="contact-options">
+        <div class="contact-card">
+            <svg viewBox="0 0 24 24">
+                <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2z"/>
+            </svg>
+            <h3>Email Support</h3>
+            <p>Get help within 24 hours</p>
+            <a href="mailto:support@studybud.com">support@studybud.com</a>
+        </div>
+
+        <div class="contact-card">
+            <svg viewBox="0 0 24 24">
+                <path d="M22.46 6c-.77.35-1.6.58-2.46.69.88-.53 1.56-1.37 1.88-2.38-.83.5-1.75.85-2.72 1.05C18.37 4.5 17.26 4 16 4c-2.35 0-4.27 1.92-4.27 4.29 0 .34.04.67.11.98-3.56-.18-6.73-1.89-8.84-4.48-.37.63-.58 1.37-.58 2.15 0 1.49.75 2.81 1.91 3.56-.71 0-1.37-.2-1.95-.5v.03c0 2.08 1.48 3.82 3.44 4.21a4.22 4.22 0 0 1-1.93.07 4.28 4.28 0 0 0 4 2.98 8.52 8.52 0 0 1-5.33 1.84c-.34 0-.68-.02-1.02-.06C3.9 20.29 6.16 21 8.58 21c7.88 0 12.21-6.54 12.21-12.21 0-.19 0-.37-.01-.56.84-.6 1.56-1.36 2.14-2.23z"/>
+            </svg>
+            <h3>Twitter</h3>
+            <p>Quick responses</p>
+            <a href="#">@studybuddy</a>
+        </div>
+
+        <div class="contact-card">
+            <svg viewBox="0 0 24 24">
+                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zM5.838 12a6.162 6.162 0 1 1 12.324 0 6.162 6.162 0 0 1-12.324 0zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm4.965-10.405a1.44 1.44 0 1 1 2.881.001 1.44 1.44 0 0 1-2.881-.001z"/>
+            </svg>
+            <h3>GitHub</h3>
+            <p>Report issues</p>
+            <a href="#">github.com/studybuddy</a>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 3rem;">
+        <p style="color: var(--color-light-gray);">Can't find what you're looking for?</p>
+        <a href="mailto:support@studybud.com" class="btn btn--main" style="margin-top: 1rem;">Contact Support</a>
+    </div>
+</div>
+
+<script>
+function toggleFAQ(element) {
+    const item = element.closest('.faq-item');
+    item.classList.toggle('active');
+}
+
+function searchHelp() {
+    const searchTerm = document.getElementById('helpSearch').value.toLowerCase();
+    const faqItems = document.querySelectorAll('.faq-item');
+    
+    faqItems.forEach(item => {
+        const question = item.querySelector('.faq-question').textContent.toLowerCase();
+        const answer = item.querySelector('.faq-answer').textContent.toLowerCase();
+        
+        if (question.includes(searchTerm) || answer.includes(searchTerm)) {
+            item.style.display = 'block';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+}
+</script>
+{% endblock %}

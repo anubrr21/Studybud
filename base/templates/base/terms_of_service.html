@@ -1,0 +1,133 @@
+{% extends 'main.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* Same styles as privacy policy */
+    .static-page-container {
+        max-width: 800px;
+        margin: 3rem auto;
+        padding: 2rem;
+        background: var(--color-dark);
+        border-radius: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .static-page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .static-page-header h1 {
+        font-size: 3.2rem;
+        color: var(--color-main);
+        margin-bottom: 1rem;
+    }
+
+    .static-page-header p {
+        color: var(--color-light-gray);
+        font-size: 1.4rem;
+    }
+
+    .static-page-content {
+        color: var(--color-light);
+        font-size: 1.6rem;
+        line-height: 1.8;
+    }
+
+    .static-page-content h2 {
+        color: var(--color-main);
+        font-size: 2.2rem;
+        margin: 2.5rem 0 1.5rem;
+    }
+
+    .static-page-content p {
+        margin-bottom: 1.5rem;
+    }
+
+    .static-page-content ul {
+        margin: 1.5rem 0;
+        padding-left: 2.5rem;
+    }
+
+    .static-page-content li {
+        margin-bottom: 0.8rem;
+    }
+
+    .static-page-content a {
+        color: var(--color-main);
+        text-decoration: none;
+    }
+
+    .static-page-content a:hover {
+        text-decoration: underline;
+    }
+
+    .last-updated {
+        color: var(--color-light-gray);
+        font-size: 1.3rem;
+        text-align: right;
+        margin-top: 3rem;
+        font-style: italic;
+    }
+</style>
+
+<div class="static-page-container">
+    <div class="static-page-header">
+        <h1>📜 Terms of Service</h1>
+        <p>Last Updated: March 2026</p>
+    </div>
+
+    <div class="static-page-content">
+        <h2>1. Acceptance of Terms</h2>
+        <p>By accessing or using StudyBuddy, you agree to be bound by these Terms. If you disagree with any part, you may not access the service.</p>
+
+        <h2>2. Eligibility</h2>
+        <p>You must be at least 13 years old to use StudyBuddy. By using our service, you represent that you meet this requirement.</p>
+
+        <h2>3. User Accounts</h2>
+        <ul>
+            <li>You're responsible for maintaining account security</li>
+            <li>Provide accurate information</li>
+            <li>One person - one account</li>
+            <li>Notify us of unauthorized use</li>
+        </ul>
+
+        <h2>4. User Conduct</h2>
+        <p>You agree not to:</p>
+        <ul>
+            <li>Harass, abuse, or harm others</li>
+            <li>Post inappropriate or offensive content</li>
+            <li>Impersonate others</li>
+            <li>Violate any laws</li>
+            <li>Spam or promote malicious content</li>
+            <li>Attempt to bypass security measures</li>
+        </ul>
+
+        <h2>5. Content Guidelines</h2>
+        <p>You retain ownership of your content. By posting, you grant us license to display and distribute it on our platform. We may remove content that violates these terms.</p>
+
+        <h2>6. Intellectual Property</h2>
+        <p>StudyBuddy's design, logo, and features are our property. You may not copy, modify, or distribute them without permission.</p>
+
+        <h2>7. Termination</h2>
+        <p>We may suspend or terminate accounts for violations. You may delete your account anytime.</p>
+
+        <h2>8. Disclaimer of Warranties</h2>
+        <p>Service is provided "as is" without warranties. We don't guarantee uninterrupted or error-free service.</p>
+
+        <h2>9. Limitation of Liability</h2>
+        <p>We're not liable for indirect damages. Our total liability is limited to what you paid us (which is usually $0).</p>
+
+        <h2>10. Changes to Terms</h2>
+        <p>We may update these terms. Continued use means you accept changes.</p>
+
+        <h2>11. Contact</h2>
+        <p>Questions? <a href="mailto:legal@studybud.com">legal@studybud.com</a></p>
+
+        <div class="last-updated">
+            Last Updated: March 10, 2026
+        </div>
+    </div>
+</div>
+{% endblock %}

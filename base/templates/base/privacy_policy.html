@@ -1,0 +1,142 @@
+{% extends 'main.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* Same styles as above */
+    .static-page-container {
+        max-width: 800px;
+        margin: 3rem auto;
+        padding: 2rem;
+        background: var(--color-dark);
+        border-radius: 2rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    .static-page-header {
+        text-align: center;
+        margin-bottom: 3rem;
+    }
+
+    .static-page-header h1 {
+        font-size: 3.2rem;
+        color: var(--color-main);
+        margin-bottom: 1rem;
+    }
+
+    .static-page-header p {
+        color: var(--color-light-gray);
+        font-size: 1.4rem;
+    }
+
+    .static-page-content {
+        color: var(--color-light);
+        font-size: 1.6rem;
+        line-height: 1.8;
+    }
+
+    .static-page-content h2 {
+        color: var(--color-main);
+        font-size: 2.2rem;
+        margin: 2.5rem 0 1.5rem;
+    }
+
+    .static-page-content p {
+        margin-bottom: 1.5rem;
+    }
+
+    .static-page-content ul {
+        margin: 1.5rem 0;
+        padding-left: 2.5rem;
+    }
+
+    .static-page-content li {
+        margin-bottom: 0.8rem;
+    }
+
+    .static-page-content a {
+        color: var(--color-main);
+        text-decoration: none;
+    }
+
+    .static-page-content a:hover {
+        text-decoration: underline;
+    }
+
+    .last-updated {
+        color: var(--color-light-gray);
+        font-size: 1.3rem;
+        text-align: right;
+        margin-top: 3rem;
+        font-style: italic;
+    }
+</style>
+
+<div class="static-page-container">
+    <div class="static-page-header">
+        <h1>🔒 Privacy Policy</h1>
+        <p>Last Updated: March 2026</p>
+    </div>
+
+    <div class="static-page-content">
+        <h2>1. Introduction</h2>
+        <p>Welcome to StudyBuddy. We respect your privacy and are committed to protecting your personal data. This privacy policy will inform you about how we look after your personal data when you visit our website and tell you about your privacy rights and how the law protects you.</p>
+
+        <h2>2. Data We Collect</h2>
+        <p>We may collect, use, store and transfer different kinds of personal data about you including:</p>
+        <ul>
+            <li><strong>Identity Data:</strong> username, email address</li>
+            <li><strong>Profile Data:</strong> bio, profile picture, study interests</li>
+            <li><strong>Content Data:</strong> messages, room discussions, study materials</li>
+            <li><strong>Technical Data:</strong> IP address, browser type, device information</li>
+        </ul>
+
+        <h2>3. How We Use Your Data</h2>
+        <p>We use your data to:</p>
+        <ul>
+            <li>Provide and improve our services</li>
+            <li>Connect you with study partners</li>
+            <li>Send important notifications</li>
+            <li>Ensure platform security</li>
+            <li>Analyze and improve user experience</li>
+        </ul>
+
+        <h2>4. Data Sharing</h2>
+        <p>We never sell your personal data. We may share anonymized data with:</p>
+        <ul>
+            <li>Service providers who help us run the platform</li>
+            <li>Law enforcement when required by law</li>
+            <li>Other users (only what you choose to share publicly)</li>
+        </ul>
+
+        <h2>5. Data Security</h2>
+        <p>We implement appropriate security measures including encryption, secure servers, and regular security audits. However, no method of transmission over the Internet is 100% secure.</p>
+
+        <h2>6. Your Rights</h2>
+        <p>You have the right to:</p>
+        <ul>
+            <li>Access your personal data</li>
+            <li>Correct inaccurate data</li>
+            <li>Request deletion of your data</li>
+            <li>Object to processing</li>
+            <li>Export your data</li>
+        </ul>
+
+        <h2>7. Cookies</h2>
+        <p>We use cookies to enhance your experience. You can control cookies through your browser settings.</p>
+
+        <h2>8. Children's Privacy</h2>
+        <p>Our service is not intended for users under 13. We do not knowingly collect data from children.</p>
+
+        <h2>9. Changes to Policy</h2>
+        <p>We may update this policy periodically. We'll notify you of significant changes.</p>
+
+        <h2>10. Contact Us</h2>
+        <p>For privacy concerns, contact us at: <a href="mailto:privacy@studybud.com">privacy@studybud.com</a></p>
+
+        <div class="last-updated">
+            Last Updated: March 10, 2026
+        </div>
+    </div>
+</div>
+{% endblock %}

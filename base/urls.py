@@ -61,4 +61,8 @@ urlpatterns = [
     path('chat/<int:chat_id>/upload/', views.upload_chat_file, name='upload-chat-file'),
     path('favicon.ico', RedirectView.as_view(url='/static/images/avatar.svg', permanent=True)),
     path('assets/favicon.ico', RedirectView.as_view(url='/static/images/avatar.svg', permanent=True)),
+    path('about-us/', views.about_us, name='about-us'),
+    path('privacy-policy/', views.privacy_policy, name='privacy-policy'),
+    path('terms-of-service/', views.terms_of_service, name='terms-of-service'),
+    path('help-center/', views.help_center, name='help-center'),
 ]

@@ -19,6 +19,7 @@ from .models import Room,Topic,Message,User,Notification
 from .forms import RoomForm,UserForm,MyUserCreationForm
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
+from django.shortcuts import render
 import os
 import mimetypes
 from PIL import Image
@@ -115,6 +116,11 @@ def registerPage(request):
                 verification_code = generate_verification_code()
                 user.email_verification_token = verification_code
                 user.save()
+
+                 
+                # Get site URL for email links
+                current_site = get_current_site(request)
+                site_url = f"{request.scheme}://{current_site.domain}"
                 
                 # Send verification email via Resend
                 result = send_verification_email(user, verification_code)
@@ -206,6 +212,10 @@ class CustomPasswordResetView(PasswordResetView):
             uid = urlsafe_base64_encode(force_bytes(user.pk))
             token = self.token_generator.make_token(user)
             reset_link = f"{self.request.scheme}://{get_current_site(self.request).domain}/password-reset-confirm/{uid}/{token}/"
+
+             # Get site URL for email links
+            current_site = get_current_site(self.request)
+            site_url = f"{self.request.scheme}://{current_site.domain}"
             
             # Send via Resend
             send_password_reset_email(user, reset_link)
@@ -1082,3 +1092,18 @@ def ensure_default_themes():
             name=theme_data['name'],
             defaults=theme_data
         )
+def about_us(request):
+    """About Us page"""
+    return render(request, 'base/about_us.html')
+
+def privacy_policy(request):
+    """Privacy Policy page"""
+    return render(request, 'base/privacy_policy.html')
+
+def terms_of_service(request):
+    """Terms of Service page"""
+    return render(request, 'base/terms_of_service.html')
+
+def help_center(request):
+    """Help Center page"""
+    return render(request, 'base/help_center.html')
