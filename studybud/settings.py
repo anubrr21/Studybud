@@ -12,6 +12,10 @@ EMAIL_HOST_USER = 'a48b92001@smtp-brevo.com'  # This is the username for Resend 
 EMAIL_HOST_PASSWORD = os.environ.get('BREVO_SMTP_KEY')
 DEFAULT_FROM_EMAIL = 'StudyBud <no-reply@studybud.com>'  # Use your verified domain later
 
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+
 
 
 
