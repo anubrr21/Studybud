@@ -16,7 +16,7 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'resend'  # This is the username for Resend SMTP
 EMAIL_HOST_PASSWORD = RESEND_API_KEY
-DEFAULT_FROM_EMAIL = 'onboarding@resend.dev'  # Use your verified domain later
+DEFAULT_FROM_EMAIL = 'no-reply_studybud@resend.dev'  # Use your verified domain later
 
 
 
