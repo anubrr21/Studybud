@@ -11,16 +11,34 @@ def send_email_brevo(subject, to_email, html_content, text_content=None):
     """
     Send email using Brevo's HTTP API (more reliable on Render)
     """
-    api_key = os.environ.get('BREVO_SMTP_KEY')  # Same key works for API
+    # Get API key from settings
+    api_key = getattr(settings, 'BREVO_API_KEY', None)
     
+    # If not in settings, try environment directly
     if not api_key:
-        logger.error("BREVO_SMTP_KEY not found in environment")
+        api_key = os.environ.get('BREVO_SMTP_KEY')
+    
+    # Debug output
+    print("="*50)
+    print("🔍 BREVO EMAIL DEBUG")
+    print("="*50)
+    print(f"To email: {to_email}")
+    print(f"Subject: {subject}")
+    print(f"API Key from settings: {'✅ Found' if getattr(settings, 'BREVO_API_KEY', None) else '❌ Not found'}")
+    print(f"API Key from env: {'✅ Found' if os.environ.get('BREVO_SMTP_KEY') else '❌ Not found'}")
+    
+    if api_key:
+        print(f"Key length: {len(api_key)} characters")
+        print(f"Key starts with: {api_key[:20]}...")
+        print(f"Key ends with: ...{api_key[-10:]}")
+    else:
+        print("❌ CRITICAL: No API key found anywhere!")
         return {'success': False, 'error': 'API key not configured'}
     
     # Prepare the email data
     data = {
         "sender": {
-            "name": "StudyBuddy",
+            "name": "StudyBud",
             "email": settings.DEFAULT_FROM_EMAIL
         },
         "to": [
@@ -38,17 +56,21 @@ def send_email_brevo(subject, to_email, html_content, text_content=None):
     
     headers = {
         "accept": "application/json",
-        "api-key": api_key,
+        "api-key": api_key.strip(),  # Remove any whitespace
         "content-type": "application/json"
     }
     
     try:
+        print("Sending request to Brevo API...")
         response = requests.post(
             "https://api.brevo.com/v3/smtp/email",
             json=data,
             headers=headers,
             timeout=30
         )
+        
+        print(f"Response status: {response.status_code}")
+        print(f"Response body: {response.text}")
         
         if response.status_code == 201:
             logger.info(f"Email sent successfully to {to_email}")
@@ -58,13 +80,13 @@ def send_email_brevo(subject, to_email, html_content, text_content=None):
             return {'success': False, 'error': f"API error: {response.status_code}"}
             
     except requests.exceptions.Timeout:
-        logger.error("Brevo API timeout")
+        print("❌ Timeout error")
         return {'success': False, 'error': 'Connection timeout'}
     except requests.exceptions.RequestException as e:
-        logger.error(f"Brevo request error: {e}")
+        print(f"❌ Request error: {e}")
         return {'success': False, 'error': str(e)}
     except Exception as e:
-        logger.error(f"Unexpected error: {e}")
+        print(f"❌ Unexpected error: {e}")
         return {'success': False, 'error': str(e)}
 
 def get_base_styles():

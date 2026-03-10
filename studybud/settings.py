@@ -4,15 +4,17 @@ import dj_database_url
 
 from django.urls import reverse_lazy
 
-# Email settings for Django
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp-relay.brevo.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'a48b92001@smtp-brevo.com'  # This is the username for Resend SMTP
-EMAIL_HOST_PASSWORD = os.environ.get('BREVO_SMTP_KEY')
-DEFAULT_FROM_EMAIL = 'StudyBud <no-reply@studybud.com>'  # Use your verified domain later
+BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Email settings for Django
+# SECURITY
+SECRET_KEY = os.environ.get('SECRET_KEY')
+DEBUG = os.getenv('DEBUG', 'False') == 'True'
+ALLOWED_HOSTS = ['*']
+
+# Brevo Email Configuration - API only (no SMTP)
+BREVO_API_KEY = os.environ.get('BREVO_SMTP_KEY')  # Same key works for API
+DEFAULT_FROM_EMAIL = 'StudyBud <no-reply@studybud.com>'
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
