@@ -2,26 +2,69 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.template.loader import render_to_string
 import logging
+import requests
+import os
 
 logger = logging.getLogger(__name__)
 
 def send_email_brevo(subject, to_email, html_content, text_content=None):
     """
-    Send email using Django's mail backend (now configured for Brevo)
+    Send email using Brevo's HTTP API (more reliable on Render)
     """
+    api_key = os.environ.get('BREVO_SMTP_KEY')  # Same key works for API
+    
+    if not api_key:
+        logger.error("BREVO_SMTP_KEY not found in environment")
+        return {'success': False, 'error': 'API key not configured'}
+    
+    # Prepare the email data
+    data = {
+        "sender": {
+            "name": "StudyBuddy",
+            "email": settings.DEFAULT_FROM_EMAIL
+        },
+        "to": [
+            {
+                "email": to_email,
+                "name": ""
+            }
+        ],
+        "subject": subject,
+        "htmlContent": html_content,
+    }
+    
+    if text_content:
+        data["textContent"] = text_content
+    
+    headers = {
+        "accept": "application/json",
+        "api-key": api_key,
+        "content-type": "application/json"
+    }
+    
     try:
-        send_mail(
-            subject=subject,
-            message=text_content or "",
-            from_email=settings.DEFAULT_FROM_EMAIL,
-            recipient_list=[to_email],
-            fail_silently=False,
-            html_message=html_content,
+        response = requests.post(
+            "https://api.brevo.com/v3/smtp/email",
+            json=data,
+            headers=headers,
+            timeout=30
         )
-        logger.info(f"Email sent successfully to {to_email}")
-        return {'success': True}
+        
+        if response.status_code == 201:
+            logger.info(f"Email sent successfully to {to_email}")
+            return {'success': True, 'id': response.json().get('messageId')}
+        else:
+            logger.error(f"Brevo API error: {response.status_code} - {response.text}")
+            return {'success': False, 'error': f"API error: {response.status_code}"}
+            
+    except requests.exceptions.Timeout:
+        logger.error("Brevo API timeout")
+        return {'success': False, 'error': 'Connection timeout'}
+    except requests.exceptions.RequestException as e:
+        logger.error(f"Brevo request error: {e}")
+        return {'success': False, 'error': str(e)}
     except Exception as e:
-        logger.error(f"Brevo email error: {e}")
+        logger.error(f"Unexpected error: {e}")
         return {'success': False, 'error': str(e)}
 
 def get_base_styles():

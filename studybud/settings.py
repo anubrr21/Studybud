@@ -2,6 +2,7 @@ from pathlib import Path
 import os
 import dj_database_url
 
+from django.urls import reverse_lazy
 
 # Email settings for Django
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
@@ -15,6 +16,7 @@ DEFAULT_FROM_EMAIL = 'StudyBud <no-reply@studybud.com>'  # Use your verified dom
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
+LOGIN_URL = reverse_lazy('login')
 
 
 
