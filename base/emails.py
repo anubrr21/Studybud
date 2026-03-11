@@ -455,10 +455,11 @@ def get_base_styles():
         }
     """
 
-def send_verification_email(user, verification_code):
+def send_verification_email(user, verification_code, site_url=None):
     """Send email verification code with stunning design"""
     if site_url is None:
-        site_url = "https://studybud-kxsv.onrender.com"  # Your default URL
+        site_url = "https://studybud-kxsv.onrender.com"  # Default fallback
+    
     subject = "✨ Verify Your StudyBud Account"
     
     html_content = f"""
@@ -543,11 +544,11 @@ def send_verification_email(user, verification_code):
             <!-- Footer -->
             <div class="email-footer">
                 <div class="footer-links">
-    <a href="{{ site_url }}/about-us/" class="footer-link">About Us</a>
-    <a href="{{ site_url }}/privacy-policy/" class="footer-link">Privacy Policy</a>
-    <a href="{{ site_url }}/terms-of-service/" class="footer-link">Terms of Service</a>
-    <a href="{{ site_url }}/help-center/" class="footer-link">Help Center</a>
-</div>
+                    <a href="{site_url}/about-us/" class="footer-link">About Us</a>
+                    <a href="{site_url}/privacy-policy/" class="footer-link">Privacy Policy</a>
+                    <a href="{site_url}/terms-of-service/" class="footer-link">Terms of Service</a>
+                    <a href="{site_url}/help-center/" class="footer-link">Help Center</a>
+                </div>
                 
                 <div class="social-links">
                     <a href="#" class="social-link">
@@ -569,8 +570,7 @@ def send_verification_email(user, verification_code):
                 
                 <div class="copyright">
                     © {verification_code[:4]} StudyBud. All rights reserved.
-                    <br>
-                     Study Rooms • Active Users • Support
+                    <br> Study Rooms • Active Users • Support
                 </div>
             </div>
         </div>
@@ -594,6 +594,8 @@ What's next?
 - Connect with study partners
 - Create your own groups
 
+Visit us at: {site_url}
+
 © 2026 StudyBud. All rights reserved.
     """
     
@@ -601,15 +603,14 @@ What's next?
         subject=subject,
         to_email=user.email,
         html_content=html_content,
-        text_content=text_content,
-        user=user
+        text_content=text_content
     )
 
-
-def send_password_reset_email(user, reset_link):
+def send_password_reset_email(user, reset_link, site_url=None):
     """Send password reset email with stunning design"""
     if site_url is None:
         site_url = "https://studybud-kxsv.onrender.com"
+    
     subject = "🔐 Reset Your StudyBud Password"
     
     html_content = f"""
@@ -691,11 +692,11 @@ def send_password_reset_email(user, reset_link):
             <!-- Footer -->
             <div class="email-footer">
                 <div class="footer-links">
-    <a href="{{ site_url }}/about-us/" class="footer-link">About Us</a>
-    <a href="{{ site_url }}/privacy-policy/" class="footer-link">Privacy Policy</a>
-    <a href="{{ site_url }}/terms-of-service/" class="footer-link">Terms of Service</a>
-    <a href="{{ site_url }}/help-center/" class="footer-link">Help Center</a>
-</div>
+                    <a href="{site_url}/about-us/" class="footer-link">About Us</a>
+                    <a href="{site_url}/privacy-policy/" class="footer-link">Privacy Policy</a>
+                    <a href="{site_url}/terms-of-service/" class="footer-link">Terms of Service</a>
+                    <a href="{site_url}/help-center/" class="footer-link">Help Center</a>
+                </div>
                 
                 <div class="social-links">
                     <a href="#" class="social-link">
@@ -717,8 +718,7 @@ def send_password_reset_email(user, reset_link):
                 
                 <div class="copyright">
                     © 2026 StudyBud. All rights reserved.
-                    <br>
-                    Secure • Reliable • Community-Driven
+                    <br> Secure • Reliable • Community-Driven
                 </div>
             </div>
         </div>
@@ -745,6 +745,8 @@ SECURITY TIPS:
 
 If you didn't request this, please ignore this email.
 
+Visit us at: {site_url}
+
 © 2026 StudyBud. All rights reserved.
     """
     
@@ -754,3 +756,4 @@ If you didn't request this, please ignore this email.
         html_content=html_content,
         text_content=text_content
     )
+
