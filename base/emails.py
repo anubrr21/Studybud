@@ -7,15 +7,20 @@ import os
 
 logger = logging.getLogger(__name__)
 
-def send_email_brevo_api(subject, to_email, html_content, text_content=None):
+def send_email_brevo_api(subject, to_email, html_content, text_content=None, user=None):
     """
     Send email using Brevo API (not SMTP) - This WILL work!
     """
-    api_key = os.environ.get('BREVO_API_KEY')  # New variable name
+    api_key = os.environ.get('BREVO_API_KEY')
     
     if not api_key:
         logger.error("BREVO_API_KEY not found in environment")
         return {'success': False, 'error': 'API key not configured'}
+    
+    # Get recipient name
+    recipient_name = "StudyBud User"
+    if user and hasattr(user, 'username'):
+        recipient_name = f"@{user.username}"
     
     # Prepare the email data
     data = {
@@ -26,7 +31,7 @@ def send_email_brevo_api(subject, to_email, html_content, text_content=None):
         "to": [
             {
                 "email": to_email,
-                "name": ""
+                "name": recipient_name  # <-- Now with a name!
             }
         ],
         "subject": subject,
@@ -43,6 +48,7 @@ def send_email_brevo_api(subject, to_email, html_content, text_content=None):
     }
     
     try:
+        print(f"Sending email to: {to_email} with name: {recipient_name}")
         response = requests.post(
             "https://api.brevo.com/v3/smtp/email",
             json=data,
@@ -451,6 +457,8 @@ def get_base_styles():
 
 def send_verification_email(user, verification_code):
     """Send email verification code with stunning design"""
+    if site_url is None:
+        site_url = "https://studybud-kxsv.onrender.com"  # Your default URL
     subject = "✨ Verify Your StudyBud Account"
     
     html_content = f"""
@@ -593,12 +601,15 @@ What's next?
         subject=subject,
         to_email=user.email,
         html_content=html_content,
-        text_content=text_content
+        text_content=text_content,
+        user=user
     )
 
 
 def send_password_reset_email(user, reset_link):
     """Send password reset email with stunning design"""
+    if site_url is None:
+        site_url = "https://studybud-kxsv.onrender.com"
     subject = "🔐 Reset Your StudyBud Password"
     
     html_content = f"""
@@ -737,7 +748,7 @@ If you didn't request this, please ignore this email.
 © 2026 StudyBud. All rights reserved.
     """
     
-    return send_email_brevo(
+    return send_email_brevo_api(
         subject=subject,
         to_email=user.email,
         html_content=html_content,
