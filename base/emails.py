@@ -7,39 +7,21 @@ import os
 
 logger = logging.getLogger(__name__)
 
-def send_email_brevo(subject, to_email, html_content, text_content=None):
+def send_email_brevo_api(subject, to_email, html_content, text_content=None):
     """
-    Send email using Brevo's HTTP API (more reliable on Render)
+    Send email using Brevo API (not SMTP) - This WILL work!
     """
-    # Get API key from settings
-    api_key = getattr(settings, 'BREVO_API_KEY', None)
+    api_key = os.environ.get('BREVO_API_KEY')  # New variable name
     
-    # If not in settings, try environment directly
     if not api_key:
-        api_key = os.environ.get('BREVO_SMTP_KEY')
-    
-    # Debug output
-    print("="*50)
-    print("🔍 BREVO EMAIL DEBUG")
-    print("="*50)
-    print(f"To email: {to_email}")
-    print(f"Subject: {subject}")
-    print(f"API Key from settings: {'✅ Found' if getattr(settings, 'BREVO_API_KEY', None) else '❌ Not found'}")
-    print(f"API Key from env: {'✅ Found' if os.environ.get('BREVO_SMTP_KEY') else '❌ Not found'}")
-    
-    if api_key:
-        print(f"Key length: {len(api_key)} characters")
-        print(f"Key starts with: {api_key[:20]}...")
-        print(f"Key ends with: ...{api_key[-10:]}")
-    else:
-        print("❌ CRITICAL: No API key found anywhere!")
+        logger.error("BREVO_API_KEY not found in environment")
         return {'success': False, 'error': 'API key not configured'}
     
     # Prepare the email data
     data = {
         "sender": {
             "name": "StudyBud",
-            "email": settings.DEFAULT_FROM_EMAIL
+            "email": "noreply@studybud.com"
         },
         "to": [
             {
@@ -56,12 +38,11 @@ def send_email_brevo(subject, to_email, html_content, text_content=None):
     
     headers = {
         "accept": "application/json",
-        "api-key": api_key.strip(),  # Remove any whitespace
+        "api-key": api_key.strip(),
         "content-type": "application/json"
     }
     
     try:
-        print("Sending request to Brevo API...")
         response = requests.post(
             "https://api.brevo.com/v3/smtp/email",
             json=data,
@@ -69,24 +50,15 @@ def send_email_brevo(subject, to_email, html_content, text_content=None):
             timeout=30
         )
         
-        print(f"Response status: {response.status_code}")
-        print(f"Response body: {response.text}")
-        
         if response.status_code == 201:
-            logger.info(f"Email sent successfully to {to_email}")
-            return {'success': True, 'id': response.json().get('messageId')}
+            logger.info(f"✅ Email sent successfully to {to_email}")
+            return {'success': True}
         else:
-            logger.error(f"Brevo API error: {response.status_code} - {response.text}")
+            logger.error(f"❌ Brevo API error: {response.status_code} - {response.text}")
             return {'success': False, 'error': f"API error: {response.status_code}"}
             
-    except requests.exceptions.Timeout:
-        print("❌ Timeout error")
-        return {'success': False, 'error': 'Connection timeout'}
-    except requests.exceptions.RequestException as e:
-        print(f"❌ Request error: {e}")
-        return {'success': False, 'error': str(e)}
     except Exception as e:
-        print(f"❌ Unexpected error: {e}")
+        logger.error(f"❌ Error: {e}")
         return {'success': False, 'error': str(e)}
 
 def get_base_styles():
@@ -617,7 +589,7 @@ What's next?
 © 2026 StudyBud. All rights reserved.
     """
     
-    return send_email_brevo(
+    return send_email_brevo_api(
         subject=subject,
         to_email=user.email,
         html_content=html_content,
