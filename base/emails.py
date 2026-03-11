@@ -26,7 +26,7 @@ def send_email_brevo_api(subject, to_email, html_content, text_content=None, use
     data = {
         "sender": {
             "name": "StudyBud",
-            "email": "noreply@studybud.com"
+            "email": "anubratabhattacharyya81@gmail.com"
         },
         "to": [
             {
