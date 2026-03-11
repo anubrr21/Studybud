@@ -75,6 +75,8 @@ def logoutUser(request):
      return redirect('home')
 
 
+
+
 def registerPage(request):
     page = 'register'
     form = MyUserCreationForm()
@@ -89,43 +91,36 @@ def registerPage(request):
             user.username = user.username.lower()
             user.email = user.email.lower()
             
-            # List of dummy email addresses that should be auto-verified
+            # List of dummy email addresses
             dummy_emails = [
                 'anubrata@gmail.com',
                 'ashtu@gmail.com', 
                 'annnnyyz@gmail.com',
                 'anuyz@gmail.com',
-                # Add any other dummy emails you've used
             ]
             
-            # Check if it's a dummy email
             if user.email in dummy_emails:
-                # Auto-verify dummy accounts
                 user.email_verified = True
                 user.email_verification_token = None
                 user.save()
                 login(request, user)
-                # Use session for welcome message instead of messages
                 request.session['welcome_message'] = f'Welcome, {user.username}!'
                 request.session['welcome_type'] = 'new'
                 return redirect('home')
             else:
-                # Real email - require verification
                 user.email_verified = False
                 user.save()
                 
-                # Generate verification code
                 verification_code = generate_verification_code()
                 user.email_verification_token = verification_code
                 user.save()
-
-                 
-                # Get site URL for email links
+                
+                # Get the site URL for email links
                 current_site = get_current_site(request)
                 site_url = f"{request.scheme}://{current_site.domain}"
                 
-                # Send verification email via Resend
-                result = send_verification_email(user, verification_code)
+                # Pass site_url to the email function
+                result = send_verification_email(user, verification_code, site_url)
                 
                 if result['success']:
                     messages.success(request, 'Account created! Please check your email for verification code.')
@@ -134,14 +129,12 @@ def registerPage(request):
                 
                 return redirect('verify-email', user_id=user.id)
         else:
-            # Form is invalid - show errors
             for field, errors in form.errors.items():
                 for error in errors:
                     messages.error(request, f'{error}')
     
     context = {'form': form, 'page': page}
     return render(request, 'base/login_register.html', context)
-
 
 def verify_email(request, user_id):
     try:
