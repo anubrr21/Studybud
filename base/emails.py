@@ -68,182 +68,248 @@ def send_email_brevo_api(subject, to_email, html_content, text_content=None, use
         return {'success': False, 'error': str(e)}
 
 def get_base_styles():
-    """Return email-client-friendly CSS styles"""
+    """Return email-client-friendly CSS styles with stunning design"""
     return """
         /* Base Styles - Email Safe */
         body {
             font-family: 'DM Sans', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            background-color: #1a1a2a;
+            background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2a 100%);
             margin: 0;
-            padding: 0;
+            padding: 20px;
         }
         
+        /* Main Container with 3D Border Effect */
         .email-container {
             max-width: 600px;
             margin: 0 auto;
             background-color: #2d2d39;
-            border-radius: 24px;
+            border-radius: 32px;
             overflow: hidden;
-            border: 1px solid #51546e;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 0 1px #71c6dd inset;
+            border: 1px solid rgba(113, 198, 221, 0.3);
         }
         
-        /* Header */
+        /* Animated Gradient Header */
         .email-header {
-            background-color: #71c6dd;
-            padding: 40px 30px;
+            background: linear-gradient(145deg, #71c6dd 0%, #4fa3b8 50%, #2d7a8c 100%);
+            padding: 45px 30px;
             text-align: center;
-            border-bottom: 3px solid #ffffff;
+            position: relative;
+            border-bottom: 4px solid #ffffff;
         }
         
+        /* Glowing Orb Animation */
+        .email-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%);
+            animation: rotate 15s linear infinite;
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Logo Container with 3D Effect */
         .logo-container {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 15px;
             margin-bottom: 15px;
+            position: relative;
+            z-index: 2;
         }
         
         .logo-icon {
-            width: 60px;
-            height: 60px;
-            background-color: #2d2d39;
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(145deg, #2d2d39 0%, #1a1a2a 100%);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            border: 3px solid #ffffff;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4), 0 0 0 3px #ffffff;
+            border: 2px solid #71c6dd;
         }
         
         .logo-icon svg {
-            width: 35px;
-            height: 35px;
+            width: 40px;
+            height: 40px;
             fill: #71c6dd;
+            filter: drop-shadow(0 0 5px rgba(113,198,221,0.8));
         }
         
+        /* Stylized Text Logo */
         .logo-text {
-            font-size: 42px;
-            font-weight: 800;
-            color: #1a1a2a;
+            font-size: 48px;
+            font-weight: 900;
+            background: linear-gradient(145deg, #ffffff 0%, #f0f0f0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 3px 3px 0 #1a1a2a, 5px 5px 10px rgba(0,0,0,0.4);
+            letter-spacing: -1px;
+        }
+        
+        .logo-text span {
+            background: linear-gradient(145deg, #71c6dd 0%, #4fa3b8 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         
         .header-tagline {
             color: #1a1a2a;
             font-size: 16px;
-            font-weight: 600;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 2px;
-            background-color: rgba(255,255,255,0.3);
+            letter-spacing: 3px;
+            background-color: rgba(255,255,255,0.95);
             display: inline-block;
-            padding: 8px 20px;
+            padding: 10px 25px;
             border-radius: 50px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            border: 1px solid #ffffff;
+            position: relative;
+            z-index: 2;
         }
         
-        /* Content */
+        /* Content Area with Glass Effect */
         .email-content {
-            padding: 40px 35px;
-            background-color: #2d2d39;
+            padding: 45px 35px;
+            background: linear-gradient(145deg, #2d2d39 0%, #252533 100%);
         }
         
         .greeting {
-            font-size: 28px;
-            font-weight: 700;
+            font-size: 30px;
+            font-weight: 800;
             color: #ffffff;
             margin-bottom: 20px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
         }
         
         .greeting-emoji {
-            font-size: 32px;
+            font-size: 36px;
+            background: rgba(113,198,221,0.2);
+            padding: 8px;
+            border-radius: 50px;
         }
         
         .message-text {
-            color: #b2bdbd;
+            color: #e0e0e0;
             font-size: 16px;
-            line-height: 1.6;
+            line-height: 1.8;
             margin-bottom: 30px;
+            border-left: 4px solid #71c6dd;
+            padding-left: 20px;
+            background: rgba(113,198,221,0.05);
+            padding: 20px;
+            border-radius: 0 20px 20px 0;
         }
         
-        /* Verification Code Box */
+        /* Enhanced Verification Code Box with Glow */
         .code-container {
-            background-color: #1a1a2a;
-            border-radius: 20px;
-            padding: 30px;
-            margin: 30px 0;
+            background: linear-gradient(145deg, #1a1a2a 0%, #23233a 100%);
+            border-radius: 30px;
+            padding: 35px;
+            margin: 35px 0;
             text-align: center;
-            border: 2px solid #71c6dd;
+            border: 3px solid #71c6dd;
+            box-shadow: 0 15px 30px rgba(113, 198, 221, 0.3), 0 0 0 2px #ffffff inset;
         }
         
         .code-label {
             color: #ffffff;
             font-size: 14px;
             text-transform: uppercase;
-            letter-spacing: 3px;
+            letter-spacing: 4px;
             margin-bottom: 15px;
+            font-weight: 600;
         }
         
         .verification-code {
-            font-size: 48px;
-            font-weight: 800;
+            font-size: 56px;
+            font-weight: 900;
             color: #71c6dd;
-            letter-spacing: 8px;
-            margin: 10px 0;
+            letter-spacing: 10px;
+            margin: 15px 0;
             font-family: 'Courier New', monospace;
+            text-shadow: 0 0 20px rgba(113,198,221,0.8);
+            background: rgba(255,255,255,0.1);
+            padding: 15px;
+            border-radius: 20px;
+            display: inline-block;
         }
         
         .code-expiry {
             color: #b2bdbd;
-            font-size: 13px;
-            margin-top: 10px;
+            font-size: 14px;
+            margin-top: 15px;
+            font-weight: 500;
         }
         
-        /* Features Section */
+        /* Features Section - Improved Layout */
         .features-section {
             display: flex;
             justify-content: space-between;
             gap: 15px;
             margin: 40px 0;
             padding: 25px 0;
-            border-top: 2px solid #51546e;
-            border-bottom: 2px solid #51546e;
         }
         
         .feature-item {
             text-align: center;
             flex: 1;
+            background: rgba(26, 26, 42, 0.8);
+            padding: 20px 10px;
+            border-radius: 20px;
+            border: 1px solid rgba(113,198,221,0.3);
+            backdrop-filter: blur(5px);
         }
         
         .feature-icon {
-            font-size: 28px;
-            margin-bottom: 8px;
+            font-size: 32px;
+            margin-bottom: 10px;
+            display: block;
         }
         
         .feature-text {
             color: #ffffff;
             font-size: 13px;
-            font-weight: 600;
+            font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1px;
+            word-break: break-word;
+            line-height: 1.4;
         }
         
-        /* Info Box */
+        /* Info Box with 3D Effect */
         .info-box {
-            background-color: #1a1a2a;
-            border-radius: 20px;
-            padding: 30px;
-            margin: 30px 0;
-            border: 1px solid #51546e;
+            background: linear-gradient(145deg, #1a1a2a 0%, #202035 100%);
+            border-radius: 25px;
+            padding: 35px;
+            margin: 35px 0;
+            border: 1px solid #71c6dd;
+            box-shadow: 0 10px 25px -5px rgba(113,198,221,0.3);
         }
         
         .info-title {
             color: #71c6dd;
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 20px;
+            font-size: 22px;
+            font-weight: 800;
+            margin-bottom: 25px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            border-bottom: 2px solid rgba(113,198,221,0.3);
+            padding-bottom: 15px;
         }
         
         .info-list {
@@ -253,19 +319,21 @@ def get_base_styles():
         }
         
         .info-list li {
-            color: #b2bdbd;
+            color: #e0e0e0;
             font-size: 15px;
-            margin-bottom: 15px;
-            padding-left: 25px;
+            margin-bottom: 18px;
+            padding-left: 30px;
             position: relative;
+            line-height: 1.5;
         }
         
         .info-list li::before {
-            content: '✓';
+            content: '✨';
             color: #71c6dd;
             position: absolute;
             left: 0;
             font-weight: bold;
+            font-size: 18px;
         }
         
         /* Quote */
@@ -274,17 +342,19 @@ def get_base_styles():
             font-size: 18px;
             font-style: italic;
             text-align: center;
-            padding: 25px 0;
-            border-top: 1px solid #51546e;
+            padding: 25px;
             margin-top: 30px;
+            background: rgba(113,198,221,0.1);
+            border-radius: 50px;
+            border: 1px dashed #71c6dd;
         }
         
-        /* Footer */
+        /* Enhanced Footer */
         .email-footer {
-            background-color: #1a1a2a;
-            padding: 40px 35px;
+            background: linear-gradient(145deg, #1a1a2a 0%, #151525 100%);
+            padding: 45px 35px;
             text-align: center;
-            border-top: 3px solid #71c6dd;
+            border-top: 4px solid #71c6dd;
         }
         
         .footer-links {
@@ -299,71 +369,161 @@ def get_base_styles():
             color: #b2bdbd;
             text-decoration: none;
             font-size: 14px;
+            padding: 5px 10px;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.05);
+            border-radius: 30px;
         }
         
         .footer-link:hover {
             color: #71c6dd;
-            text-decoration: underline;
+            background: rgba(113,198,221,0.1);
         }
         
         .social-links {
             display: flex;
             justify-content: center;
             gap: 15px;
-            margin: 25px 0;
+            margin: 30px 0;
         }
         
         .social-link {
-            width: 40px;
-            height: 40px;
-            background-color: #2d2d39;
+            width: 45px;
+            height: 45px;
+            background: linear-gradient(145deg, #2d2d39 0%, #1a1a2a 100%);
             border-radius: 50%;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            border: 1px solid #71c6dd;
+            border: 2px solid #71c6dd;
+            transition: all 0.3s ease;
+        }
+        
+        .social-link:hover {
+            transform: translateY(-5px);
+            background: #71c6dd;
+        }
+        
+        .social-link:hover svg {
+            fill: #1a1a2a;
         }
         
         .social-link svg {
-            width: 20px;
-            height: 20px;
+            width: 22px;
+            height: 22px;
             fill: #71c6dd;
         }
         
         .copyright {
             color: #808080;
             font-size: 13px;
-            margin-top: 25px;
-            padding-top: 20px;
-            border-top: 1px solid #51546e;
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 2px solid rgba(113,198,221,0.2);
+            line-height: 1.8;
         }
         
         .copyright span {
             color: #71c6dd;
-            font-weight: 600;
+            font-weight: 700;
+            font-size: 14px;
+            display: inline-block;
+            margin: 0 5px;
+        }
+        
+        .stats-row {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin: 15px 0;
+        }
+        
+        .stat-item {
+            background: rgba(113,198,221,0.1);
+            padding: 8px 16px;
+            border-radius: 50px;
+            border: 1px solid rgba(113,198,221,0.3);
+            font-size: 13px;
+            color: #ffffff;
+        }
+        
+        .stat-item span {
+            color: #71c6dd;
+            font-weight: 700;
+            margin-right: 5px;
         }
         
         /* Reset Button */
         .reset-button {
             display: inline-block;
-            padding: 15px 40px;
-            background-color: #71c6dd;
+            padding: 18px 45px;
+            background: linear-gradient(145deg, #71c6dd 0%, #4fa3b8 100%);
             color: #1a1a2a;
             text-decoration: none;
-            border-radius: 50px;
-            font-weight: 700;
-            font-size: 16px;
+            border-radius: 60px;
+            font-weight: 800;
+            font-size: 18px;
+            letter-spacing: 1px;
+            box-shadow: 0 10px 20px rgba(113,198,221,0.4);
             border: 2px solid #ffffff;
+            transition: all 0.3s ease;
+        }
+        
+        .reset-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 30px rgba(113,198,221,0.6);
+        }
+        
+        /* Warning Box */
+        .warning-box {
+            background-color: rgba(252, 75, 11, 0.1);
+            border-radius: 20px;
+            padding: 25px;
+            margin: 30px 0;
+            border-left: 5px solid #fc4b0b;
+        }
+        
+        .warning-content {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .warning-icon {
+            font-size: 28px;
+        }
+        
+        .warning-title {
+            color: #fc4b0b;
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 5px;
+        }
+        
+        .warning-text {
+            color: #b2bdbd;
+            font-size: 14px;
+            line-height: 1.6;
         }
         
         /* Mobile Responsive */
         @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            
             .email-header {
                 padding: 30px 20px;
             }
             
             .logo-text {
-                font-size: 32px;
+                font-size: 36px;
+            }
+            
+            .logo-icon {
+                width: 55px;
+                height: 55px;
             }
             
             .email-content {
@@ -375,24 +535,48 @@ def get_base_styles():
             }
             
             .verification-code {
-                font-size: 36px;
-                letter-spacing: 5px;
+                font-size: 40px;
+                letter-spacing: 6px;
             }
             
             .features-section {
                 flex-direction: column;
-                gap: 20px;
+                gap: 12px;
+            }
+            
+            .feature-item {
+                width: 100%;
+            }
+            
+            .feature-text {
+                font-size: 14px;
             }
             
             .footer-links {
                 flex-direction: column;
-                gap: 15px;
+                gap: 10px;
+            }
+            
+            .footer-link {
+                width: 100%;
+                text-align: center;
+                padding: 8px;
+            }
+            
+            .stats-row {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .warning-content {
+                flex-direction: column;
+                text-align: center;
             }
         }
     """
 
 def send_verification_email(user, verification_code, site_url=None):
-    """Send email verification code with email-friendly design"""
+    """Send email verification code with stunning email-friendly design"""
     if site_url is None:
         site_url = "https://studybud-kxsv.onrender.com"
     
@@ -416,11 +600,14 @@ def send_verification_email(user, verification_code, site_url=None):
                     <div class="logo-icon">
                         <svg viewBox="0 0 24 24">
                             <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+                            <circle cx="12" cy="12" r="3" fill="#71c6dd"/>
                         </svg>
                     </div>
-                    <div class="logo-text">StudyBud</div>
+                    <div class="logo-text">
+                        Study<span>Bud</span>
+                    </div>
                 </div>
-                <div class="header-tagline">Your Learning Journey Starts Here</div>
+                <div class="header-tagline">✨ Your Learning Journey Starts Here ✨</div>
             </div>
             
             <!-- Content -->
@@ -443,19 +630,19 @@ def send_verification_email(user, verification_code, site_url=None):
                     <div class="code-expiry">⏰ This code will expire in 24 hours</div>
                 </div>
                 
-                <!-- Features Section -->
+                <!-- Features Section - Now with better wrapping -->
                 <div class="features-section">
                     <div class="feature-item">
-                        <div class="feature-icon">📚</div>
-                        <div class="feature-text">Study Rooms</div>
+                        <span class="feature-icon">📚</span>
+                        <div class="feature-text">Study<br>Rooms</div>
                     </div>
                     <div class="feature-item">
-                        <div class="feature-icon">💬</div>
-                        <div class="feature-text">Live Chat</div>
+                        <span class="feature-icon">💬</span>
+                        <div class="feature-text">Live<br>Chat</div>
                     </div>
                     <div class="feature-item">
-                        <div class="feature-icon">🤝</div>
-                        <div class="feature-text">Find Partners</div>
+                        <span class="feature-icon">🤝</span>
+                        <div class="feature-text">Find<br>Partners</div>
                     </div>
                 </div>
                 
@@ -482,9 +669,9 @@ def send_verification_email(user, verification_code, site_url=None):
             <div class="email-footer">
                 <div class="footer-links">
                     <a href="{site_url}/about-us/" class="footer-link">About Us</a>
-                    <a href="{site_url}/privacy-policy/" class="footer-link">Privacy Policy</a>
-                    <a href="{site_url}/terms-of-service/" class="footer-link">Terms of Service</a>
-                    <a href="{site_url}/help-center/" class="footer-link">Help Center</a>
+                    <a href="{site_url}/privacy-policy/" class="footer-link">Privacy</a>
+                    <a href="{site_url}/terms-of-service/" class="footer-link">Terms</a>
+                    <a href="{site_url}/help-center/" class="footer-link">Help</a>
                 </div>
                 
                 <div class="social-links">
@@ -505,10 +692,14 @@ def send_verification_email(user, verification_code, site_url=None):
                     </a>
                 </div>
                 
+                <div class="stats-row">
+                    <div class="stat-item"><span>📚</span> 300+ Study Rooms</div>
+                    <div class="stat-item"><span>👥</span> 10K+ Active Users</div>
+                    <div class="stat-item"><span>⚡</span> 24/7 Support</div>
+                </div>
+                
                 <div class="copyright">
                     <span>© {verification_code[:4]} StudyBud.</span> All rights reserved.
-                    <br>
-                    <span>✨ 300+ Study Rooms</span> • <span>👥 10K+ Active Users</span> • <span>⚡ 24/7 Support</span>
                 </div>
             </div>
         </div>
@@ -546,7 +737,7 @@ Visit us at: {site_url}
     )
 
 def send_password_reset_email(user, reset_link, site_url=None):
-    """Send password reset email with email-friendly design"""
+    """Send password reset email with stunning email-friendly design"""
     if site_url is None:
         site_url = "https://studybud-kxsv.onrender.com"
     
@@ -570,11 +761,14 @@ def send_password_reset_email(user, reset_link, site_url=None):
                     <div class="logo-icon">
                         <svg viewBox="0 0 24 24">
                             <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
+                            <circle cx="12" cy="12" r="3" fill="#71c6dd"/>
                         </svg>
                     </div>
-                    <div class="logo-text">StudyBud</div>
+                    <div class="logo-text">
+                        Study<span>Bud</span>
+                    </div>
                 </div>
-                <div class="header-tagline">Your Learning Journey Starts Here</div>
+                <div class="header-tagline">✨ Your Learning Journey Starts Here ✨</div>
             </div>
             
             <!-- Content -->
@@ -614,15 +808,15 @@ def send_password_reset_email(user, reset_link, site_url=None):
                 </div>
                 
                 <!-- Warning Box -->
-                <div style="background-color: rgba(252, 75, 11, 0.1); border-radius: 16px; padding: 20px; margin: 30px 0; border-left: 4px solid #fc4b0b;">
-                    <div style="display: flex; align-items: center; gap: 15px;">
-                        <span style="font-size: 24px;">⚠️</span>
+                <div class="warning-box">
+                    <div class="warning-content">
+                        <span class="warning-icon">⚠️</span>
                         <div>
-                            <strong style="color: #fc4b0b; font-size: 15px;">Didn't request this?</strong>
-                            <p style="color: #b2bdbd; font-size: 14px; margin-top: 5px;">
+                            <div class="warning-title">Didn't request this?</div>
+                            <div class="warning-text">
                                 If you didn't request a password reset, please ignore this email 
                                 or contact support if you're concerned about your account security.
-                            </p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -632,9 +826,9 @@ def send_password_reset_email(user, reset_link, site_url=None):
             <div class="email-footer">
                 <div class="footer-links">
                     <a href="{site_url}/about-us/" class="footer-link">About Us</a>
-                    <a href="{site_url}/privacy-policy/" class="footer-link">Privacy Policy</a>
-                    <a href="{site_url}/terms-of-service/" class="footer-link">Terms of Service</a>
-                    <a href="{site_url}/help-center/" class="footer-link">Help Center</a>
+                    <a href="{site_url}/privacy-policy/" class="footer-link">Privacy</a>
+                    <a href="{site_url}/terms-of-service/" class="footer-link">Terms</a>
+                    <a href="{site_url}/help-center/" class="footer-link">Help</a>
                 </div>
                 
                 <div class="social-links">
@@ -655,10 +849,14 @@ def send_password_reset_email(user, reset_link, site_url=None):
                     </a>
                 </div>
                 
+                <div class="stats-row">
+                    <div class="stat-item"><span>🔐</span> Secure</div>
+                    <div class="stat-item"><span>⚡</span> Reliable</div>
+                    <div class="stat-item"><span>🌍</span> Community-Driven</div>
+                </div>
+                
                 <div class="copyright">
                     <span>© 2026 StudyBud.</span> All rights reserved.
-                    <br>
-                    <span>🔐 Secure</span> • <span>⚡ Reliable</span> • <span>🌍 Community-Driven</span>
                 </div>
             </div>
         </div>
