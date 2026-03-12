@@ -102,34 +102,26 @@
 
       </div>
 
-      <!-- User Profile -->
-      <!-- In the header__user section -->
-<div class="header__user">
-    <a href="{% url 'update-user' %}">
-        <div class="avatar avatar--medium active">
+      <!-- User Profile - FIXED: Removed the Study link that was causing dropdown issues -->
+      <div class="header__user">
+        <a href="{% url 'update-user' %}">
+          <div class="avatar avatar--medium active">
             <img src="{{ request.user.avatar_url }}" />
-        </div>
-        <p>
+          </div>
+          <p>
             {{ request.user.username }}
             <span>@{{ request.user.username }}</span>
-        </p>
-    </a>
-    
-    <!-- Quick Study Status -->
-    <div style="margin-left: 1rem; padding-left: 1rem; border-left: 1px solid var(--color-dark-light);">
-        <a href="{% url 'study-planner' %}" style="color: var(--color-main); text-decoration: none;">
-            📚 Study
+          </p>
         </a>
-    </div>
-    
-    <button class="dropdown-button">
-        <svg width="32" height="32" viewBox="0 0 32 32">
+        
+        <button class="dropdown-button">
+          <svg width="32" height="32" viewBox="0 0 32 32">
             <path d="M16 21l-13-13h-3l16 16 16-16h-3l-13 13z"></path>
-        </svg>
-    </button>
-</div>
+          </svg>
+        </button>
+      </div>
 
-      <!-- Dropdown Menu with Messages Link -->
+      <!-- Dropdown Menu - FIXED: Study Planner now properly inside dropdown -->
       <div class="dropdown-menu">
         <a href="{% url 'user-profile' request.user.id %}">Profile</a>
         
@@ -138,9 +130,11 @@
           <span>Messages</span>
           <span id="nav-unread-chats-badge" style="background: var(--color-main); color: var(--color-dark); padding: 0.2rem 0.6rem; border-radius: 1rem; font-size: 1.2rem; display: none;">0</span>
         </a>
-         <a href="{% url 'study-planner' %}" style="display: flex; align-items: center; gap: 0.5rem;">
-    <span>📚</span> Study Planner
-  </a>
+        
+        <!-- Study Planner now properly inside dropdown -->
+        <a href="{% url 'study-planner' %}" style="display: flex; align-items: center; gap: 0.5rem;">
+          <span>📚</span> Study Planner
+        </a>
         
         <a href="{% url 'update-user' %}">Settings</a>
         <a href="{% url 'notifications' %}">Notifications</a>
@@ -166,10 +160,25 @@
 
   <!-- Toggle Script -->
   <script>
-    document.getElementById("notification-toggle")?.addEventListener("click", function() {
-      const dropdown = document.getElementById("notification-dropdown");
-      dropdown.style.display =
-        dropdown.style.display === "block" ? "none" : "block";
+    document.addEventListener('DOMContentLoaded', function() {
+      const notificationToggle = document.getElementById("notification-toggle");
+      if (notificationToggle) {
+        notificationToggle.addEventListener("click", function(e) {
+          e.stopPropagation();
+          const dropdown = document.getElementById("notification-dropdown");
+          dropdown.style.display =
+            dropdown.style.display === "block" ? "none" : "block";
+        });
+      }
+
+      // Close notification dropdown when clicking outside
+      document.addEventListener('click', function(e) {
+        const dropdown = document.getElementById("notification-dropdown");
+        const toggle = document.getElementById("notification-toggle");
+        if (dropdown && toggle && !toggle.contains(e.target) && !dropdown.contains(e.target)) {
+          dropdown.style.display = "none";
+        }
+      });
     });
 
     // Update navbar unread count for messages
@@ -177,7 +186,7 @@
         fetch('/api/unread-chats-count/')
             .then(res => res.json())
             .then(data => {
-                const badge = document.getElementById('nav-unread-badge');
+                const badge = document.getElementById('nav-unread-chats-badge');
                 if (badge) {
                     if (data.unread_count > 0) {
                         badge.textContent = data.unread_count;

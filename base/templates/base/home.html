@@ -18,14 +18,18 @@
         transform: translateY(-2px);
     }
     
-    /* Study Dashboard Styles */
+    /* Study Dashboard Styles - FIXED POSITIONING */
     .study-dashboard {
-        margin-top: 4rem;
+        margin-top: 3rem;
         padding: 2rem;
         background: linear-gradient(145deg, rgba(45,45,57,0.5) 0%, rgba(26,26,42,0.5) 100%);
         border-radius: 2rem;
         backdrop-filter: blur(10px);
         border: 1px solid rgba(113,198,221,0.2);
+        width: 100%;
+        clear: both;
+        position: relative;
+        grid-column: 1 / -1;
     }
     
     .dashboard-title {
@@ -40,7 +44,7 @@
     
     .dashboard-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
         gap: 2rem;
     }
     
@@ -210,8 +214,50 @@
         100% { background-position: -200% 0; }
     }
     
+    /* FIX: Make the layout stack properly on all devices */
+    .layout--3 .container {
+        display: grid;
+        grid-template-columns: 1fr 3fr 1fr;
+        gap: 2rem;
+        align-items: start;
+    }
+    
+    /* FIX: Position study dashboard under room list */
+    .roomList {
+        display: flex;
+        flex-direction: column;
+        grid-column: 2 / 3;
+    }
+    
+    .study-dashboard {
+        margin-top: 2rem;
+        width: 100%;
+    }
+    
     /* Mobile Responsive */
+    @media (max-width: 1024px) {
+        .layout--3 .container {
+            grid-template-columns: 1fr 2fr;
+        }
+        
+        .layout--3 .container > div:last-child {
+            grid-column: 2 / 3;
+        }
+    }
+    
     @media (max-width: 768px) {
+        .layout--3 .container {
+            grid-template-columns: 1fr;
+        }
+        
+        .roomList {
+            grid-column: 1 / -1;
+        }
+        
+        .layout--3 .container > div:last-child {
+            grid-column: 1 / -1;
+        }
+        
         .dashboard-grid {
             grid-template-columns: 1fr;
             gap: 1.5rem;
@@ -274,7 +320,7 @@
             {% include 'base/feed_component.html' %}
 
             <!-- View All Rooms Button -->
-            <div style="text-align:center; margin-top:3rem; margin-bottom:2rem; padding:1rem 0;">
+            <div style="text-align:center; margin-top:3rem; margin-bottom:1rem; padding:1rem 0;">
                 <a href="{% url 'all-rooms' %}" 
                    style="display:inline-flex; align-items:center; gap:1rem; padding:1.2rem 3rem; background:var(--color-main); color:var(--color-dark); border-radius:3rem; text-decoration:none; font-weight:bold; transition:all 0.3s ease; box-shadow:0 4px 10px rgba(113, 198, 221, 0.3);"
                    onmouseover="this.style.opacity='0.9'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 15px rgba(113, 198, 221, 0.4)';"
@@ -286,66 +332,66 @@
                 </a>
             </div>
 
-        </div>
-        <!-- Room List End -->
-        
-        <!-- Study Dashboard Section -->
-        {% if request.user.is_authenticated %}
-        <div class="study-dashboard">
-            <h2 class="dashboard-title">
-                <span>📚</span> Today's Study Plan
-            </h2>
-            
-            <div class="dashboard-grid">
-                <!-- Today's Schedule Card -->
-                <div class="dashboard-card">
-                    <div class="card-header">
-                        <span>⏰</span>
-                        <h3>Today's Schedule</h3>
-                    </div>
-                    <div id="today-plans-preview">
-                        <div class="loading-skeleton"></div>
-                    </div>
-                    <a href="{% url 'study-planner' %}" class="view-link">
-                        View Full Planner →
-                    </a>
-                </div>
+            <!-- Study Dashboard Section - NOW UNDER ROOM LIST -->
+            {% if request.user.is_authenticated %}
+            <div class="study-dashboard">
+                <h2 class="dashboard-title">
+                    <span>📚</span> Today's Study Plan
+                </h2>
                 
-                <!-- Study Stats Card -->
-                <div class="dashboard-card">
-                    <div class="card-header">
-                        <span>📊</span>
-                        <h3>This Week</h3>
-                    </div>
-                    <div class="stats-grid">
-                        <div class="stat-item">
-                            <div class="stat-number" id="weekly-hours">0</div>
-                            <div class="stat-label">Hours</div>
+                <div class="dashboard-grid">
+                    <!-- Today's Schedule Card -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <span>⏰</span>
+                            <h3>Today's Schedule</h3>
                         </div>
-                        <div class="stat-item">
-                            <div class="stat-number" id="weekly-plans">0</div>
-                            <div class="stat-label">Plans</div>
+                        <div id="today-plans-preview">
+                            <div class="loading-skeleton"></div>
                         </div>
+                        <a href="{% url 'study-planner' %}" class="view-link">
+                            View Full Planner →
+                        </a>
                     </div>
-                    <a href="{% url 'study-planner' %}" class="view-link">
-                        View Stats →
-                    </a>
-                </div>
-                
-                <!-- Quick Add Card -->
-                <div class="dashboard-card">
-                    <div class="card-header">
-                        <span>➕</span>
-                        <h3>Quick Add</h3>
+                    
+                    <!-- Study Stats Card -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <span>📊</span>
+                            <h3>This Week</h3>
+                        </div>
+                        <div class="stats-grid">
+                            <div class="stat-item">
+                                <div class="stat-number" id="weekly-hours">0</div>
+                                <div class="stat-label">Hours</div>
+                            </div>
+                            <div class="stat-item">
+                                <div class="stat-number" id="weekly-plans">0</div>
+                                <div class="stat-label">Plans</div>
+                            </div>
+                        </div>
+                        <a href="{% url 'study-planner' %}" class="view-link">
+                            View Stats →
+                        </a>
                     </div>
-                    <a href="{% url 'create-study-plan' %}" class="quick-add-btn">
-                        <span>+</span> Create Study Plan
-                    </a>
+                    
+                    <!-- Quick Add Card -->
+                    <div class="dashboard-card">
+                        <div class="card-header">
+                            <span>➕</span>
+                            <h3>Quick Add</h3>
+                        </div>
+                        <a href="{% url 'create-study-plan' %}" class="quick-add-btn">
+                            <span>+</span> Create Study Plan
+                        </a>
+                    </div>
                 </div>
             </div>
+            {% endif %}
+            <!-- End Study Dashboard Section -->
+
         </div>
-        {% endif %}
-        <!-- End Study Dashboard Section -->
+        <!-- Room List End -->
 
         <!-- Activities Start -->
         {% include 'base/activity_component.html' %}
