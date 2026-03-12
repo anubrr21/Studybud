@@ -4,11 +4,11 @@
 <style>
     /* Adjust Recent Activities box position */
     .layout--3 > .container > div:last-child {
-        margin-top: 2rem; /* Adds space at the top */
+        margin-top: 2rem;
         align-self: flex-start;
     }
     
-    /* Optional: Add a subtle shadow to make it pop */
+    /* Add a subtle shadow to make it pop */
     .activities {
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         transition: transform 0.3s ease;
@@ -17,11 +17,221 @@
     .activities:hover {
         transform: translateY(-2px);
     }
+    
+    /* Study Dashboard Styles */
+    .study-dashboard {
+        margin-top: 4rem;
+        padding: 2rem;
+        background: linear-gradient(145deg, rgba(45,45,57,0.5) 0%, rgba(26,26,42,0.5) 100%);
+        border-radius: 2rem;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(113,198,221,0.2);
+    }
+    
+    .dashboard-title {
+        color: var(--color-main);
+        font-size: 2.4rem;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        text-shadow: 0 0 20px rgba(113,198,221,0.3);
+    }
+    
+    .dashboard-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+    }
+    
+    .dashboard-card {
+        background: linear-gradient(145deg, var(--color-dark) 0%, #2a2a38 100%);
+        border-radius: 1.5rem;
+        padding: 2rem;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        border: 1px solid rgba(113,198,221,0.2);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .dashboard-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(113,198,221,0.1) 0%, transparent 70%);
+        animation: rotate 20s linear infinite;
+    }
+    
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .dashboard-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--color-main);
+        box-shadow: 0 15px 30px rgba(113,198,221,0.2);
+    }
+    
+    .card-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .card-header h3 {
+        color: var(--color-light);
+        font-size: 1.8rem;
+        font-weight: 600;
+    }
+    
+    .card-header span {
+        font-size: 2.4rem;
+    }
+    
+    .plan-item {
+        padding: 1.2rem;
+        background: var(--color-dark-medium);
+        border-radius: 1rem;
+        margin-bottom: 1rem;
+        border-left: 4px solid var(--color-main);
+        transition: all 0.3s ease;
+    }
+    
+    .plan-item:hover {
+        transform: translateX(5px);
+        background: #3a3a4a;
+    }
+    
+    .plan-time {
+        color: var(--color-main);
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 0.3rem;
+    }
+    
+    .plan-title {
+        color: var(--color-light);
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 0.3rem;
+    }
+    
+    .plan-subject {
+        color: var(--color-light-gray);
+        font-size: 1.3rem;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
+    .stat-item {
+        text-align: center;
+        padding: 1.5rem;
+        background: var(--color-dark-medium);
+        border-radius: 1rem;
+        border: 1px solid rgba(113,198,221,0.2);
+    }
+    
+    .stat-number {
+        font-size: 2.8rem;
+        font-weight: 800;
+        color: var(--color-main);
+        text-shadow: 0 0 15px rgba(113,198,221,0.5);
+        margin-bottom: 0.3rem;
+    }
+    
+    .stat-label {
+        color: var(--color-light-gray);
+        font-size: 1.3rem;
+    }
+    
+    .view-link {
+        color: var(--color-main);
+        text-decoration: none;
+        font-size: 1.4rem;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        transition: all 0.3s ease;
+        margin-top: 1rem;
+    }
+    
+    .view-link:hover {
+        gap: 1rem;
+        text-decoration: underline;
+    }
+    
+    .quick-add-btn {
+        width: 100%;
+        padding: 1.5rem;
+        background: linear-gradient(135deg, var(--color-main) 0%, #4fa3b8 100%);
+        color: var(--color-dark);
+        border: none;
+        border-radius: 1rem;
+        font-size: 1.6rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+        border: 2px solid #ffffff;
+        text-decoration: none;
+    }
+    
+    .quick-add-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(113,198,221,0.4);
+    }
+    
+    /* Loading Skeleton */
+    .loading-skeleton {
+        background: linear-gradient(90deg, var(--color-dark-medium) 25%, var(--color-dark) 50%, var(--color-dark-medium) 75%);
+        background-size: 200% 100%;
+        animation: loading 1.5s infinite;
+        border-radius: 1rem;
+        height: 80px;
+    }
+    
+    @keyframes loading {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+    
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .dashboard-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+        
+        .study-dashboard {
+            padding: 1.5rem;
+            margin-top: 2rem;
+        }
+        
+        .dashboard-title {
+            font-size: 2rem;
+        }
+    }
 </style>
-    <main class="layout layout--3">
-      <div class="container">
+
+<main class="layout layout--3">
+    <div class="container">
         {% if welcome_message %}
-          <div class="welcome-message" data-type="{{ welcome_type }}" style="display: none;">{{ welcome_message }}</div>
+        <div class="welcome-message" data-type="{{ welcome_type }}" style="display: none;">{{ welcome_message }}</div>
         {% endif %}
         
         <!-- Topics Start -->
@@ -30,74 +240,158 @@
 
         <!-- Room List Start -->
         <div class="roomList">
-          <div class="mobile-menu">
-            <form action="{% url 'home' %}" method="GET" class="header__search">
-              <label>
-                <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-                  <title>search</title>
-                  <path
-                    d="M32 30.586l-10.845-10.845c1.771-2.092 2.845-4.791 2.845-7.741 0-6.617-5.383-12-12-12s-12 5.383-12 12c0 6.617 5.383 12 12 12 2.949 0 5.649-1.074 7.741-2.845l10.845 10.845 1.414-1.414zM12 22c-5.514 0-10-4.486-10-10s4.486-10 10-10c5.514 0 10 4.486 10 10s-4.486 10-10 10z"
-                  ></path>
-                </svg>
-                <input name="q" placeholder="Search for posts" />
-              </label>
-            </form>
-            <div class="mobile-menuItems">
-              <a class="btn btn--main btn--pill" href="{% url 'topics' %}">Browse Topics</a>
-              <a class="btn btn--main btn--pill" href="{% url 'activity' %}">Recent Activities</a>
+            <div class="mobile-menu">
+                <form action="{% url 'home' %}" method="GET" class="header__search">
+                    <label>
+                        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+                            <title>search</title>
+                            <path d="M32 30.586l-10.845-10.845c1.771-2.092 2.845-4.791 2.845-7.741 0-6.617-5.383-12-12-12s-12 5.383-12 12c0 6.617 5.383 12 12 12 2.949 0 5.649-1.074 7.741-2.845l10.845 10.845 1.414-1.414zM12 22c-5.514 0-10-4.486-10-10s4.486-10 10-10c5.514 0 10 4.486 10 10s-4.486 10-10 10z"></path>
+                        </svg>
+                        <input name="q" placeholder="Search for posts" />
+                    </label>
+                </form>
+                <div class="mobile-menuItems">
+                    <a class="btn btn--main btn--pill" href="{% url 'topics' %}">Browse Topics</a>
+                    <a class="btn btn--main btn--pill" href="{% url 'activity' %}">Recent Activities</a>
+                </div>
             </div>
-          </div>
-          
-          <div class="roomList__header">
-            <div>
-              <h2>Study Room</h2>
-              <p>{{ room_count }} Rooms available</p>
+            
+            <div class="roomList__header">
+                <div>
+                    <h2>Study Room</h2>
+                    <p>{{ room_count }} Rooms available</p>
+                </div>
+                <a class="btn btn--main" href="{% url 'create-room' %}">
+                    <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
+                        <title>add</title>
+                        <path d="M16.943 0.943h-1.885v14.115h-14.115v1.885h14.115v14.115h1.885v-14.115h14.115v-1.885h-14.115v-14.115z"></path>
+                    </svg>
+                    Create Room
+                </a>
             </div>
-            <a class="btn btn--main" href="{% url 'create-room' %}">
-              <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32">
-                <title>add</title>
-                <path
-                  d="M16.943 0.943h-1.885v14.115h-14.115v1.885h14.115v14.115h1.885v-14.115h14.115v-1.885h-14.115v-14.115z"
-                ></path>
-              </svg>
-              Create Room
-            </a>
-          </div>
 
-          <!-- Feed Component (Rooms List) -->
-          {% include 'base/feed_component.html' %}
+            <!-- Feed Component (Rooms List) -->
+            {% include 'base/feed_component.html' %}
 
-          <!-- View All Rooms Button -->
-          <div style="text-align:center; margin-top:3rem; margin-bottom:2rem; padding:1rem 0;">
-            <a href="{% url 'all-rooms' %}" 
-               style="
-                 display:inline-flex;
-                 align-items:center;
-                 gap:1rem;
-                 padding:1.2rem 3rem;
-                 background:var(--color-main);
-                 color:var(--color-dark);
-                 border-radius:3rem;
-                 text-decoration:none;
-                 font-weight:bold;
-                 transition:all 0.3s ease;
-                 box-shadow:0 4px 10px rgba(113, 198, 221, 0.3);
-               "
-               onmouseover="this.style.opacity='0.9'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 15px rgba(113, 198, 221, 0.4)';"
-               onmouseout="this.style.opacity='1'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10px rgba(113, 198, 221, 0.3)';">
-              <span>View All Rooms</span>
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-                <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
-              </svg>
-            </a>
-          </div>
+            <!-- View All Rooms Button -->
+            <div style="text-align:center; margin-top:3rem; margin-bottom:2rem; padding:1rem 0;">
+                <a href="{% url 'all-rooms' %}" 
+                   style="display:inline-flex; align-items:center; gap:1rem; padding:1.2rem 3rem; background:var(--color-main); color:var(--color-dark); border-radius:3rem; text-decoration:none; font-weight:bold; transition:all 0.3s ease; box-shadow:0 4px 10px rgba(113, 198, 221, 0.3);"
+                   onmouseover="this.style.opacity='0.9'; this.style.transform='translateY(-2px)'; this.style.boxShadow='0 6px 15px rgba(113, 198, 221, 0.4)';"
+                   onmouseout="this.style.opacity='1'; this.style.transform='translateY(0)'; this.style.boxShadow='0 4px 10px rgba(113, 198, 221, 0.3)';">
+                    <span>View All Rooms</span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/>
+                    </svg>
+                </a>
+            </div>
 
         </div>
         <!-- Room List End -->
+        
+        <!-- Study Dashboard Section -->
+        {% if request.user.is_authenticated %}
+        <div class="study-dashboard">
+            <h2 class="dashboard-title">
+                <span>📚</span> Today's Study Plan
+            </h2>
+            
+            <div class="dashboard-grid">
+                <!-- Today's Schedule Card -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <span>⏰</span>
+                        <h3>Today's Schedule</h3>
+                    </div>
+                    <div id="today-plans-preview">
+                        <div class="loading-skeleton"></div>
+                    </div>
+                    <a href="{% url 'study-planner' %}" class="view-link">
+                        View Full Planner →
+                    </a>
+                </div>
+                
+                <!-- Study Stats Card -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <span>📊</span>
+                        <h3>This Week</h3>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <div class="stat-number" id="weekly-hours">0</div>
+                            <div class="stat-label">Hours</div>
+                        </div>
+                        <div class="stat-item">
+                            <div class="stat-number" id="weekly-plans">0</div>
+                            <div class="stat-label">Plans</div>
+                        </div>
+                    </div>
+                    <a href="{% url 'study-planner' %}" class="view-link">
+                        View Stats →
+                    </a>
+                </div>
+                
+                <!-- Quick Add Card -->
+                <div class="dashboard-card">
+                    <div class="card-header">
+                        <span>➕</span>
+                        <h3>Quick Add</h3>
+                    </div>
+                    <a href="{% url 'create-study-plan' %}" class="quick-add-btn">
+                        <span>+</span> Create Study Plan
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        <!-- End Study Dashboard Section -->
 
         <!-- Activities Start -->
         {% include 'base/activity_component.html' %}
         <!-- Activities End -->
-      </div>
-    </main>
+    </div>
+</main>
+
+<script>
+// Load today's plans for the dashboard
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('/api/today-plans/')
+        .then(res => res.json())
+        .then(data => {
+            const container = document.getElementById('today-plans-preview');
+            if (data.plans && data.plans.length > 0) {
+                let html = '';
+                data.plans.slice(0, 3).forEach(plan => {
+                    html += `
+                        <div class="plan-item">
+                            <div class="plan-time">${plan.start_time}</div>
+                            <div class="plan-title">${plan.title}</div>
+                            <div class="plan-subject">${plan.subject}</div>
+                        </div>
+                    `;
+                });
+                container.innerHTML = html;
+            } else {
+                container.innerHTML = '<p style="color: var(--color-light-gray); padding: 1rem; text-align: center;">✨ No plans for today</p>';
+            }
+        })
+        .catch(error => {
+            console.error('Error loading plans:', error);
+            document.getElementById('today-plans-preview').innerHTML = '<p style="color: var(--color-light-gray); padding: 1rem; text-align: center;">⚠️ Could not load plans</p>';
+        });
+    
+    // Load weekly stats
+    fetch('/api/weekly-stats/')
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById('weekly-hours').textContent = data.total_hours || 0;
+            document.getElementById('weekly-plans').textContent = data.total_plans || 0;
+        })
+        .catch(error => {
+            console.error('Error loading stats:', error);
+        });
+});
+</script>
+
 {% endblock %}

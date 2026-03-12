@@ -66,4 +66,13 @@ urlpatterns = [
     path('terms-of-service/', views.terms_of_service, name='terms-of-service'),
     path('help-center/', views.help_center, name='help-center'),
     path('debug-brevo/', views.debug_brevo_api, name='debug-brevo'),
+    path('study-planner/', views.study_planner, name='study-planner'),
+path('create-study-plan/', views.create_study_plan, name='create-study-plan'),
+path('edit-study-plan/<int:plan_id>/', views.edit_study_plan, name='edit-study-plan'),
+path('delete-study-plan/<int:plan_id>/', views.delete_study_plan, name='delete-study-plan'),
+path('update-plan-status/<int:plan_id>/', views.update_plan_status, name='update-plan-status'),
+path('start-study-session/<int:plan_id>/', views.start_study_session, name='start-study-session'),
+path('end-study-session/<int:session_id>/', views.end_study_session, name='end-study-session'),
+path('calendar-data/', views.calendar_data, name='calendar-data'),
+path('api/today-plans/', views.today_plans_api, name='today-plans-api'),
 ]

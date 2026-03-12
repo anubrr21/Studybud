@@ -1,0 +1,959 @@
+{% extends 'main.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    /* Main Container */
+    .planner-container {
+        max-width: 1400px;
+        margin: 2rem auto;
+        padding: 0 2rem;
+    }
+    
+    /* Header Section */
+    .planner-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2.5rem;
+        flex-wrap: wrap;
+        gap: 1.5rem;
+    }
+    
+    .planner-header h1 {
+        font-size: 3.2rem;
+        color: var(--color-main);
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .planner-header h1 svg {
+        filter: drop-shadow(0 4px 6px rgba(113,198,221,0.3));
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.05); }
+    }
+    
+    /* Date Navigation */
+    .date-navigation {
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+        background: linear-gradient(145deg, var(--color-dark) 0%, #2a2a38 100%);
+        padding: 0.8rem 2rem;
+        border-radius: 50px;
+        box-shadow: 0 10px 20px rgba(0,0,0,0.3), 0 0 0 1px var(--color-main) inset;
+    }
+    
+    .date-nav-btn {
+        background: linear-gradient(145deg, var(--color-dark-medium) 0%, var(--color-dark) 100%);
+        border: none;
+        color: var(--color-light);
+        width: 3.5rem;
+        height: 3.5rem;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 2rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .date-nav-btn:hover {
+        background: var(--color-main);
+        color: var(--color-dark);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(113,198,221,0.4);
+    }
+    
+    .current-date {
+        font-size: 1.8rem;
+        font-weight: 600;
+        color: var(--color-light);
+        min-width: 240px;
+        text-align: center;
+        text-shadow: 1px 1px 2px rgba(0,0,0,0.3);
+    }
+    
+    /* Create Button */
+    .create-btn {
+        background: linear-gradient(135deg, var(--color-main) 0%, #4fa3b8 100%);
+        color: var(--color-dark);
+        padding: 1.2rem 2.5rem;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 1.6rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 1rem;
+        transition: all 0.3s ease;
+        border: 2px solid #ffffff;
+        box-shadow: 0 8px 16px rgba(113,198,221,0.3);
+    }
+    
+    .create-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 24px rgba(113,198,221,0.5);
+    }
+    
+    .create-btn span {
+        font-size: 2.4rem;
+        font-weight: 400;
+    }
+    
+    /* Stats Grid */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+    
+    .stat-card {
+        background: linear-gradient(145deg, var(--color-dark) 0%, #2a2a38 100%);
+        padding: 2rem;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+        border-left: 6px solid var(--color-main);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(113,198,221,0.1) 0%, transparent 70%);
+        animation: rotate 20s linear infinite;
+    }
+    
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 30px rgba(113,198,221,0.2);
+    }
+    
+    .stat-icon {
+        font-size: 3.2rem;
+        filter: drop-shadow(0 4px 8px rgba(113,198,221,0.4));
+        animation: bounce 2s infinite;
+    }
+    
+    @keyframes bounce {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-5px); }
+    }
+    
+    .stat-info h3 {
+        color: var(--color-light-gray);
+        font-size: 1.4rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-info p {
+        color: var(--color-main);
+        font-size: 2.4rem;
+        font-weight: 800;
+        text-shadow: 0 0 10px rgba(113,198,221,0.5);
+    }
+    
+    /* Main Content Layout */
+    .main-content {
+        display: grid;
+        grid-template-columns: 1fr 320px;
+        gap: 2rem;
+    }
+    
+    /* Calendar Section */
+    .calendar-section {
+        background: linear-gradient(145deg, var(--color-dark) 0%, #2a2a38 100%);
+        border-radius: 30px;
+        padding: 2rem;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        border: 1px solid rgba(113,198,221,0.2);
+    }
+    
+    .calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 2rem;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+    
+    .calendar-header h2 {
+        color: var(--color-main);
+        font-size: 2.2rem;
+        font-weight: 700;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    /* Subject Filter */
+    .filter-select {
+        background: var(--color-dark-medium);
+        border: 2px solid var(--color-dark-light);
+        border-radius: 30px;
+        padding: 1rem 2rem;
+        color: var(--color-light);
+        font-size: 1.4rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        min-width: 200px;
+    }
+    
+    .filter-select:hover {
+        border-color: var(--color-main);
+    }
+    
+    .filter-select:focus {
+        outline: none;
+        border-color: var(--color-main);
+        box-shadow: 0 0 0 3px rgba(113,198,221,0.2);
+    }
+    
+    /* Timeline */
+    .timeline {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        max-height: 600px;
+        overflow-y: auto;
+        padding-right: 1rem;
+    }
+    
+    .timeline::-webkit-scrollbar {
+        width: 6px;
+    }
+    
+    .timeline::-webkit-scrollbar-track {
+        background: var(--color-dark-medium);
+        border-radius: 10px;
+    }
+    
+    .timeline::-webkit-scrollbar-thumb {
+        background: var(--color-main);
+        border-radius: 10px;
+    }
+    
+    .timeline-hour {
+        display: grid;
+        grid-template-columns: 70px 1fr;
+        gap: 1rem;
+        min-height: 80px;
+        border-bottom: 1px solid rgba(113,198,221,0.1);
+        padding: 0.5rem 0;
+    }
+    
+    .hour-label {
+        color: var(--color-main);
+        font-size: 1.3rem;
+        font-weight: 600;
+        padding-top: 0.5rem;
+        position: relative;
+    }
+    
+    .hour-label::after {
+        content: '';
+        position: absolute;
+        right: 1rem;
+        top: 50%;
+        width: 4px;
+        height: 4px;
+        background: var(--color-main);
+        border-radius: 50%;
+    }
+    
+    .hour-plans {
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+    
+    /* Plan Cards */
+    .plan-card {
+        background: linear-gradient(145deg, var(--color-dark-medium) 0%, #3a3a4a 100%);
+        border-radius: 16px;
+        padding: 1.2rem;
+        border-left: 6px solid;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .plan-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100px;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05));
+        transform: skewX(-15deg) translateX(100px);
+        transition: transform 0.5s ease;
+    }
+    
+    .plan-card:hover::before {
+        transform: skewX(-15deg) translateX(-100px);
+    }
+    
+    .plan-card:hover {
+        transform: translateX(8px) scale(1.02);
+        box-shadow: 0 8px 16px rgba(113,198,221,0.3);
+    }
+    
+    .plan-card.high-priority {
+        border-left-color: #ff4757;
+    }
+    
+    .plan-card.medium-priority {
+        border-left-color: #ffa502;
+    }
+    
+    .plan-card.low-priority {
+        border-left-color: #26de81;
+    }
+    
+    .plan-card.completed {
+        opacity: 0.7;
+        background: linear-gradient(145deg, #2a2a35 0%, #22222d 100%);
+    }
+    
+    .plan-card.completed::after {
+        content: '✓';
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        color: #26de81;
+        font-size: 1.8rem;
+        font-weight: bold;
+    }
+    
+    .plan-time {
+        color: var(--color-main);
+        font-size: 1.3rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .plan-time::before {
+        content: '⏰';
+        font-size: 1.4rem;
+    }
+    
+    .plan-title {
+        color: var(--color-light);
+        font-size: 1.6rem;
+        font-weight: 700;
+        margin-bottom: 0.3rem;
+    }
+    
+    .plan-subject {
+        color: var(--color-light-gray);
+        font-size: 1.3rem;
+        margin-bottom: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .plan-subject::before {
+        content: '📚';
+        font-size: 1.4rem;
+    }
+    
+    .plan-progress {
+        height: 6px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 3px;
+        overflow: hidden;
+        margin-top: 0.8rem;
+    }
+    
+    .progress-bar {
+        height: 100%;
+        background: linear-gradient(90deg, var(--color-main), #4fa3b8);
+        border-radius: 3px;
+        transition: width 0.5s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .progress-bar::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+        animation: shimmer 2s infinite;
+    }
+    
+    @keyframes shimmer {
+        0% { transform: translateX(-100%); }
+        100% { transform: translateX(100%); }
+    }
+    
+    /* Empty State */
+    .empty-state {
+        background: linear-gradient(145deg, var(--color-dark-medium) 0%, #2a2a38 100%);
+        border-radius: 16px;
+        padding: 2rem;
+        text-align: center;
+        border: 2px dashed var(--color-dark-light);
+    }
+    
+    .empty-state p {
+        color: var(--color-light-gray);
+        font-size: 1.4rem;
+        margin: 0.5rem 0;
+    }
+    
+    /* Sidebar */
+    .sidebar {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+    
+    .upcoming-card, .overdue-card {
+        background: linear-gradient(145deg, var(--color-dark) 0%, #2a2a38 100%);
+        border-radius: 24px;
+        padding: 2rem;
+        box-shadow: 0 15px 30px rgba(0,0,0,0.3);
+        border: 1px solid rgba(113,198,221,0.2);
+    }
+    
+    .upcoming-header, .overdue-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid rgba(113,198,221,0.3);
+    }
+    
+    .upcoming-header span, .overdue-header span {
+        font-size: 2.4rem;
+    }
+    
+    .upcoming-header h3 {
+        color: var(--color-main);
+        font-size: 1.8rem;
+        font-weight: 700;
+    }
+    
+    .overdue-header h3 {
+        color: #ff4757;
+        font-size: 1.8rem;
+        font-weight: 700;
+    }
+    
+    .upcoming-list, .overdue-list {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        max-height: 300px;
+        overflow-y: auto;
+        padding-right: 0.5rem;
+    }
+    
+    .upcoming-list::-webkit-scrollbar,
+    .overdue-list::-webkit-scrollbar {
+        width: 4px;
+    }
+    
+    .upcoming-list::-webkit-scrollbar-track,
+    .overdue-list::-webkit-scrollbar-track {
+        background: var(--color-dark-medium);
+        border-radius: 10px;
+    }
+    
+    .upcoming-list::-webkit-scrollbar-thumb,
+    .overdue-list::-webkit-scrollbar-thumb {
+        background: var(--color-main);
+        border-radius: 10px;
+    }
+    
+    .upcoming-item, .overdue-item {
+        background: linear-gradient(145deg, var(--color-dark-medium) 0%, #323240 100%);
+        padding: 1.2rem;
+        border-radius: 16px;
+        transition: all 0.3s ease;
+        border-left: 4px solid transparent;
+    }
+    
+    .upcoming-item:hover {
+        transform: translateX(5px);
+        border-left-color: var(--color-main);
+    }
+    
+    .overdue-item:hover {
+        transform: translateX(5px);
+        border-left-color: #ff4757;
+    }
+    
+    .item-title {
+        color: var(--color-light);
+        font-weight: 600;
+        font-size: 1.4rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .item-time {
+        color: var(--color-light-gray);
+        font-size: 1.2rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .item-time::before {
+        content: '⏰';
+        font-size: 1.2rem;
+    }
+    
+    /* Timer Modal */
+    .timer-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.8);
+        backdrop-filter: blur(5px);
+        z-index: 1000;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .timer-modal.active {
+        display: flex;
+    }
+    
+    .timer-content {
+        background: linear-gradient(145deg, var(--color-dark) 0%, #2a2a38 100%);
+        border-radius: 40px;
+        padding: 3rem;
+        max-width: 400px;
+        width: 90%;
+        text-align: center;
+        border: 2px solid var(--color-main);
+        box-shadow: 0 30px 60px rgba(0,0,0,0.5);
+        animation: slideUp 0.3s ease;
+    }
+    
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(50px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .timer-display {
+        font-size: 6rem;
+        font-weight: 800;
+        color: var(--color-main);
+        text-shadow: 0 0 30px rgba(113,198,221,0.5);
+        font-family: monospace;
+        margin: 2rem 0;
+    }
+    
+    .timer-controls {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+    }
+    
+    .timer-btn {
+        padding: 1.2rem 2rem;
+        border-radius: 30px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .timer-start {
+        background: var(--color-main);
+        color: var(--color-dark);
+    }
+    
+    .timer-pause {
+        background: #ffa502;
+        color: var(--color-dark);
+    }
+    
+    .timer-stop {
+        background: #ff4757;
+        color: white;
+    }
+    
+    .timer-close {
+        background: var(--color-dark-medium);
+        color: var(--color-light);
+        margin-top: 1rem;
+        width: 100%;
+    }
+    
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .planner-container {
+            padding: 1rem;
+        }
+        
+        .planner-header {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .date-navigation {
+            justify-content: space-between;
+        }
+        
+        .main-content {
+            grid-template-columns: 1fr;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .calendar-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .filter-select {
+            width: 100%;
+        }
+        
+        .timeline-hour {
+            grid-template-columns: 1fr;
+        }
+        
+        .hour-label {
+            display: none;
+        }
+        
+        .timer-display {
+            font-size: 4rem;
+        }
+    }
+</style>
+
+<div class="planner-container">
+    <!-- Header -->
+    <div class="planner-header">
+        <h1>
+            <svg viewBox="0 0 24 24" width="32" height="32" fill="var(--color-main)">
+                <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V9h14v10zM7 11h5v5H7v-5z"/>
+            </svg>
+            Study Planner
+        </h1>
+        
+        <div class="date-navigation">
+            <a href="?date={{ prev_date|date:'Y-m-d' }}" class="date-nav-btn">←</a>
+            <span class="current-date">{{ current_date|date:"l, F j, Y" }}</span>
+            <a href="?date={{ next_date|date:'Y-m-d' }}" class="date-nav-btn">→</a>
+        </div>
+        
+        <a href="{% url 'create-study-plan' %}" class="create-btn">
+            <span>+</span> Create Study Plan
+        </a>
+    </div>
+    
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">📚</div>
+            <div class="stat-info">
+                <h3>Today's Study Time</h3>
+                <p>{{ total_study_time }} min</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">📊</div>
+            <div class="stat-info">
+                <h3>This Week</h3>
+                <p>{{ week_study_time }} min</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">✅</div>
+            <div class="stat-info">
+                <h3>Plans Today</h3>
+                <p>{{ plans.count }}</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">⏰</div>
+            <div class="stat-info">
+                <h3>Upcoming</h3>
+                <p>{{ upcoming_plans.count }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Calendar Section -->
+        <div class="calendar-section">
+            <div class="calendar-header">
+                <h2>📅 {{ current_date|date:"F j, Y" }}</h2>
+                <div class="subject-filter">
+                    <select class="filter-select" id="subjectFilter">
+                        <option value="all">All Subjects</option>
+                        {% for subject in subjects %}
+                        <option value="{{ subject }}">{{ subject }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            
+            <div class="timeline" id="timeline">
+                {% for hour in "01234567891011121314151617181920212223"|make_list %}
+                <div class="timeline-hour">
+                    <div class="hour-label">{{ hour }}:00</div>
+                    <div class="hour-plans">
+                        {% with hour_int=hour|add:0 %}
+                            {% for plan in plans %}
+                                {% if plan.start_date.hour == hour_int %}
+                                <div class="plan-card {% if plan.priority == 1 %}high-priority{% elif plan.priority == 2 %}medium-priority{% else %}low-priority{% endif %} {% if plan.status == 'completed' %}completed{% endif %}"
+                                     data-plan-id="{{ plan.id }}"
+                                     data-plan-title="{{ plan.title }}"
+                                     data-plan-subject="{{ plan.subject }}"
+                                     data-plan-duration="{{ plan.duration_hours }}"
+                                     onclick="showPlanDetails('{{ plan.id }}')">
+                                    <div class="plan-time">
+                                        {{ plan.start_date|time:"g:i A" }} - {{ plan.end_date|time:"g:i A" }}
+                                    </div>
+                                    <div class="plan-title">{{ plan.title }}</div>
+                                    <div class="plan-subject">{{ plan.subject }}</div>
+                                    <div class="plan-progress">
+                                        <div class="progress-bar" 
+                                             data-progress="{% if plan.estimated_hours > 0 %}{{ plan.progress_percentage }}{% else %}0{% endif %}"
+                                             style="width: 0%;">
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endif %}
+                            {% empty %}
+                                {% if forloop.first %}
+                                <div class="empty-state">
+                                    <p>✨ No plans scheduled</p>
+                                    <p>Click "Create Study Plan" to add one</p>
+                                </div>
+                                {% endif %}
+                            {% endfor %}
+                        {% endwith %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <div class="upcoming-card">
+                <div class="upcoming-header">
+                    <span>📅</span>
+                    <h3>Upcoming Plans</h3>
+                </div>
+                <div class="upcoming-list">
+                    {% for plan in upcoming_plans %}
+                    <div class="upcoming-item" onclick="showPlanDetails('{{ plan.id }}')">
+                        <div class="item-title">{{ plan.title }}</div>
+                        <div class="item-time">{{ plan.start_date|date:"M d, g:i A" }}</div>
+                    </div>
+                    {% empty %}
+                    <p style="color: var(--color-light-gray); padding: 1rem;">No upcoming plans</p>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <div class="overdue-card">
+                <div class="overdue-header">
+                    <span>⚠️</span>
+                    <h3>Overdue</h3>
+                </div>
+                <div class="overdue-list">
+                    {% for plan in overdue_plans %}
+                    <div class="overdue-item" onclick="showPlanDetails('{{ plan.id }}')">
+                        <div class="item-title">{{ plan.title }}</div>
+                        <div class="item-time">Due: {{ plan.end_date|date:"M d" }}</div>
+                    </div>
+                    {% empty %}
+                    <p style="color: var(--color-light-gray); padding: 1rem;">No overdue plans</p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Timer Modal -->
+<div class="timer-modal" id="timerModal">
+    <div class="timer-content">
+        <h2 style="color: var(--color-main); margin-bottom: 1rem;">⏰ Study Timer</h2>
+        <div class="timer-display" id="timerDisplay">25:00</div>
+        <div class="timer-controls">
+            <button class="timer-btn timer-start" onclick="startTimer()">Start</button>
+            <button class="timer-btn timer-pause" onclick="pauseTimer()">Pause</button>
+            <button class="timer-btn timer-stop" onclick="stopTimer()">Stop</button>
+        </div>
+        <button class="timer-btn timer-close" onclick="closeTimer()">Close</button>
+    </div>
+</div>
+
+<script>
+let currentPlanId = null;
+let timerInterval = null;
+let minutes = 25;
+let seconds = 0;
+let isRunning = false;
+
+function showPlanDetails(planId) {
+    currentPlanId = planId;
+    window.location.href = `/edit-study-plan/${planId}/`;
+}
+
+function startTimer() {
+    if (!isRunning) {
+        isRunning = true;
+        timerInterval = setInterval(updateTimer, 1000);
+    }
+}
+
+function pauseTimer() {
+    isRunning = false;
+    clearInterval(timerInterval);
+}
+
+function stopTimer() {
+    isRunning = false;
+    clearInterval(timerInterval);
+    minutes = 25;
+    seconds = 0;
+    updateTimerDisplay();
+    
+    if (currentPlanId) {
+        fetch(`/end-study-session/${currentPlanId}/`, {
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': '{{ csrf_token }}',
+                'Content-Type': 'application/json'
+            }
+        }).then(() => {
+            location.reload();
+        });
+    }
+}
+
+function updateTimer() {
+    if (seconds === 0) {
+        if (minutes === 0) {
+            stopTimer();
+            alert('Study session complete! 🎉');
+            return;
+        }
+        minutes--;
+        seconds = 59;
+    } else {
+        seconds--;
+    }
+    updateTimerDisplay();
+}
+
+function updateTimerDisplay() {
+    const display = document.getElementById('timerDisplay');
+    display.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+}
+
+function openTimer(planId, duration) {
+    currentPlanId = planId;
+    minutes = duration || 25;
+    seconds = 0;
+    updateTimerDisplay();
+    document.getElementById('timerModal').classList.add('active');
+}
+
+function closeTimer() {
+    stopTimer();
+    document.getElementById('timerModal').classList.remove('active');
+}
+
+// Subject filter
+document.getElementById('subjectFilter').addEventListener('change', function() {
+    const subject = this.value;
+    const plans = document.querySelectorAll('.plan-card');
+    
+    plans.forEach(plan => {
+        const planSubject = plan.querySelector('.plan-subject').textContent;
+        if (subject === 'all' || planSubject === subject) {
+            plan.style.display = 'block';
+        } else {
+            plan.style.display = 'none';
+        }
+    });
+});
+
+// Quick plan actions
+document.querySelectorAll('.plan-card').forEach(card => {
+    card.addEventListener('dblclick', function(e) {
+        e.stopPropagation();
+        const planId = this.dataset.planId;
+        const duration = parseInt(this.dataset.planDuration) || 1;
+        openTimer(planId, duration * 60);
+    });
+});
+
+// Update progress bars from data-progress attribute
+document.querySelectorAll('.progress-bar').forEach(bar => {
+    const progress = bar.dataset.progress;
+    if (progress) {
+        bar.style.width = progress + '%';
+    }
+});
+
+// Close timer modal on outside click
+document.getElementById('timerModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeTimer();
+    }
+});
+</script>
+{% endblock %}

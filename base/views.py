@@ -20,6 +20,9 @@ from .forms import RoomForm,UserForm,MyUserCreationForm
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.shortcuts import render
+from datetime import datetime,timedelta
+from .models import StudyPlan, StudyResource, StudySession
+from django.db import models
 import os
 import mimetypes
 import subprocess
@@ -1151,3 +1154,297 @@ def debug_brevo_api(request):
             output.append(f"<p style='color:red'>❌ Error: {e}</p>")
     
     return HttpResponse(''.join(output))
+
+
+
+
+@login_required
+def study_planner(request):
+    """Main study planner view"""
+    user = request.user
+    
+    # Get date from request or default to today
+    selected_date = request.GET.get('date')
+    if selected_date:
+        current_date = datetime.strptime(selected_date, '%Y-%m-%d').date()
+    else:
+        current_date = timezone.now().date()
+    
+    # Get plans for selected date
+    day_start = timezone.make_aware(datetime.combine(current_date, datetime.min.time()))
+    day_end = timezone.make_aware(datetime.combine(current_date, datetime.max.time()))
+    
+    plans = StudyPlan.objects.filter(
+        user=user,
+        start_date__lte=day_end,
+        end_date__gte=day_start
+    ).order_by('start_date')
+    
+    # Get upcoming plans
+    upcoming_plans = StudyPlan.objects.filter(
+        user=user,
+        start_date__gt=timezone.now(),
+        status='pending'
+    ).order_by('start_date')[:5]
+    
+    # Get overdue plans
+    overdue_plans = StudyPlan.objects.filter(
+        user=user,
+        end_date__lt=timezone.now(),
+        status__in=['pending', 'in_progress']
+    )
+    
+    # Update status for overdue plans
+    for plan in overdue_plans:
+        if plan.status != 'overdue':
+            plan.status = 'overdue'
+            plan.save()
+    
+    # Study stats
+    total_study_time = StudySession.objects.filter(
+        user=user,
+        start_time__date=current_date
+    ).aggregate(models.Sum('duration'))['duration__sum'] or 0
+    
+    week_start = current_date - timedelta(days=current_date.weekday())
+    week_study_time = StudySession.objects.filter(
+        user=user,
+        start_time__date__gte=week_start
+    ).aggregate(models.Sum('duration'))['duration__sum'] or 0
+    
+    context = {
+        'plans': plans,
+        'upcoming_plans': upcoming_plans,
+        'overdue_plans': overdue_plans,
+        'current_date': current_date,
+        'prev_date': current_date - timedelta(days=1),
+        'next_date': current_date + timedelta(days=1),
+        'total_study_time': total_study_time,
+        'week_study_time': week_study_time,
+        'subjects': StudyPlan.objects.filter(user=user).values_list('subject', flat=True).distinct(),
+    }
+    
+    return render(request, 'base/study_planner.html', context)
+
+@login_required
+def create_study_plan(request):
+    """Create a new study plan"""
+    if request.method == 'POST':
+        title = request.POST.get('title')
+        description = request.POST.get('description')
+        subject = request.POST.get('subject')
+        start_date = request.POST.get('start_date')
+        start_time = request.POST.get('start_time')
+        end_date = request.POST.get('end_date')
+        end_time = request.POST.get('end_time')
+        priority = request.POST.get('priority', 2)
+        estimated_hours = request.POST.get('estimated_hours', 1)
+        is_recurring = request.POST.get('is_recurring') == 'on'
+        
+        # Combine date and time
+        start_datetime = timezone.make_aware(
+            datetime.strptime(f"{start_date} {start_time}", '%Y-%m-%d %H:%M')
+        )
+        end_datetime = timezone.make_aware(
+            datetime.strptime(f"{end_date} {end_time}", '%Y-%m-%d %H:%M')
+        )
+        
+        # Handle recurring pattern
+        recurring_pattern = None
+        if is_recurring:
+            recurring_pattern = {
+                'monday': request.POST.get('monday') == 'on',
+                'tuesday': request.POST.get('tuesday') == 'on',
+                'wednesday': request.POST.get('wednesday') == 'on',
+                'thursday': request.POST.get('thursday') == 'on',
+                'friday': request.POST.get('friday') == 'on',
+                'saturday': request.POST.get('saturday') == 'on',
+                'sunday': request.POST.get('sunday') == 'on',
+            }
+        
+        plan = StudyPlan.objects.create(
+            user=request.user,
+            title=title,
+            description=description,
+            subject=subject,
+            start_date=start_datetime,
+            end_date=end_datetime,
+            priority=priority,
+            estimated_hours=estimated_hours,
+            is_recurring=is_recurring,
+            recurring_pattern=recurring_pattern,
+        )
+        
+        messages.success(request, f'Study plan "{title}" created successfully!')
+        return redirect('study-planner')
+    
+    return render(request, 'base/create_study_plan.html')
+
+@login_required
+def edit_study_plan(request, plan_id):
+    """Edit a study plan"""
+    plan = get_object_or_404(StudyPlan, id=plan_id, user=request.user)
+    
+    if request.method == 'POST':
+        plan.title = request.POST.get('title')
+        plan.description = request.POST.get('description')
+        plan.subject = request.POST.get('subject')
+        
+        start_date = request.POST.get('start_date')
+        start_time = request.POST.get('start_time')
+        end_date = request.POST.get('end_date')
+        end_time = request.POST.get('end_time')
+        
+        plan.start_date = timezone.make_aware(
+            datetime.strptime(f"{start_date} {start_time}", '%Y-%m-%d %H:%M')
+        )
+        plan.end_date = timezone.make_aware(
+            datetime.strptime(f"{end_date} {end_time}", '%Y-%m-%d %H:%M')
+        )
+        
+        plan.priority = request.POST.get('priority')
+        plan.estimated_hours = request.POST.get('estimated_hours')
+        plan.status = request.POST.get('status')
+        
+        plan.save()
+        messages.success(request, 'Plan updated successfully!')
+        return redirect('study-planner')
+    
+    return render(request, 'base/edit_study_plan.html', {'plan': plan})
+
+@login_required
+def delete_study_plan(request, plan_id):
+    """Delete a study plan"""
+    plan = get_object_or_404(StudyPlan, id=plan_id, user=request.user)
+    
+    if request.method == 'POST':
+        plan.delete()
+        messages.success(request, 'Plan deleted successfully!')
+        return JsonResponse({'success': True})
+    
+    return render(request, 'base/delete_study_plan.html', {'plan': plan})
+
+@login_required
+def update_plan_status(request, plan_id):
+    """Update plan status (mark as complete/in progress)"""
+    if request.method == 'POST':
+        plan = get_object_or_404(StudyPlan, id=plan_id, user=request.user)
+        status = request.POST.get('status')
+        actual_hours = request.POST.get('actual_hours', 0)
+        
+        plan.status = status
+        if actual_hours:
+            plan.actual_hours = float(actual_hours)
+        plan.save()
+        
+        return JsonResponse({'success': True})
+    
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+@login_required
+def start_study_session(request, plan_id=None):
+    """Start a study session (timer)"""
+    if request.method == 'POST':
+        subject = request.POST.get('subject')
+        plan = None
+        
+        if plan_id:
+            plan = get_object_or_404(StudyPlan, id=plan_id, user=request.user)
+            subject = plan.subject
+        
+        session = StudySession.objects.create(
+            user=request.user,
+            plan=plan,
+            subject=subject,
+            start_time=timezone.now()
+        )
+        
+        return JsonResponse({
+            'success': True,
+            'session_id': session.id,
+            'start_time': session.start_time.isoformat()
+        })
+    
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+@login_required
+def end_study_session(request, session_id):
+    """End a study session and record duration"""
+    if request.method == 'POST':
+        session = get_object_or_404(StudySession, id=session_id, user=request.user)
+        
+        session.end_time = timezone.now()
+        duration = (session.end_time - session.start_time).total_seconds() / 60
+        session.duration = int(duration)
+        session.save()
+        
+        # Update plan's actual hours if linked
+        if session.plan:
+            session.plan.actual_hours += duration / 60
+            session.plan.save()
+        
+        return JsonResponse({
+            'success': True,
+            'duration': session.duration
+        })
+    
+    return JsonResponse({'error': 'Invalid request'}, status=400)
+
+@login_required
+def calendar_data(request):
+    """Get calendar data for full calendar display"""
+    user = request.user
+    start = request.GET.get('start')
+    end = request.GET.get('end')
+    
+    if start and end:
+        start_date = datetime.fromisoformat(start)
+        end_date = datetime.fromisoformat(end)
+        
+        plans = StudyPlan.objects.filter(
+            user=user,
+            start_date__gte=start_date,
+            end_date__lte=end_date
+        )
+        
+        events = []
+        for plan in plans:
+            events.append({
+                'id': plan.id,
+                'title': f"{plan.title} ({plan.subject})",
+                'start': plan.start_date.isoformat(),
+                'end': plan.end_date.isoformat(),
+                'color': '#71c6dd' if plan.status == 'pending' else '#4caf50' if plan.status == 'completed' else '#ff9800',
+                'url': f'/study-plan/{plan.id}/',
+            })
+        
+        return JsonResponse(events, safe=False)
+    
+    return JsonResponse([], safe=False)
+
+
+@login_required
+def today_plans_api(request):
+    """API endpoint for today's plans (used in dashboard)"""
+    today = timezone.now().date()
+    day_start = timezone.make_aware(datetime.combine(today, datetime.min.time()))
+    day_end = timezone.make_aware(datetime.combine(today, datetime.max.time()))
+    
+    plans = StudyPlan.objects.filter(
+        user=request.user,
+        start_date__lte=day_end,
+        end_date__gte=day_start
+    ).order_by('start_date')[:5]
+    
+    plan_data = []
+    for plan in plans:
+        plan_data.append({
+            'id': plan.id,
+            'title': plan.title,
+            'subject': plan.subject,
+            'start_time': plan.start_date.strftime('%I:%M %p'),
+            'end_time': plan.end_date.strftime('%I:%M %p'),
+            'status': plan.status,
+        })
+    
+    return JsonResponse({'plans': plan_data})

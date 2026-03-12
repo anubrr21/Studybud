@@ -4,6 +4,7 @@ from django.contrib.auth.models import BaseUserManager
 from django.utils import timezone
 import json
 from PIL import Image
+from django.contrib.auth.models import User 
 import base64
 import io
 
@@ -299,3 +300,108 @@ class ChatParticipant(models.Model):
         return self.chat.messages.filter(
             created__gt=self.last_read_message.created
         ).exclude(sender=self.user).count()
+    
+
+
+class StudyPlan(models.Model):
+    PRIORITY_CHOICES = [
+        (1, '🔥 High'),
+        (2, '📌 Medium'),
+        (3, '📝 Low'),
+    ]
+    
+    STATUS_CHOICES = [
+        ('pending', '⏳ Pending'),
+        ('in_progress', '▶️ In Progress'),
+        ('completed', '✅ Completed'),
+        ('overdue', '⚠️ Overdue'),
+    ]
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='study_plans')
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True, null=True)
+    subject = models.CharField(max_length=100)
+    
+    # Date and Time
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
+    reminder_time = models.DateTimeField(null=True, blank=True)
+    
+    # Study details
+    estimated_hours = models.FloatField(default=1.0)
+    actual_hours = models.FloatField(default=0.0)
+    
+    # Status and Priority
+    priority = models.IntegerField(choices=PRIORITY_CHOICES, default=2)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    
+    # Recurring plans
+    is_recurring = models.BooleanField(default=False)
+    recurring_pattern = models.JSONField(null=True, blank=True)  # Store weekly pattern
+    
+    # Resources
+    resources = models.ManyToManyField('StudyResource', blank=True)
+    
+    # Timestamps
+    created = models.DateTimeField(auto_now_add=True)
+    updated = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['start_date', 'priority']
+    
+    def __str__(self):
+        return f"{self.title} - {self.user.username}"
+    
+    def duration_hours(self):
+        delta = self.end_date - self.start_date
+        return delta.total_seconds() / 3600
+    
+    def progress_percentage(self):
+        if self.estimated_hours > 0:
+            return min(100, (self.actual_hours / self.estimated_hours) * 100)
+        return 0
+    
+    def is_overdue(self):
+        return self.end_date < timezone.now() and self.status != 'completed'
+
+class StudyResource(models.Model):
+    RESOURCE_TYPES = [
+        ('pdf', '📄 PDF'),
+        ('video', '🎥 Video'),
+        ('link', '🔗 Link'),
+        ('note', '📝 Note'),
+    ]
+    
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    title = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    resource_type = models.CharField(max_length=10, choices=RESOURCE_TYPES)
+    
+    # File or URL
+    file = models.FileField(upload_to='study_resources/', null=True, blank=True)
+    url = models.URLField(null=True, blank=True)
+    
+    # Metadata
+    subject = models.CharField(max_length=100)
+    duration = models.IntegerField(default=0, help_text="Estimated time in minutes")
+    is_public = models.BooleanField(default=False)
+    
+    created = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return self.title
+
+class StudySession(models.Model):
+    """Track actual study sessions"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    plan = models.ForeignKey(StudyPlan, on_delete=models.SET_NULL, null=True, blank=True)
+    subject = models.CharField(max_length=100)
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField(null=True, blank=True)
+    duration = models.IntegerField(default=0, help_text="Duration in minutes")
+    notes = models.TextField(blank=True)
+    
+    created = models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return f"{self.subject} - {self.start_time.date()}"
