@@ -116,7 +116,7 @@ def get_base_styles():
             to { transform: rotate(360deg); }
         }
         
-        /* Logo Container with 3D Effect */
+        /* Logo Container with Perfect Alignment */
         .logo-container {
             display: flex;
             align-items: center;
@@ -137,12 +137,14 @@ def get_base_styles():
             justify-content: center;
             box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4), 0 0 0 3px #ffffff;
             border: 2px solid #71c6dd;
+            overflow: hidden;
         }
         
         .logo-icon img {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
         }
         
         .logo-text {
@@ -153,6 +155,7 @@ def get_base_styles():
             -webkit-text-fill-color: transparent;
             text-shadow: 3px 3px 0 #1a1a2a, 5px 5px 10px rgba(0,0,0,0.4);
             letter-spacing: -1px;
+            line-height: 1;
         }
         
         .logo-text span {
@@ -255,7 +258,7 @@ def get_base_styles():
             font-weight: 500;
         }
         
-        /* Features Section - Centered */
+        /* Features Section - Perfectly Centered */
         .features-section {
             display: flex;
             justify-content: center;
@@ -351,7 +354,7 @@ def get_base_styles():
             border: 1px dashed #71c6dd;
         }
         
-        /* Enhanced Footer - All centered */
+        /* Enhanced Footer - Perfectly Centered */
         .email-footer {
             background: linear-gradient(145deg, #1a1a2a 0%, #151525 100%);
             padding: 45px 35px;
@@ -383,14 +386,14 @@ def get_base_styles():
             background: rgba(113,198,221,0.1);
         }
         
-        /* Single Social Link - Email Only */
+        /* Single Social Link - Email Only - Perfectly Centered */
         .email-link {
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
             background: linear-gradient(145deg, #2d2d39 0%, #1a1a2a 100%);
-            padding: 12px 25px;
+            padding: 12px 30px;
             border-radius: 50px;
             border: 2px solid #71c6dd;
             color: #ffffff;
@@ -417,7 +420,7 @@ def get_base_styles():
             fill: #71c6dd;
         }
         
-        /* Stats Row - Centered */
+        /* Stats Row - Perfectly Centered */
         .stats-row {
             display: flex;
             justify-content: center;
@@ -441,7 +444,7 @@ def get_base_styles():
             margin-right: 5px;
         }
         
-        /* Copyright - Centered */
+        /* Copyright - Perfectly Centered */
         .copyright {
             color: #808080;
             font-size: 13px;
@@ -533,9 +536,9 @@ def get_base_styles():
                 height: 55px;
             }
             
-            .logo-icon svg {
-                width: 30px;
-                height: 30px;
+            .logo-icon img {
+                width: 100%;
+                height: 100%;
             }
             
             .email-content {
@@ -595,6 +598,9 @@ def send_verification_email(user, verification_code, site_url=None):
     
     subject = "✨ Welcome to StudyBud - Verify Your Account"
     
+    # Use a data URI as fallback if the image doesn't load
+    logo_fallback = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2371c6dd'%3E%3Cpath d='M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z'/%3E%3Ccircle cx='12' cy='12' r='3' fill='%2371c6dd'/%3E%3C/svg%3E"
+    
     html_content = f"""
     <!DOCTYPE html>
     <html>
@@ -607,11 +613,15 @@ def send_verification_email(user, verification_code, site_url=None):
     </head>
     <body>
         <div class="email-container">
-            <!-- Header with Logo -->
+            <!-- Header with Logo - Perfectly Centered -->
             <div class="email-header">
                 <div class="logo-container">
                     <div class="logo-icon">
-                        <img src="{site_url}/static/images/logo.svg" alt="StudyBud Logo" width="40" height="40">
+                        <img src="{site_url}/static/images/logo.svg" 
+                             alt="StudyBud Logo" 
+                             width="40" 
+                             height="40"
+                             onerror="this.onerror=null; this.src='{logo_fallback}';">
                     </div>
                     <div class="logo-text">
                         Study<span>Bud</span>
@@ -640,7 +650,7 @@ def send_verification_email(user, verification_code, site_url=None):
                     <div class="code-expiry">⏰ This code will expire in 24 hours</div>
                 </div>
                 
-                <!-- Features Section - Centered -->
+                <!-- Features Section - Perfectly Centered -->
                 <div class="features-section">
                     <div class="feature-item">
                         <span class="feature-icon">📚</span>
@@ -675,7 +685,7 @@ def send_verification_email(user, verification_code, site_url=None):
                 </div>
             </div>
             
-            <!-- Footer -->
+            <!-- Footer - Perfectly Centered -->
             <div class="email-footer">
                 <div class="footer-links">
                     <a href="{site_url}/about-us/" class="footer-link">About Us</a>
@@ -684,7 +694,7 @@ def send_verification_email(user, verification_code, site_url=None):
                     <a href="{site_url}/help-center/" class="footer-link">Help</a>
                 </div>
                 
-                <!-- Single Email Link -->
+                <!-- Single Email Link - Perfectly Centered -->
                 <a href="mailto:StudyBud@gmail.com" class="email-link">
                     <svg viewBox="0 0 24 24">
                         <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
@@ -743,6 +753,9 @@ def send_password_reset_email(user, reset_link, site_url=None):
     
     subject = "🔐 Reset Your StudyBud Password"
     
+    # Use a data URI as fallback if the image doesn't load
+    logo_fallback = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2371c6dd'%3E%3Cpath d='M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z'/%3E%3Ccircle cx='12' cy='12' r='3' fill='%2371c6dd'/%3E%3C/svg%3E"
+    
     html_content = f"""
     <!DOCTYPE html>
     <html>
@@ -755,11 +768,15 @@ def send_password_reset_email(user, reset_link, site_url=None):
     </head>
     <body>
         <div class="email-container">
-            <!-- Header with Logo -->
+            <!-- Header with Logo - Perfectly Centered -->
             <div class="email-header">
                 <div class="logo-container">
                     <div class="logo-icon">
-                        <img src="{site_url}/static/images/logo.svg" alt="StudyBud Logo" width="40" height="40">
+                        <img src="{site_url}/static/images/logo.svg" 
+                             alt="StudyBud Logo" 
+                             width="40" 
+                             height="40"
+                             onerror="this.onerror=null; this.src='{logo_fallback}';">
                     </div>
                     <div class="logo-text">
                         Study<span>Bud</span>
@@ -783,7 +800,7 @@ def send_password_reset_email(user, reset_link, site_url=None):
                     to create a new password and get back to learning.
                 </div>
                 
-                <!-- Reset Button -->
+                <!-- Reset Button - Centered -->
                 <div style="text-align: center; margin: 40px 0;">
                     <a href="{reset_link}" class="reset-button">
                         Reset Password →
@@ -819,7 +836,7 @@ def send_password_reset_email(user, reset_link, site_url=None):
                 </div>
             </div>
             
-            <!-- Footer -->
+            <!-- Footer - Perfectly Centered -->
             <div class="email-footer">
                 <div class="footer-links">
                     <a href="{site_url}/about-us/" class="footer-link">About Us</a>
@@ -828,7 +845,7 @@ def send_password_reset_email(user, reset_link, site_url=None):
                     <a href="{site_url}/help-center/" class="footer-link">Help</a>
                 </div>
                 
-                <!-- Single Email Link -->
+                <!-- Single Email Link - Perfectly Centered -->
                 <a href="mailto:StudyBud@gmail.com" class="email-link">
                     <svg viewBox="0 0 24 24">
                         <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
