@@ -56,6 +56,11 @@ def loginPage(request):
             messages.error(request, 'This username/email is not registered')
             return render(request, 'base/login_register.html', {'page': page})
 
+        # Check if email is verified
+        if not user.email_verified:
+            messages.error(request, 'Please verify your email first. Check your inbox for the verification code.')
+            return redirect('verify-email', user_id=user.id)
+
         # Check password
         user = authenticate(request, email=user.email, password=password)
 
@@ -68,7 +73,6 @@ def loginPage(request):
             messages.error(request, 'Incorrect password')
            
     return render(request, 'base/login_register.html', {'page': page})
-
 
 def logoutUser(request):
      logout(request)

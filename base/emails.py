@@ -76,6 +76,7 @@ def get_base_styles():
             background: linear-gradient(135deg, #0f0f1a 0%, #1a1a2a 100%);
             margin: 0;
             padding: 20px;
+            text-align: center;
         }
         
         /* Main Container with 3D Border Effect */
@@ -138,14 +139,12 @@ def get_base_styles():
             border: 2px solid #71c6dd;
         }
         
-        .logo-icon svg {
+        .logo-icon img {
             width: 40px;
             height: 40px;
-            fill: #71c6dd;
-            filter: drop-shadow(0 0 5px rgba(113,198,221,0.8));
+            border-radius: 50%;
         }
         
-        /* Stylized Text Logo */
         .logo-text {
             font-size: 48px;
             font-weight: 900;
@@ -182,6 +181,7 @@ def get_base_styles():
         .email-content {
             padding: 45px 35px;
             background: linear-gradient(145deg, #2d2d39 0%, #252533 100%);
+            text-align: left;
         }
         
         .greeting {
@@ -255,20 +255,22 @@ def get_base_styles():
             font-weight: 500;
         }
         
-        /* Features Section - Improved Layout */
+        /* Features Section - Centered */
         .features-section {
             display: flex;
-            justify-content: space-between;
-            gap: 15px;
+            justify-content: center;
+            gap: 20px;
             margin: 40px 0;
             padding: 25px 0;
+            text-align: center;
         }
         
         .feature-item {
             text-align: center;
-            flex: 1;
+            flex: 0 1 auto;
+            min-width: 120px;
             background: rgba(26, 26, 42, 0.8);
-            padding: 20px 10px;
+            padding: 20px 15px;
             border-radius: 20px;
             border: 1px solid rgba(113,198,221,0.3);
             backdrop-filter: blur(5px);
@@ -282,7 +284,7 @@ def get_base_styles():
         
         .feature-text {
             color: #ffffff;
-            font-size: 13px;
+            font-size: 14px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -349,7 +351,7 @@ def get_base_styles():
             border: 1px dashed #71c6dd;
         }
         
-        /* Enhanced Footer */
+        /* Enhanced Footer - All centered */
         .email-footer {
             background: linear-gradient(145deg, #1a1a2a 0%, #151525 100%);
             padding: 45px 35px;
@@ -360,16 +362,17 @@ def get_base_styles():
         .footer-links {
             display: flex;
             justify-content: center;
-            gap: 20px;
+            gap: 25px;
             margin-bottom: 30px;
             flex-wrap: wrap;
+            padding: 0;
         }
         
         .footer-link {
             color: #b2bdbd;
             text-decoration: none;
             font-size: 14px;
-            padding: 5px 10px;
+            padding: 8px 16px;
             transition: all 0.3s ease;
             background: rgba(255,255,255,0.05);
             border-radius: 30px;
@@ -380,68 +383,52 @@ def get_base_styles():
             background: rgba(113,198,221,0.1);
         }
         
-        .social-links {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin: 30px 0;
-        }
-        
-        .social-link {
-            width: 45px;
-            height: 45px;
-            background: linear-gradient(145deg, #2d2d39 0%, #1a1a2a 100%);
-            border-radius: 50%;
+        /* Single Social Link - Email Only */
+        .email-link {
             display: inline-flex;
             align-items: center;
             justify-content: center;
+            gap: 10px;
+            background: linear-gradient(145deg, #2d2d39 0%, #1a1a2a 100%);
+            padding: 12px 25px;
+            border-radius: 50px;
             border: 2px solid #71c6dd;
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 16px;
+            margin: 20px auto;
             transition: all 0.3s ease;
+            width: fit-content;
         }
         
-        .social-link:hover {
-            transform: translateY(-5px);
+        .email-link:hover {
+            transform: translateY(-3px);
             background: #71c6dd;
+            color: #1a1a2a;
         }
         
-        .social-link:hover svg {
+        .email-link:hover svg {
             fill: #1a1a2a;
         }
         
-        .social-link svg {
+        .email-link svg {
             width: 22px;
             height: 22px;
             fill: #71c6dd;
         }
         
-        .copyright {
-            color: #808080;
-            font-size: 13px;
-            margin-top: 30px;
-            padding-top: 25px;
-            border-top: 2px solid rgba(113,198,221,0.2);
-            line-height: 1.8;
-        }
-        
-        .copyright span {
-            color: #71c6dd;
-            font-weight: 700;
-            font-size: 14px;
-            display: inline-block;
-            margin: 0 5px;
-        }
-        
+        /* Stats Row - Centered */
         .stats-row {
             display: flex;
             justify-content: center;
-            gap: 15px;
+            gap: 20px;
             flex-wrap: wrap;
-            margin: 15px 0;
+            margin: 25px 0;
         }
         
         .stat-item {
             background: rgba(113,198,221,0.1);
-            padding: 8px 16px;
+            padding: 8px 20px;
             border-radius: 50px;
             border: 1px solid rgba(113,198,221,0.3);
             font-size: 13px;
@@ -452,6 +439,26 @@ def get_base_styles():
             color: #71c6dd;
             font-weight: 700;
             margin-right: 5px;
+        }
+        
+        /* Copyright - Centered */
+        .copyright {
+            color: #808080;
+            font-size: 13px;
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 2px solid rgba(113,198,221,0.2);
+            text-align: center;
+        }
+        
+        .copyright a {
+            color: #71c6dd;
+            font-weight: 700;
+            text-decoration: none;
+        }
+        
+        .copyright a:hover {
+            text-decoration: underline;
         }
         
         /* Reset Button */
@@ -526,6 +533,11 @@ def get_base_styles():
                 height: 55px;
             }
             
+            .logo-icon svg {
+                width: 30px;
+                height: 30px;
+            }
+            
             .email-content {
                 padding: 30px 20px;
             }
@@ -542,30 +554,31 @@ def get_base_styles():
             .features-section {
                 flex-direction: column;
                 gap: 12px;
+                align-items: center;
             }
             
             .feature-item {
-                width: 100%;
-            }
-            
-            .feature-text {
-                font-size: 14px;
+                width: 80%;
             }
             
             .footer-links {
                 flex-direction: column;
                 gap: 10px;
+                align-items: center;
             }
             
             .footer-link {
-                width: 100%;
-                text-align: center;
-                padding: 8px;
+                width: 80%;
             }
             
             .stats-row {
                 flex-direction: column;
                 gap: 8px;
+                align-items: center;
+            }
+            
+            .stat-item {
+                width: fit-content;
             }
             
             .warning-content {
@@ -598,10 +611,7 @@ def send_verification_email(user, verification_code, site_url=None):
             <div class="email-header">
                 <div class="logo-container">
                     <div class="logo-icon">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
-                            <circle cx="12" cy="12" r="3" fill="#71c6dd"/>
-                        </svg>
+                        <img src="{site_url}/static/images/logo.svg" alt="StudyBud Logo" width="40" height="40">
                     </div>
                     <div class="logo-text">
                         Study<span>Bud</span>
@@ -630,7 +640,7 @@ def send_verification_email(user, verification_code, site_url=None):
                     <div class="code-expiry">⏰ This code will expire in 24 hours</div>
                 </div>
                 
-                <!-- Features Section - Now with better wrapping -->
+                <!-- Features Section - Centered -->
                 <div class="features-section">
                     <div class="feature-item">
                         <span class="feature-icon">📚</span>
@@ -674,23 +684,13 @@ def send_verification_email(user, verification_code, site_url=None):
                     <a href="{site_url}/help-center/" class="footer-link">Help</a>
                 </div>
                 
-                <div class="social-links">
-                    <a href="#" class="social-link">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.879v-6.99h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.99C18.343 21.128 22 16.991 22 12z"/>
-                        </svg>
-                    </a>
-                    <a href="#" class="social-link">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M22.46 6c-.77.35-1.6.58-2.46.69.88-.53 1.56-1.37 1.88-2.38-.83.5-1.75.85-2.72 1.05C18.37 4.5 17.26 4 16 4c-2.35 0-4.27 1.92-4.27 4.29 0 .34.04.67.11.98-3.56-.18-6.73-1.89-8.84-4.48-.37.63-.58 1.37-.58 2.15 0 1.49.75 2.81 1.91 3.56-.71 0-1.37-.2-1.95-.5v.03c0 2.08 1.48 3.82 3.44 4.21a4.22 4.22 0 0 1-1.93.07 4.28 4.28 0 0 0 4 2.98 8.52 8.52 0 0 1-5.33 1.84c-.34 0-.68-.02-1.02-.06C3.9 20.29 6.16 21 8.58 21c7.88 0 12.21-6.54 12.21-12.21 0-.19 0-.37-.01-.56.84-.6 1.56-1.36 2.14-2.23z"/>
-                        </svg>
-                    </a>
-                    <a href="#" class="social-link">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z"/>
-                        </svg>
-                    </a>
-                </div>
+                <!-- Single Email Link -->
+                <a href="mailto:StudyBud@gmail.com" class="email-link">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                    </svg>
+                    StudyBud@gmail.com
+                </a>
                 
                 <div class="stats-row">
                     <div class="stat-item"><span>📚</span> 300+ Study Rooms</div>
@@ -699,7 +699,7 @@ def send_verification_email(user, verification_code, site_url=None):
                 </div>
                 
                 <div class="copyright">
-                    <span>© {verification_code[:4]} StudyBud.</span> All rights reserved.
+                    <span>© 2026 <a href="{site_url}">StudyBud</a>.</span> All rights reserved.
                 </div>
             </div>
         </div>
@@ -759,10 +759,7 @@ def send_password_reset_email(user, reset_link, site_url=None):
             <div class="email-header">
                 <div class="logo-container">
                     <div class="logo-icon">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
-                            <circle cx="12" cy="12" r="3" fill="#71c6dd"/>
-                        </svg>
+                        <img src="{site_url}/static/images/logo.svg" alt="StudyBud Logo" width="40" height="40">
                     </div>
                     <div class="logo-text">
                         Study<span>Bud</span>
@@ -831,23 +828,13 @@ def send_password_reset_email(user, reset_link, site_url=None):
                     <a href="{site_url}/help-center/" class="footer-link">Help</a>
                 </div>
                 
-                <div class="social-links">
-                    <a href="#" class="social-link">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.879v-6.99h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.99C18.343 21.128 22 16.991 22 12z"/>
-                        </svg>
-                    </a>
-                    <a href="#" class="social-link">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M22.46 6c-.77.35-1.6.58-2.46.69.88-.53 1.56-1.37 1.88-2.38-.83.5-1.75.85-2.72 1.05C18.37 4.5 17.26 4 16 4c-2.35 0-4.27 1.92-4.27 4.29 0 .34.04.67.11.98-3.56-.18-6.73-1.89-8.84-4.48-.37.63-.58 1.37-.58 2.15 0 1.49.75 2.81 1.91 3.56-.71 0-1.37-.2-1.95-.5v.03c0 2.08 1.48 3.82 3.44 4.21a4.22 4.22 0 0 1-1.93.07 4.28 4.28 0 0 0 4 2.98 8.52 8.52 0 0 1-5.33 1.84c-.34 0-.68-.02-1.02-.06C3.9 20.29 6.16 21 8.58 21c7.88 0 12.21-6.54 12.21-12.21 0-.19 0-.37-.01-.56.84-.6 1.56-1.36 2.14-2.23z"/>
-                        </svg>
-                    </a>
-                    <a href="#" class="social-link">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z"/>
-                        </svg>
-                    </a>
-                </div>
+                <!-- Single Email Link -->
+                <a href="mailto:StudyBud@gmail.com" class="email-link">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                    </svg>
+                    StudyBud@gmail.com
+                </a>
                 
                 <div class="stats-row">
                     <div class="stat-item"><span>🔐</span> Secure</div>
@@ -856,7 +843,7 @@ def send_password_reset_email(user, reset_link, site_url=None):
                 </div>
                 
                 <div class="copyright">
-                    <span>© 2026 StudyBud.</span> All rights reserved.
+                    <span>© 2026 <a href="{site_url}">StudyBud</a>.</span> All rights reserved.
                 </div>
             </div>
         </div>
