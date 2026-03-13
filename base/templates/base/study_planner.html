@@ -94,13 +94,14 @@
         text-align: center;
     }
     
-    /* Calendar View */
+    /* Calendar View - Like Create Study Plan */
     .calendar-view {
         background: linear-gradient(145deg, var(--color-dark) 0%, #2a2a38 100%);
         border-radius: 20px;
         padding: 2rem;
         margin-bottom: 2rem;
         border: 1px solid rgba(113,198,221,0.2);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.3);
     }
     
     .calendar-header {
@@ -108,12 +109,25 @@
         justify-content: space-between;
         align-items: center;
         margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid rgba(113,198,221,0.3);
+    }
+    
+    .calendar-header h2 {
+        color: var(--color-main);
+        font-size: 2.2rem;
+        font-weight: 700;
+    }
+    
+    .calendar-nav {
+        display: flex;
+        gap: 0.5rem;
     }
     
     .calendar-grid {
         display: grid;
         grid-template-columns: repeat(7, 1fr);
-        gap: 1rem;
+        gap: 0.8rem;
         margin-top: 1rem;
     }
     
@@ -122,6 +136,9 @@
         color: var(--color-main);
         font-weight: 600;
         padding: 1rem;
+        font-size: 1.4rem;
+        background: rgba(113,198,221,0.1);
+        border-radius: 10px;
     }
     
     .calendar-day {
@@ -135,10 +152,13 @@
         cursor: pointer;
         transition: all 0.3s ease;
         position: relative;
+        border: 2px solid transparent;
+        font-weight: 500;
     }
     
     .calendar-day:hover {
         transform: translateY(-2px);
+        border-color: var(--color-main);
         box-shadow: 0 5px 15px rgba(113,198,221,0.3);
     }
     
@@ -146,25 +166,29 @@
         background: linear-gradient(135deg, var(--color-main) 0%, #4fa3b8 100%);
         color: var(--color-dark);
         font-weight: bold;
+        border-color: white;
+    }
+    
+    .calendar-day.has-plans {
+        position: relative;
+        font-weight: bold;
     }
     
     .calendar-day.has-plans::after {
-        content: '';
+        content: '📚';
         position: absolute;
-        bottom: 5px;
-        width: 5px;
-        height: 5px;
-        background: var(--color-main);
-        border-radius: 50%;
+        bottom: 2px;
+        font-size: 1rem;
     }
     
     .calendar-day.selected.has-plans::after {
-        background: var(--color-dark);
+        color: var(--color-dark);
     }
     
     .calendar-day-number {
-        font-size: 1.4rem;
+        font-size: 1.6rem;
         font-weight: 600;
+        margin-bottom: 0.5rem;
     }
     
     /* Create Button */
@@ -283,7 +307,7 @@
         box-shadow: 0 0 0 3px rgba(113,198,221,0.2);
     }
     
-    /* Timeline */
+    /* Timeline - 24 Hour Format */
     .timeline {
         display: flex;
         flex-direction: column;
@@ -309,7 +333,7 @@
     
     .timeline-hour {
         display: grid;
-        grid-template-columns: 70px 1fr;
+        grid-template-columns: 80px 1fr;
         gap: 1rem;
         min-height: 80px;
         border-bottom: 1px solid rgba(113,198,221,0.1);
@@ -318,9 +342,11 @@
     
     .hour-label {
         color: var(--color-main);
-        font-size: 1.3rem;
+        font-size: 1.4rem;
         font-weight: 600;
         padding-top: 0.5rem;
+        text-align: right;
+        font-family: monospace;
     }
     
     .hour-plans {
@@ -387,6 +413,7 @@
         display: flex;
         align-items: center;
         gap: 0.5rem;
+        font-family: monospace;
     }
     
     .plan-time::before {
@@ -417,6 +444,7 @@
         display: flex;
         gap: 1rem;
         margin-top: 1rem;
+        flex-wrap: wrap;
     }
     
     .plan-action-btn {
@@ -549,6 +577,7 @@
         border-radius: 16px;
         transition: all 0.3s ease;
         border-left: 4px solid transparent;
+        cursor: pointer;
     }
     
     .upcoming-item:hover {
@@ -607,8 +636,13 @@
             gap: 0.5rem;
         }
         
-        .calendar-day-number {
+        .calendar-weekday {
+            padding: 0.5rem;
             font-size: 1.2rem;
+        }
+        
+        .calendar-day-number {
+            font-size: 1.4rem;
         }
         
         .timeline-hour {
@@ -616,11 +650,20 @@
         }
         
         .hour-label {
-            display: none;
+            text-align: left;
+            padding-left: 1rem;
+            background: rgba(113,198,221,0.1);
+            border-radius: 20px;
+            margin-bottom: 0.5rem;
         }
         
         .plan-actions {
-            flex-wrap: wrap;
+            flex-direction: column;
+        }
+        
+        .plan-action-btn {
+            width: 100%;
+            justify-content: center;
         }
     }
 </style>
@@ -676,7 +719,7 @@
             <div class="stat-icon">✅</div>
             <div class="stat-info">
                 <h3>Plans Today</h3>
-                <p id="plans-today">{{ plans.count }}</p>
+                <p id="plans-today">{{ plans_count }}</p>
             </div>
         </div>
         
@@ -689,7 +732,7 @@
         </div>
     </div>
     
-    <!-- Calendar View -->
+    <!-- Calendar View - Like Create Study Plan -->
     <div class="calendar-view">
         <div class="calendar-header">
             <h2>{{ current_date|date:"F Y" }}</h2>
@@ -710,8 +753,8 @@
             
             {% for day in calendar_days %}
             <div class="calendar-day {% if day.date == current_date %}selected{% endif %} {% if day.has_plans %}has-plans{% endif %}"
-     data-url="?date={{ day.date|date:"Y-m-d" }}"
-     onclick="window.location.href=this.dataset.url">
+                 data-url="?date={{ day.date|date:'Y-m-d' }}"
+                 onclick="window.location.href=this.dataset.url">
                 <span class="calendar-day-number">{{ day.day }}</span>
             </div>
             {% endfor %}
@@ -737,7 +780,7 @@
             <div class="timeline" id="timeline">
                 {% for hour in "01234567891011121314151617181920212223"|make_list %}
                 <div class="timeline-hour">
-                    <div class="hour-label">{{ hour }}:00</div>
+                    <div class="hour-label">{{ hour|stringformat:"02d" }}:00</div>
                     <div class="hour-plans">
                         {% with hour_int=hour|add:0 %}
                             {% for plan in plans %}
@@ -748,33 +791,23 @@
                                     {% if plan.status == 'overdue' %}overdue{% endif %}"
                                      data-plan-id="{{ plan.id }}">
                                     <div class="plan-time">
-                                        {{ plan.start_date|time:"g:i A" }} - {{ plan.end_date|time:"g:i A" }}
+                                        {{ plan.start_date|time:"H:i" }} - {{ plan.end_date|time:"H:i" }}
                                     </div>
                                     <div class="plan-title">{{ plan.title }}</div>
                                     <div class="plan-subject">{{ plan.subject }}</div>
                                     
-                                    {% if plan.status == 'overdue' %}
                                     <div class="plan-actions">
+                                        {% if plan.status == 'overdue' or plan.status == 'pending' and plan.end_date < now %}
                                         <button class="plan-action-btn complete-btn" onclick="markPlanComplete('{{ plan.id }}', event)">
                                             ✓ Mark Complete
                                         </button>
+                                        {% endif %}
+                                        {% if plan.status != 'completed' %}
                                         <button class="plan-action-btn edit-btn" onclick="editPlan('{{ plan.id }}', event)">
                                             ✎ Edit
                                         </button>
+                                        {% endif %}
                                     </div>
-                                    {% elif plan.status == 'pending' and plan.end_date < now %}
-                                    <div class="plan-actions">
-                                        <button class="plan-action-btn complete-btn" onclick="markPlanComplete('{{ plan.id }}', event)">
-                                            ✓ Mark Complete
-                                        </button>
-                                    </div>
-                                    {% elif plan.status == 'pending' %}
-                                    <div class="plan-actions">
-                                        <button class="plan-action-btn edit-btn" onclick="editPlan('{{ plan.id }}', event)">
-                                            ✎ Edit
-                                        </button>
-                                    </div>
-                                    {% endif %}
                                 </div>
                                 {% endif %}
                             {% empty %}
@@ -803,7 +836,7 @@
                     {% for plan in upcoming_plans %}
                     <div class="upcoming-item" onclick="editPlan('{{ plan.id }}')">
                         <div class="item-title">{{ plan.title }}</div>
-                        <div class="item-time">{{ plan.start_date|date:"M d, g:i A" }}</div>
+                        <div class="item-time">{{ plan.start_date|date:"M d, H:i" }}</div>
                     </div>
                     {% empty %}
                     <p style="color: var(--color-light-gray); padding: 1rem;">No upcoming plans</p>
@@ -820,8 +853,8 @@
                     {% for plan in overdue_plans %}
                     <div class="overdue-item">
                         <div class="item-title">{{ plan.title }}</div>
-                        <div class="item-time">Due: {{ plan.end_date|date:"M d, g:i A" }}</div>
-                        <button class="plan-action-btn complete-btn" style="margin-top: 0.5rem;" onclick="markPlanComplete('{{ plan.id }}', event)">
+                        <div class="item-time">Due: {{ plan.end_date|date:"M d, H:i" }}</div>
+                        <button class="plan-action-btn complete-btn" style="margin-top: 0.5rem; width: 100%;" onclick="markPlanComplete('{{ plan.id }}', event)">
                             ✓ Mark Complete
                         </button>
                     </div>
@@ -862,6 +895,9 @@ function markPlanComplete(planId, event) {
             // Update stats
             updateStats();
             
+            // Show success message
+            alert('Plan marked as complete! 🎉');
+            
             // Reload page to reflect changes
             location.reload();
         }
@@ -872,12 +908,13 @@ function markPlanComplete(planId, event) {
     });
 }
 
-// Edit plan
+// Edit plan - FIXED
 function editPlan(planId, event) {
     if (event) {
         event.stopPropagation();
     }
-    window.location.href = `/edit-study-plan/${planId}/`;
+    // Use the correct URL pattern - redirect to create-study-plan with edit parameter
+    window.location.href = `{% url 'create-study-plan' %}?edit=${planId}`;
 }
 
 // Update all stats
@@ -908,7 +945,7 @@ document.getElementById('subjectFilter').addEventListener('change', function() {
     });
 });
 
-// Check for overdue plans on page load
+// Check for reminders and overdue plans
 document.addEventListener('DOMContentLoaded', function() {
     updateStats();
     
@@ -918,10 +955,30 @@ document.addEventListener('DOMContentLoaded', function() {
         headers: {
             'X-CSRFToken': '{{ csrf_token }}'
         }
-    });
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.reminders_sent && data.reminders_sent.length > 0) {
+            // Show browser notifications
+            if (Notification.permission === 'granted') {
+                data.reminders_sent.forEach(reminder => {
+                    new Notification('Study Reminder', {
+                        body: `Time to study: ${reminder.title}`,
+                        icon: '/static/images/logo.svg'
+                    });
+                });
+            }
+        }
+    })
+    .catch(err => console.log('Reminder check failed:', err));
 });
 
 // Refresh stats every minute
 setInterval(updateStats, 60000);
+
+// Request notification permission
+if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+    Notification.requestPermission();
+}
 </script>
 {% endblock %}

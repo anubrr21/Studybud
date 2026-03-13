@@ -16,6 +16,7 @@
         min-width: 300px;
         max-height: 600px;
         overflow-y: auto;
+        border-radius: 1.5rem;
     }
     
     .activities:hover {
@@ -30,9 +31,10 @@
         z-index: 10;
         padding: 1.5rem;
         border-bottom: 2px solid var(--color-main);
+        border-radius: 1.5rem 1.5rem 0 0;
     }
     
-    /* Study Dashboard Styles */
+    /* Study Dashboard Styles - Full Width */
     .study-dashboard {
         margin-top: 3rem;
         padding: 2rem;
@@ -58,7 +60,7 @@
     
     .dashboard-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
         gap: 2rem;
     }
     
@@ -202,7 +204,7 @@
         box-shadow: 0 10px 20px rgba(113,198,221,0.4);
     }
     
-    /* Layout fixes */
+    /* Layout fixes - Full width bottom section */
     .layout--3 .container {
         display: grid;
         grid-template-columns: 1fr 3fr 1.2fr;
@@ -217,24 +219,22 @@
     }
     
     .study-dashboard {
-        margin-top: 2rem;
+        margin-top: 3rem;
         width: 100%;
+        grid-column: 1 / -1;
     }
     
-    /* Mobile Responsive */
+    /* Mobile Responsive - Fixed */
     @media (max-width: 1024px) {
         .layout--3 .container {
             grid-template-columns: 1fr 2fr 1fr;
-        }
-        
-        .layout--3 .container > div:last-child {
-            grid-column: 2 / 3;
         }
     }
     
     @media (max-width: 768px) {
         .layout--3 .container {
             grid-template-columns: 1fr;
+            gap: 1.5rem;
         }
         
         .roomList {
@@ -244,6 +244,13 @@
         .layout--3 .container > div:last-child {
             grid-column: 1 / -1;
             margin-top: 2rem;
+            width: 100%;
+        }
+        
+        /* Fix for mobile - ensure full width */
+        .container {
+            width: 100%;
+            padding: 1rem;
         }
         
         .dashboard-grid {
@@ -254,10 +261,45 @@
         .study-dashboard {
             padding: 1.5rem;
             margin-top: 2rem;
+            width: 100%;
         }
         
         .dashboard-title {
             font-size: 2rem;
+        }
+        
+        /* Fix activities on mobile */
+        .activities {
+            min-width: 100%;
+            max-height: 400px;
+        }
+        
+        /* Ensure no empty space on right */
+        .layout--3 .container > * {
+            width: 100%;
+        }
+    }
+    
+    /* Fix for very small screens */
+    @media (max-width: 480px) {
+        .dashboard-card {
+            padding: 1.5rem;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+        }
+        
+        .plan-item {
+            padding: 1rem;
+        }
+        
+        .plan-time {
+            font-size: 1.2rem;
+        }
+        
+        .plan-title {
+            font-size: 1.4rem;
         }
     }
 </style>
@@ -319,66 +361,6 @@
                     </svg>
                 </a>
             </div>
-
-            <!-- Study Dashboard Section -->
-            {% if request.user.is_authenticated %}
-            <div class="study-dashboard">
-                <h2 class="dashboard-title">
-                    <span>📚</span> Today's Study Plan
-                </h2>
-                
-                <div class="dashboard-grid">
-                    <!-- Today's Schedule Card - Clickable -->
-                    <a href="{% url 'study-planner' %}" class="dashboard-card">
-                        <div class="card-header">
-                            <span>⏰</span>
-                            <h3>Today's Schedule</h3>
-                        </div>
-                        <div id="today-plans-preview">
-                            <div class="loading-skeleton"></div>
-                        </div>
-                        <span class="view-link">
-                            View Full Planner →
-                        </span>
-                    </a>
-                    
-                    <!-- Study Stats Card - Clickable -->
-                    <a href="{% url 'study-planner' %}" class="dashboard-card">
-                        <div class="card-header">
-                            <span>📊</span>
-                            <h3>This Week</h3>
-                        </div>
-                        <div class="stats-grid">
-                            <div class="stat-item">
-                                <div class="stat-number" id="weekly-hours">0</div>
-                                <div class="stat-label">Hours</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-number" id="weekly-plans">0</div>
-                                <div class="stat-label">Plans</div>
-                            </div>
-                        </div>
-                        <span class="view-link">
-                            View Stats →
-                        </span>
-                    </a>
-                    
-                    <!-- Quick Add Card - Clickable -->
-                    <a href="{% url 'create-study-plan' %}" class="dashboard-card quick-add-btn" style="padding: 2rem;">
-                        <div class="card-header">
-                            <span>➕</span>
-                            <h3>Quick Add</h3>
-                        </div>
-                        <div style="text-align: center;">
-                            <span style="font-size: 4rem; display: block; margin: 1rem 0;">+</span>
-                            <span style="font-size: 1.6rem;">Create Study Plan</span>
-                        </div>
-                    </a>
-                </div>
-            </div>
-            {% endif %}
-            <!-- End Study Dashboard Section -->
-
         </div>
         <!-- Room List End -->
 
@@ -388,6 +370,65 @@
         </div>
         <!-- Activities End -->
     </div>
+    
+    <!-- Study Dashboard Section - Now FULL WIDTH outside the grid but inside main -->
+    {% if request.user.is_authenticated %}
+    <div class="study-dashboard" style="margin-top: 0; width: 100%; max-width: 1400px; margin-left: auto; margin-right: auto; padding: 2rem;">
+        <h2 class="dashboard-title">
+            <span>📚</span> Today's Study Plan
+        </h2>
+        
+        <div class="dashboard-grid">
+            <!-- Today's Schedule Card - Clickable -->
+            <a href="{% url 'study-planner' %}" class="dashboard-card">
+                <div class="card-header">
+                    <span>⏰</span>
+                    <h3>Today's Schedule</h3>
+                </div>
+                <div id="today-plans-preview">
+                    <div class="loading-skeleton"></div>
+                </div>
+                <span class="view-link">
+                    View Full Planner →
+                </span>
+            </a>
+            
+            <!-- Study Stats Card - Clickable -->
+            <a href="{% url 'study-planner' %}" class="dashboard-card">
+                <div class="card-header">
+                    <span>📊</span>
+                    <h3>This Week</h3>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number" id="weekly-hours">0</div>
+                        <div class="stat-label">Hours</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number" id="weekly-plans">0</div>
+                        <div class="stat-label">Plans</div>
+                    </div>
+                </div>
+                <span class="view-link">
+                    View Stats →
+                </span>
+            </a>
+            
+            <!-- Quick Add Card - Clickable -->
+            <a href="{% url 'create-study-plan' %}" class="dashboard-card" style="padding: 2rem; background: linear-gradient(135deg, var(--color-main) 0%, #4fa3b8 100%);">
+                <div class="card-header">
+                    <span>➕</span>
+                    <h3 style="color: var(--color-dark);">Quick Add</h3>
+                </div>
+                <div style="text-align: center;">
+                    <span style="font-size: 4rem; display: block; margin: 1rem 0; color: var(--color-dark);">+</span>
+                    <span style="font-size: 1.6rem; color: var(--color-dark); font-weight: bold;">Create Study Plan</span>
+                </div>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+    <!-- End Study Dashboard Section -->
 </main>
 
 <script>
@@ -395,6 +436,11 @@
 document.addEventListener('DOMContentLoaded', function() {
     loadDashboardPlans();
     loadWeeklyStats();
+    
+    // Check for browser notification permission
+    if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
+        Notification.requestPermission();
+    }
 });
 
 function loadDashboardPlans() {
@@ -403,8 +449,13 @@ function loadDashboardPlans() {
         .then(data => {
             const container = document.getElementById('today-plans-preview');
             if (data.plans && data.plans.length > 0) {
+                // Sort plans by start time to show most recent first
+                const sortedPlans = data.plans.sort((a, b) => {
+                    return new Date(a.start_time) - new Date(b.start_time);
+                });
+                
                 let html = '';
-                data.plans.slice(0, 3).forEach(plan => {
+                sortedPlans.slice(0, 3).forEach(plan => {
                     html += `
                         <div class="plan-item">
                             <div class="plan-time">${plan.start_time}</div>
