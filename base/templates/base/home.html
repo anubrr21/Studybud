@@ -6,19 +6,33 @@
     .layout--3 > .container > div:last-child {
         margin-top: 2rem;
         align-self: flex-start;
+        width: 100%;
     }
     
-    /* Add a subtle shadow to make it pop */
+    /* Make Activities component broader */
     .activities {
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         transition: transform 0.3s ease;
+        min-width: 300px;
+        max-height: 600px;
+        overflow-y: auto;
     }
     
     .activities:hover {
         transform: translateY(-2px);
     }
     
-    /* Study Dashboard Styles - FIXED POSITIONING */
+    /* Activities Header */
+    .activities__header {
+        position: sticky;
+        top: 0;
+        background: var(--color-dark);
+        z-index: 10;
+        padding: 1.5rem;
+        border-bottom: 2px solid var(--color-main);
+    }
+    
+    /* Study Dashboard Styles */
     .study-dashboard {
         margin-top: 3rem;
         padding: 2rem;
@@ -57,22 +71,10 @@
         transition: all 0.3s ease;
         position: relative;
         overflow: hidden;
-    }
-    
-    .dashboard-card::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        right: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(113,198,221,0.1) 0%, transparent 70%);
-        animation: rotate 20s linear infinite;
-    }
-    
-    @keyframes rotate {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
+        cursor: pointer;
+        text-decoration: none;
+        color: inherit;
+        display: block;
     }
     
     .dashboard-card:hover {
@@ -200,29 +202,14 @@
         box-shadow: 0 10px 20px rgba(113,198,221,0.4);
     }
     
-    /* Loading Skeleton */
-    .loading-skeleton {
-        background: linear-gradient(90deg, var(--color-dark-medium) 25%, var(--color-dark) 50%, var(--color-dark-medium) 75%);
-        background-size: 200% 100%;
-        animation: loading 1.5s infinite;
-        border-radius: 1rem;
-        height: 80px;
-    }
-    
-    @keyframes loading {
-        0% { background-position: 200% 0; }
-        100% { background-position: -200% 0; }
-    }
-    
-    /* FIX: Make the layout stack properly on all devices */
+    /* Layout fixes */
     .layout--3 .container {
         display: grid;
-        grid-template-columns: 1fr 3fr 1fr;
+        grid-template-columns: 1fr 3fr 1.2fr;
         gap: 2rem;
         align-items: start;
     }
     
-    /* FIX: Position study dashboard under room list */
     .roomList {
         display: flex;
         flex-direction: column;
@@ -237,7 +224,7 @@
     /* Mobile Responsive */
     @media (max-width: 1024px) {
         .layout--3 .container {
-            grid-template-columns: 1fr 2fr;
+            grid-template-columns: 1fr 2fr 1fr;
         }
         
         .layout--3 .container > div:last-child {
@@ -256,6 +243,7 @@
         
         .layout--3 .container > div:last-child {
             grid-column: 1 / -1;
+            margin-top: 2rem;
         }
         
         .dashboard-grid {
@@ -332,7 +320,7 @@
                 </a>
             </div>
 
-            <!-- Study Dashboard Section - NOW UNDER ROOM LIST -->
+            <!-- Study Dashboard Section -->
             {% if request.user.is_authenticated %}
             <div class="study-dashboard">
                 <h2 class="dashboard-title">
@@ -340,8 +328,8 @@
                 </h2>
                 
                 <div class="dashboard-grid">
-                    <!-- Today's Schedule Card -->
-                    <div class="dashboard-card">
+                    <!-- Today's Schedule Card - Clickable -->
+                    <a href="{% url 'study-planner' %}" class="dashboard-card">
                         <div class="card-header">
                             <span>⏰</span>
                             <h3>Today's Schedule</h3>
@@ -349,13 +337,13 @@
                         <div id="today-plans-preview">
                             <div class="loading-skeleton"></div>
                         </div>
-                        <a href="{% url 'study-planner' %}" class="view-link">
+                        <span class="view-link">
                             View Full Planner →
-                        </a>
-                    </div>
+                        </span>
+                    </a>
                     
-                    <!-- Study Stats Card -->
-                    <div class="dashboard-card">
+                    <!-- Study Stats Card - Clickable -->
+                    <a href="{% url 'study-planner' %}" class="dashboard-card">
                         <div class="card-header">
                             <span>📊</span>
                             <h3>This Week</h3>
@@ -370,21 +358,22 @@
                                 <div class="stat-label">Plans</div>
                             </div>
                         </div>
-                        <a href="{% url 'study-planner' %}" class="view-link">
+                        <span class="view-link">
                             View Stats →
-                        </a>
-                    </div>
+                        </span>
+                    </a>
                     
-                    <!-- Quick Add Card -->
-                    <div class="dashboard-card">
+                    <!-- Quick Add Card - Clickable -->
+                    <a href="{% url 'create-study-plan' %}" class="dashboard-card quick-add-btn" style="padding: 2rem;">
                         <div class="card-header">
                             <span>➕</span>
                             <h3>Quick Add</h3>
                         </div>
-                        <a href="{% url 'create-study-plan' %}" class="quick-add-btn">
-                            <span>+</span> Create Study Plan
-                        </a>
-                    </div>
+                        <div style="text-align: center;">
+                            <span style="font-size: 4rem; display: block; margin: 1rem 0;">+</span>
+                            <span style="font-size: 1.6rem;">Create Study Plan</span>
+                        </div>
+                    </a>
                 </div>
             </div>
             {% endif %}
@@ -393,8 +382,10 @@
         </div>
         <!-- Room List End -->
 
-        <!-- Activities Start -->
-        {% include 'base/activity_component.html' %}
+        <!-- Activities Start - Made broader -->
+        <div style="width: 100%;">
+            {% include 'base/activity_component.html' %}
+        </div>
         <!-- Activities End -->
     </div>
 </main>
@@ -402,6 +393,11 @@
 <script>
 // Load today's plans for the dashboard
 document.addEventListener('DOMContentLoaded', function() {
+    loadDashboardPlans();
+    loadWeeklyStats();
+});
+
+function loadDashboardPlans() {
     fetch('/api/today-plans/')
         .then(res => res.json())
         .then(data => {
@@ -426,8 +422,9 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Error loading plans:', error);
             document.getElementById('today-plans-preview').innerHTML = '<p style="color: var(--color-light-gray); padding: 1rem; text-align: center;">⚠️ Could not load plans</p>';
         });
-    
-    // Load weekly stats
+}
+
+function loadWeeklyStats() {
     fetch('/api/weekly-stats/')
         .then(res => res.json())
         .then(data => {
@@ -437,7 +434,10 @@ document.addEventListener('DOMContentLoaded', function() {
         .catch(error => {
             console.error('Error loading stats:', error);
         });
-});
+}
+
+// Refresh stats every minute
+setInterval(loadWeeklyStats, 60000);
 </script>
 
 {% endblock %}

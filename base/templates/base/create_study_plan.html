@@ -5,7 +5,7 @@
 <style>
     /* Main Container with Glass Morphism */
     .form-container {
-        max-width: 700px;
+        max-width: 800px;
         margin: 3rem auto;
         background: linear-gradient(145deg, var(--color-dark) 0%, #2a2a38 100%);
         border-radius: 3rem;
@@ -34,6 +34,28 @@
         to { transform: rotate(360deg); }
     }
     
+    /* Back Button */
+    .back-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.8rem;
+        color: var(--color-light);
+        text-decoration: none;
+        font-size: 1.6rem;
+        margin-bottom: 2rem;
+        padding: 1rem 2rem;
+        background: linear-gradient(145deg, var(--color-dark) 0%, #2a2a38 100%);
+        border-radius: 30px;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(113,198,221,0.2);
+    }
+    
+    .back-button:hover {
+        transform: translateX(-5px);
+        border-color: var(--color-main);
+        box-shadow: 0 5px 15px rgba(113,198,221,0.2);
+    }
+    
     /* Header Section */
     .form-header {
         margin-bottom: 3rem;
@@ -51,13 +73,6 @@
         align-items: center;
         justify-content: center;
         gap: 1rem;
-    }
-    
-    .form-header h1 span {
-        background: linear-gradient(135deg, #71c6dd 0%, #4fa3b8 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-size: 3.2rem;
     }
     
     .form-header p {
@@ -99,12 +114,6 @@
         padding-bottom: 1rem;
     }
     
-    .section-title svg {
-        width: 2.4rem;
-        height: 2.4rem;
-        fill: var(--color-main);
-    }
-    
     /* Form Groups */
     .form-group {
         margin-bottom: 1.8rem;
@@ -133,11 +142,6 @@
         border-color: var(--color-main);
         outline: none;
         box-shadow: 0 0 0 4px rgba(113,198,221,0.2);
-    }
-    
-    .form-control::placeholder {
-        color: var(--color-light-gray);
-        opacity: 0.7;
     }
     
     /* Input with Icon */
@@ -181,23 +185,6 @@
         border-radius: 1.5rem;
         cursor: pointer;
         transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .priority-option::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.1), transparent);
-        transition: left 0.5s ease;
-    }
-    
-    .priority-option:hover::before {
-        left: 100%;
     }
     
     .priority-option:hover {
@@ -211,120 +198,85 @@
         box-shadow: 0 0 20px rgba(113,198,221,0.3);
     }
     
-    .priority-option.selected::after {
-        content: '✓';
-        position: absolute;
-        top: 0.5rem;
-        right: 0.5rem;
-        color: var(--color-main);
-        font-size: 1.6rem;
-        font-weight: bold;
-    }
-    
-    .priority-option span {
-        font-size: 1.6rem;
-        font-weight: 600;
-    }
-    
-    /* Recurring Section */
-    .recurring-section {
-        background: linear-gradient(145deg, var(--color-dark-medium) 0%, #2a2a38 100%);
-        padding: 2rem;
-        border-radius: 1.5rem;
-        margin-top: 1.5rem;
-        border: 1px solid var(--color-main);
-        animation: slideDown 0.3s ease;
-    }
-    
-    @keyframes slideDown {
-        from {
-            opacity: 0;
-            transform: translateY(-20px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    .weekdays {
+    /* Reminder Options */
+    .reminder-options {
         display: grid;
-        grid-template-columns: repeat(7, 1fr);
+        grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
         gap: 1rem;
-        margin-top: 1.5rem;
+        margin-top: 0.5rem;
     }
     
-    .weekday-checkbox {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        gap: 0.8rem;
+    .reminder-option {
+        padding: 1rem;
+        text-align: center;
+        background: var(--color-dark-medium);
+        border: 2px solid var(--color-dark-light);
+        border-radius: 1rem;
         cursor: pointer;
+        transition: all 0.3s ease;
     }
     
-    .weekday-checkbox span {
-        color: var(--color-light-gray);
+    .reminder-option:hover {
+        border-color: var(--color-main);
+    }
+    
+    .reminder-option.selected {
+        background: var(--color-main);
+        color: var(--color-dark);
+        border-color: var(--color-main);
+    }
+    
+    /* Study Techniques */
+    .techniques-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 1rem;
+        margin-top: 0.5rem;
+    }
+    
+    .technique-card {
+        padding: 1.5rem;
+        background: linear-gradient(145deg, var(--color-dark-medium) 0%, #323240 100%);
+        border-radius: 1rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 2px solid transparent;
+    }
+    
+    .technique-card:hover {
+        transform: translateY(-3px);
+        border-color: var(--color-main);
+    }
+    
+    .technique-card.selected {
+        border-color: var(--color-main);
+        background: linear-gradient(145deg, rgba(113,198,221,0.2) 0%, #2a2a45 100%);
+    }
+    
+    .technique-icon {
+        font-size: 2.4rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .technique-name {
+        color: var(--color-light);
         font-size: 1.4rem;
         font-weight: 600;
-        transition: all 0.3s ease;
     }
     
-    .weekday-checkbox input[type="checkbox"] {
-        width: 2.4rem;
-        height: 2.4rem;
-        cursor: pointer;
-        accent-color: var(--color-main);
-        transform: scale(1);
-        transition: all 0.3s ease;
+    .technique-desc {
+        color: var(--color-light-gray);
+        font-size: 1.2rem;
+        margin-top: 0.5rem;
     }
     
-    .weekday-checkbox input[type="checkbox"]:checked + span {
-        color: var(--color-main);
-        font-weight: 700;
-    }
-    
-    .weekday-checkbox:hover span {
-        color: var(--color-main);
-    }
-    
-    /* Advanced Options Toggle */
-    .advanced-toggle {
-        display: flex;
-        align-items: center;
+    /* Break Reminder */
+    .break-settings {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
         gap: 1rem;
-        color: var(--color-main);
-        cursor: pointer;
-        font-size: 1.5rem;
-        margin: 1rem 0;
-        padding: 1rem;
-        background: rgba(113,198,221,0.1);
-        border-radius: 1rem;
-        transition: all 0.3s ease;
-    }
-    
-    .advanced-toggle:hover {
-        background: rgba(113,198,221,0.2);
-    }
-    
-    .advanced-toggle svg {
-        width: 2rem;
-        height: 2rem;
-        fill: var(--color-main);
-        transition: transform 0.3s ease;
-    }
-    
-    .advanced-toggle.active svg {
-        transform: rotate(180deg);
-    }
-    
-    .advanced-options {
-        max-height: 0;
-        overflow: hidden;
-        transition: max-height 0.3s ease;
-    }
-    
-    .advanced-options.show {
-        max-height: 500px;
+        margin-top: 1rem;
     }
     
     /* Submit Button */
@@ -339,8 +291,6 @@
         font-weight: 700;
         cursor: pointer;
         margin-top: 3rem;
-        position: relative;
-        overflow: hidden;
         transition: all 0.3s ease;
         display: flex;
         align-items: center;
@@ -350,60 +300,9 @@
         box-shadow: 0 10px 20px rgba(113,198,221,0.4);
     }
     
-    .submit-btn::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: -100%;
-        width: 100%;
-        height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-        transition: left 0.5s ease;
-    }
-    
-    .submit-btn:hover::before {
-        left: 100%;
-    }
-    
     .submit-btn:hover {
         transform: translateY(-3px);
         box-shadow: 0 15px 30px rgba(113,198,221,0.6);
-    }
-    
-    .submit-btn svg {
-        width: 2.4rem;
-        height: 2.4rem;
-        fill: var(--color-dark);
-    }
-    
-    /* Tooltips */
-    .tooltip {
-        position: relative;
-        display: inline-block;
-    }
-    
-    .tooltip .tooltip-text {
-        visibility: hidden;
-        width: 200px;
-        background-color: var(--color-dark);
-        color: var(--color-light);
-        text-align: center;
-        padding: 1rem;
-        border-radius: 1rem;
-        position: absolute;
-        z-index: 10;
-        bottom: 125%;
-        left: 50%;
-        margin-left: -100px;
-        opacity: 0;
-        transition: opacity 0.3s;
-        border: 1px solid var(--color-main);
-        font-size: 1.2rem;
-    }
-    
-    .tooltip:hover .tooltip-text {
-        visibility: visible;
-        opacity: 1;
     }
     
     /* Mobile Responsive */
@@ -415,31 +314,40 @@
         
         .datetime-group {
             grid-template-columns: 1fr;
-            gap: 1rem;
         }
         
         .priority-options {
             flex-direction: column;
-            gap: 1rem;
         }
         
-        .weekdays {
-            grid-template-columns: repeat(4, 1fr);
-            gap: 1rem;
+        .reminder-options {
+            grid-template-columns: repeat(2, 1fr);
         }
         
-        .form-header h1 {
-            font-size: 2.4rem;
+        .techniques-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .break-settings {
+            grid-template-columns: 1fr;
         }
     }
 </style>
 
 <div class="form-container">
+    <!-- Back Button -->
+    <a href="javascript:history.back()" class="back-button">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
+        </svg>
+        Back
+    </a>
+    
     <div class="form-header">
         <h1>
             <span>📚</span> Create <span>Study Plan</span>
         </h1>
-        <p>✨ Plan your study session effectively ✨</p>
+        <p>✨ Plan your study session with advanced features ✨</p>
     </div>
     
     <form method="POST" id="studyPlanForm">
@@ -448,7 +356,7 @@
         <!-- Basic Information Section -->
         <div class="form-section">
             <div class="section-title">
-                <svg viewBox="0 0 24 24">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="var(--color-main)">
                     <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
                 </svg>
                 Basic Information
@@ -463,7 +371,7 @@
             </div>
             
             <div class="form-group">
-                <label>📖 Description <span style="color: var(--color-light-gray);">(Optional)</span></label>
+                <label>📖 Description</label>
                 <textarea name="description" class="form-control" rows="4" placeholder="What do you want to study? What are your goals?"></textarea>
             </div>
             
@@ -479,10 +387,10 @@
         <!-- Date & Time Section -->
         <div class="form-section">
             <div class="section-title">
-                <svg viewBox="0 0 24 24">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="var(--color-main)">
                     <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V9h14v10zM7 11h5v5H7v-5z"/>
                 </svg>
-                Date & Time
+                Date & Time (Indian Timezone)
             </div>
             
             <div class="datetime-group">
@@ -492,7 +400,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <label>⏰ Start Time</label>
+                    <label>⏰ Start Time (IST)</label>
                     <input type="time" name="start_time" class="form-control" value="09:00" required>
                 </div>
             </div>
@@ -504,7 +412,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <label>⏰ End Time</label>
+                    <label>⏰ End Time (IST)</label>
                     <input type="time" name="end_time" class="form-control" value="10:00" required>
                 </div>
             </div>
@@ -518,13 +426,13 @@
             </div>
         </div>
         
-        <!-- Priority & Effort Section -->
+        <!-- Priority & Reminder Section -->
         <div class="form-section">
             <div class="section-title">
-                <svg viewBox="0 0 24 24">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="var(--color-main)">
                     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                 </svg>
-                Priority & Effort
+                Priority & Reminders
             </div>
             
             <div class="form-group">
@@ -544,103 +452,109 @@
             </div>
             
             <div class="form-group">
-                <label>⏳ Estimated Hours</label>
-                <div class="input-icon-wrapper">
-                    <span class="input-icon">⏱️</span>
-                    <input type="number" name="estimated_hours" id="estimatedHours" class="form-control" min="0.5" step="0.5" value="1" required onchange="updateDuration()">
+                <label>🔔 Reminder</label>
+                <div class="reminder-options">
+                    <div class="reminder-option" onclick="selectReminder(this, 15)">15 min before</div>
+                    <div class="reminder-option" onclick="selectReminder(this, 30)">30 min before</div>
+                    <div class="reminder-option selected" onclick="selectReminder(this, 60)">1 hour before</div>
+                    <div class="reminder-option" onclick="selectReminder(this, 120)">2 hours before</div>
                 </div>
-                <small style="color: var(--color-light-gray);">How many hours do you think this will take?</small>
+                <input type="hidden" name="reminder" id="reminder-input" value="60">
             </div>
         </div>
         
-        <!-- Recurring Section -->
+        <!-- Study Techniques Section (Advanced) -->
         <div class="form-section">
             <div class="section-title">
-                <svg viewBox="0 0 24 24">
-                    <path d="M17 2h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V9h14v10z"/>
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="var(--color-main)">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                 </svg>
-                Recurring Schedule
+                Study Techniques (Optional)
             </div>
             
-            <div class="form-group">
-                <label class="tooltip">
-                    <input type="checkbox" name="is_recurring" id="recurring-checkbox">
-                    🔄 Repeat weekly
-                    <span class="tooltip-text">Create this plan for multiple days of the week</span>
-                </label>
-            </div>
-            
-            <div class="recurring-section" id="recurring-section" style="display: none;">
-                <label style="color: var(--color-main); font-size: 1.5rem; margin-bottom: 1rem; display: block;">Select days:</label>
-                <div class="weekdays">
-                    <label class="weekday-checkbox">
-                        <input type="checkbox" name="monday">
-                        <span>Mon</span>
-                    </label>
-                    <label class="weekday-checkbox">
-                        <input type="checkbox" name="tuesday">
-                        <span>Tue</span>
-                    </label>
-                    <label class="weekday-checkbox">
-                        <input type="checkbox" name="wednesday">
-                        <span>Wed</span>
-                    </label>
-                    <label class="weekday-checkbox">
-                        <input type="checkbox" name="thursday">
-                        <span>Thu</span>
-                    </label>
-                    <label class="weekday-checkbox">
-                        <input type="checkbox" name="friday">
-                        <span>Fri</span>
-                    </label>
-                    <label class="weekday-checkbox">
-                        <input type="checkbox" name="saturday">
-                        <span>Sat</span>
-                    </label>
-                    <label class="weekday-checkbox">
-                        <input type="checkbox" name="sunday">
-                        <span>Sun</span>
-                    </label>
+            <div class="techniques-grid">
+                <div class="technique-card" onclick="selectTechnique(this, 'pomodoro')">
+                    <div class="technique-icon">🍅</div>
+                    <div class="technique-name">Pomodoro</div>
+                    <div class="technique-desc">25 min study, 5 min break</div>
+                </div>
+                
+                <div class="technique-card" onclick="selectTechnique(this, 'active_recall')">
+                    <div class="technique-icon">🧠</div>
+                    <div class="technique-name">Active Recall</div>
+                    <div class="technique-desc">Test yourself regularly</div>
+                </div>
+                
+                <div class="technique-card" onclick="selectTechnique(this, 'spaced_repetition')">
+                    <div class="technique-icon">🔄</div>
+                    <div class="technique-name">Spaced Repetition</div>
+                    <div class="technique-desc">Review at intervals</div>
+                </div>
+                
+                <div class="technique-card" onclick="selectTechnique(this, 'feynman')">
+                    <div class="technique-icon">📝</div>
+                    <div class="technique-name">Feynman Technique</div>
+                    <div class="technique-desc">Teach to learn</div>
                 </div>
             </div>
+            <input type="hidden" name="technique" id="technique-input">
         </div>
         
-        <!-- Advanced Options Toggle -->
-        <div class="advanced-toggle" onclick="toggleAdvanced()" id="advancedToggle">
-            <svg viewBox="0 0 24 24">
-                <path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/>
-            </svg>
-            <span>Advanced Options</span>
-        </div>
-        
-        <div class="advanced-options" id="advancedOptions">
-            <div class="form-section" style="margin-top: 1rem;">
+        <!-- Break Reminders Section -->
+        <div class="form-section">
+            <div class="section-title">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="var(--color-main)">
+                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                </svg>
+                Break Settings
+            </div>
+            
+            <div class="break-settings">
                 <div class="form-group">
-                    <label>🎯 Study Goals</label>
-                    <textarea name="goals" class="form-control" rows="3" placeholder="What specific goals do you want to achieve?"></textarea>
+                    <label>Break Reminder</label>
+                    <select name="break_reminder" class="form-control">
+                        <option value="0">No breaks</option>
+                        <option value="25">Every 25 min</option>
+                        <option value="30">Every 30 min</option>
+                        <option value="45">Every 45 min</option>
+                        <option value="60">Every 60 min</option>
+                    </select>
                 </div>
                 
                 <div class="form-group">
-                    <label>📎 Resources</label>
-                    <input type="text" name="resources" class="form-control" placeholder="e.g., Textbook page numbers, video links">
-                </div>
-                
-                <div class="form-group">
-                    <label>🔔 Reminder</label>
-                    <select name="reminder" class="form-control">
-                        <option value="0">No reminder</option>
-                        <option value="15">15 minutes before</option>
-                        <option value="30">30 minutes before</option>
-                        <option value="60">1 hour before</option>
-                        <option value="120">2 hours before</option>
-                        <option value="1440">1 day before</option>
+                    <label>Break Duration</label>
+                    <select name="break_duration" class="form-control">
+                        <option value="5">5 minutes</option>
+                        <option value="10">10 minutes</option>
+                        <option value="15">15 minutes</option>
+                        <option value="30">30 minutes</option>
                     </select>
                 </div>
             </div>
         </div>
         
+        <!-- Goals Section -->
+        <div class="form-section">
+            <div class="section-title">
+                <svg viewBox="0 0 24 24" width="24" height="24" fill="var(--color-main)">
+                    <path d="M12 2L15 8.5L22 9.5L17 14L18.5 21L12 17.5L5.5 21L7 14L2 9.5L9 8.5L12 2z"/>
+                </svg>
+                Learning Goals
+            </div>
+            
+            <div class="form-group">
+                <label>🎯 Specific Goals</label>
+                <textarea name="goals" class="form-control" rows="3" placeholder="What do you want to achieve by the end of this session?"></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>📎 Resources</label>
+                <input type="text" name="resources" class="form-control" placeholder="e.g., Textbook page numbers, video links">
+            </div>
+        </div>
+        
         <button type="submit" class="submit-btn">
-            <svg viewBox="0 0 24 24">
+            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
                 <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
             </svg>
             Create Study Plan
@@ -657,35 +571,23 @@ function selectPriority(element, value) {
     document.getElementById('priority-input').value = value;
 }
 
-document.getElementById('recurring-checkbox').addEventListener('change', function() {
-    document.getElementById('recurring-section').style.display = this.checked ? 'block' : 'none';
-});
-
-function toggleAdvanced() {
-    const options = document.getElementById('advancedOptions');
-    const toggle = document.getElementById('advancedToggle');
-    options.classList.toggle('show');
-    toggle.classList.toggle('active');
+function selectReminder(element, value) {
+    document.querySelectorAll('.reminder-option').forEach(opt => {
+        opt.classList.remove('selected');
+    });
+    element.classList.add('selected');
+    document.getElementById('reminder-input').value = value;
 }
 
-function updateDuration() {
-    const hours = document.getElementById('estimatedHours').value;
-    const display = document.getElementById('durationDisplay');
-    
-    if (hours == 1) {
-        display.textContent = '1 hour';
-    } else if (hours < 1) {
-        display.textContent = `${hours * 60} minutes`;
-    } else {
-        display.textContent = `${hours} hours`;
-    }
+function selectTechnique(element, value) {
+    document.querySelectorAll('.technique-card').forEach(card => {
+        card.classList.remove('selected');
+    });
+    element.classList.add('selected');
+    document.getElementById('technique-input').value = value;
 }
 
-// Calculate duration based on start and end times
-document.querySelectorAll('input[name="start_time"], input[name="end_time"], input[name="start_date"], input[name="end_date"]').forEach(input => {
-    input.addEventListener('change', calculateDuration);
-});
-
+// Calculate duration
 function calculateDuration() {
     const startDate = document.querySelector('input[name="start_date"]').value;
     const startTime = document.querySelector('input[name="start_time"]').value;
@@ -699,11 +601,21 @@ function calculateDuration() {
         const diffHours = diffMs / (1000 * 60 * 60);
         
         if (diffHours > 0) {
-            document.getElementById('estimatedHours').value = diffHours.toFixed(1);
-            updateDuration();
+            const display = document.getElementById('durationDisplay');
+            if (diffHours < 1) {
+                display.textContent = Math.round(diffHours * 60) + ' minutes';
+            } else if (diffHours === 1) {
+                display.textContent = '1 hour';
+            } else {
+                display.textContent = diffHours.toFixed(1) + ' hours';
+            }
         }
     }
 }
+
+document.querySelectorAll('input[name="start_time"], input[name="end_time"], input[name="start_date"], input[name="end_date"]').forEach(input => {
+    input.addEventListener('change', calculateDuration);
+});
 
 // Form validation
 document.getElementById('studyPlanForm').addEventListener('submit', function(e) {
@@ -721,25 +633,7 @@ document.getElementById('studyPlanForm').addEventListener('submit', function(e) 
     }
 });
 
-// Auto-fill recurring section based on selection
-document.querySelectorAll('.weekday-checkbox input').forEach(checkbox => {
-    checkbox.addEventListener('change', function() {
-        const parent = this.closest('.weekday-checkbox');
-        if (this.checked) {
-            parent.style.transform = 'scale(1.05)';
-        } else {
-            parent.style.transform = 'scale(1)';
-        }
-    });
-});
-
-// Initialize tooltips
-document.querySelectorAll('.tooltip').forEach(el => {
-    el.addEventListener('mouseenter', function() {
-        const tooltip = this.querySelector('.tooltip-text');
-        tooltip.style.animation = 'fadeIn 0.3s ease';
-    });
-});
+calculateDuration();
 </script>
 
 {% endblock %}

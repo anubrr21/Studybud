@@ -95,23 +95,23 @@
 
       </div>
       
-      <!-- Study Stats Section - FIXED: Added proper margin and spacing -->
+      <!-- Study Stats Section -->
       <div class="profile__stats" style="margin-top: 3rem; margin-bottom: 2rem;">
         <h3 style="color: var(--color-main); margin-bottom: 1.5rem;">📚 Study Stats</h3>
         
         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5rem; margin-bottom: 2rem;">
           <div style="background: var(--color-dark-medium); padding: 1.5rem; border-radius: 1rem; text-align: center;">
-            <div style="font-size: 2.4rem; color: var(--color-main);">{{ total_study_hours|default:0 }}</div>
+            <div style="font-size: 2.4rem; color: var(--color-main);" id="total-study-hours">{{ total_study_hours|default:0 }}</div>
             <div style="color: var(--color-light-gray);">Hours Studied</div>
           </div>
           
           <div style="background: var(--color-dark-medium); padding: 1.5rem; border-radius: 1rem; text-align: center;">
-            <div style="font-size: 2.4rem; color: var(--color-main);">{{ completed_plans|default:0 }}</div>
+            <div style="font-size: 2.4rem; color: var(--color-main);" id="completed-plans">{{ completed_plans|default:0 }}</div>
             <div style="color: var(--color-light-gray);">Plans Done</div>
           </div>
           
           <div style="background: var(--color-dark-medium); padding: 1.5rem; border-radius: 1rem; text-align: center;">
-            <div style="font-size: 2.4rem; color: var(--color-main);">{{ current_streak|default:0 }}</div>
+            <div style="font-size: 2.4rem; color: var(--color-main);" id="current-streak">{{ current_streak|default:0 }}</div>
             <div style="color: var(--color-light-gray);">Day Streak</div>
           </div>
         </div>
@@ -121,7 +121,7 @@
         </a>
       </div>
 
-      <!-- Rooms Hosted - FIXED: Added proper spacing above -->
+      <!-- Rooms Hosted -->
       <div class="roomList__header" style="margin-top: 2rem;">
         <div>
           <h2>Study Rooms Hosted by {{ user.username }}</h2>
@@ -131,7 +131,10 @@
       {% include 'base/feed_component.html' %}
     </div>
 
-    {% include 'base/activity_component.html' %}
+    <!-- Activities Component - Made broader -->
+    <div style="width: 100%;">
+      {% include 'base/activity_component.html' %}
+    </div>
   </div>
 </main>
 
@@ -335,6 +338,21 @@ window.onclick = function(event) {
         followModal.style.display = 'none';
     }
 }
+
+// Update study stats periodically
+function updateStudyStats() {
+    fetch('/api/study-stats/')
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById('total-study-hours').textContent = data.total_hours || 0;
+            document.getElementById('completed-plans').textContent = data.completed_plans || 0;
+            document.getElementById('current-streak').textContent = data.current_streak || 0;
+        })
+        .catch(err => console.log('Error updating stats:', err));
+}
+
+// Update every minute
+setInterval(updateStudyStats, 60000);
 </script>
 
 {% endblock content %}
