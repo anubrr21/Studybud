@@ -149,6 +149,7 @@ class Notification(models.Model):
     type = models.CharField(max_length=20, choices=NOTIFICATION_TYPES)
     is_read = models.BooleanField(default=False)
     created = models.DateTimeField(auto_now_add=True)
+    push_sent = models.BooleanField(default=False) 
 
     class Meta:
         ordering = ['-created']

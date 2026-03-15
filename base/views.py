@@ -28,10 +28,72 @@ import mimetypes
 import subprocess
 import sys
 import json 
+import requests
+from django.conf import settings
 from PIL import Image
 import io
 from .emails import send_verification_email, send_password_reset_email
 from django.contrib.auth.views import PasswordResetView
+
+# ============================================
+# PUSH NOTIFICATION FUNCTION
+# ============================================
+
+def send_push_notification(user_id, title, message, url=None, notification_type=None, sender_name=None):
+    """Send push notification via OneSignal"""
+    
+    # Your OneSignal credentials
+    app_id = "9a9d316f-aaeb-4eca-95ee-c70a32e1b3d1"
+    rest_api_key = os.environ.get('ONESIGNAL_REST_API_KEY')
+    
+    if not rest_api_key:
+        print("❌ ONESIGNAL_REST_API_KEY not set in environment")
+        return None
+    
+    headers = {
+        "Content-Type": "application/json; charset=utf-8",
+        "Authorization": f"Basic {rest_api_key}"
+    }
+    
+    # Build the payload
+    payload = {
+        "app_id": app_id,
+        "include_external_user_ids": [str(user_id)],
+        "headings": {"en": title},
+        "contents": {"en": message},
+        "chrome_web_icon": "https://studybud-kxsv.onrender.com/static/images/logo.svg",
+        "firefox_icon": "https://studybud-kxsv.onrender.com/static/images/logo.svg",
+    }
+    
+    # Add URL if provided
+    if url:
+        payload["url"] = url
+    else:
+        payload["url"] = "https://studybud-kxsv.onrender.com/notifications/"
+    
+    # Add custom data for notification type
+    payload["data"] = {
+        "type": notification_type,
+        "sender": sender_name,
+        "timestamp": str(timezone.now())
+    }
+    
+    # Add small icon for android
+    payload["small_icon"] = "ic_stat_onesignal_default"
+    
+    try:
+        response = requests.post(
+            "https://onesignal.com/api/v1/notifications",
+            headers=headers,
+            data=json.dumps(payload)
+        )
+        result = response.json()
+        print(f"✅ Push notification sent: {result}")
+        return result
+    except Exception as e:
+        print(f"❌ Push notification error: {e}")
+        return None
+
 
 # ============================================
 # AUTHENTICATION VIEWS
@@ -192,7 +254,7 @@ def resend_verification(request, user_id):
     else:
         messages.error(request, 'Failed to send verification code. Please try again.')
     
-    return redirect('verify-email', user_id=user.id)
+    return redirect('verify-email', user_id=user_id)
 
 
 # ============================================
@@ -288,12 +350,41 @@ def room(request, pk):
             )
 
             if room.host != request.user:
+                # Create in-app notification
                 Notification.objects.create(
                     user=room.host,
                     sender=request.user,
                     room=room,
                     type='comment'
                 )
+                
+                # 🔔 PUSH NOTIFICATION: Send to room host
+                send_push_notification(
+                    user_id=room.host.id,
+                    title=f"💬 New comment in {room.name}",
+                    message=f"@{request.user.username} commented: {body[:50]}...",
+                    url=f"/room/{room.id}/",
+                    notification_type='comment',
+                    sender_name=request.user.username
+                )
+                
+                # 🔔 PUSH NOTIFICATION: Also notify all participants (excluding the commenter and host)
+                participants_to_notify = room.participants.exclude(id=request.user.id).exclude(id=room.host.id)
+                for participant in participants_to_notify:
+                    Notification.objects.create(
+                        user=participant,
+                        sender=request.user,
+                        room=room,
+                        type='comment'
+                    )
+                    send_push_notification(
+                        user_id=participant.id,
+                        title=f"💬 New comment in {room.name}",
+                        message=f"@{request.user.username} commented: {body[:50]}...",
+                        url=f"/room/{room.id}/",
+                        notification_type='comment',
+                        sender_name=request.user.username
+                    )
 
             if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
                 return JsonResponse({
@@ -484,11 +575,22 @@ def toggle_like(request, pk):
         room.likes.add(request.user)
         liked = True
         if room.host != request.user:
+            # Create in-app notification
             Notification.objects.create(
                 user=room.host,
                 sender=request.user,
                 room=room,
                 type='like'
+            )
+            
+            # 🔔 PUSH NOTIFICATION: Send to room host
+            send_push_notification(
+                user_id=room.host.id,
+                title=f"❤️ {request.user.username} liked your room",
+                message=f"@{request.user.username} liked '{room.name}'",
+                url=f"/room/{room.id}/",
+                notification_type='like',
+                sender_name=request.user.username
             )
     return JsonResponse({
         "liked": liked,
@@ -526,10 +628,22 @@ def toggle_follow(request, pk):
     else:
         target_user.followers.add(request.user)
         following = True
+        
+        # Create in-app notification
         Notification.objects.create(
             user=target_user,
             sender=request.user,
             type='follow'
+        )
+        
+        # 🔔 PUSH NOTIFICATION: Send to the user being followed
+        send_push_notification(
+            user_id=target_user.id,
+            title=f"@{request.user.username} followed you",
+            message=f"{request.user.username} started following you",
+            url=f"/profile/{request.user.id}/",
+            notification_type='follow',
+            sender_name=request.user.username
         )
     return JsonResponse({
         "following": following,
@@ -915,6 +1029,20 @@ def upload_chat_file(request, chat_id):
             message.thumbnail.save(f'thumb_{file.name}.jpg', thumb_file, save=True)
         except Exception as e:
             print(f"Error creating thumbnail: {e}")
+    
+    # Get the recipient (the other user in the chat)
+    recipient = chat.participants.exclude(id=request.user.id).first()
+    
+    # 🔔 PUSH NOTIFICATION: Send to the recipient
+    if recipient:
+        send_push_notification(
+            user_id=recipient.id,
+            title=f"💬 New message from @{request.user.username}",
+            message=f"Sent a {message_type}: {file_name[:50]}",
+            url=f"/chat/{chat_id}/",
+            notification_type='message',
+            sender_name=request.user.username
+        )
     
     # Notify via WebSocket
     from channels.layers import get_channel_layer

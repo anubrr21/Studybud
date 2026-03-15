@@ -33,7 +33,7 @@ urlpatterns = [
     path('reset/done/', 
      auth_views.PasswordResetCompleteView.as_view(template_name='base/password_reset_complete.html'), 
      name='password_reset_complete'),
-     path('admin/', admin.site.urls),
+    
     path('', include('base.urls')),
     # Serve OneSignal worker files
     path('OneSignalSDKWorker.js', serve_onesignal_worker, {'filename': 'OneSignalSDKWorker.js'}),
