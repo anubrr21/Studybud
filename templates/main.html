@@ -177,35 +177,40 @@ function getCookie(name) {
 </script>
 
 <!-- OneSignal Push Notifications -->
+<!-- OneSignal Push Notifications - FIXED VERSION -->
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>
   window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(async function(OneSignal) {
-    await OneSignal.init({
-      appId: "9a9d316f-aaeb-4eca-95ee-c70a32e1b3d1", // ✅ Your App ID
+  OneSignalDeferred.push(function(OneSignal) {
+    console.log("🟢 Initializing OneSignal...");
+    
+    OneSignal.init({
+      appId: "9a9d316f-aaeb-4eca-95ee-c70a32e1b3d1",
       safari_web_id: "",
       notifyButton: {
         enable: true,
       },
       allowLocalhostAsSecureOrigin: true,
       serviceWorkerParam: { scope: '/' },
-      serviceWorkerPath: '/static/js/OneSignalSDKWorker.js', 
-      welcomeNotification: {
-        title: "StudyBud",
-        message: "Thanks for subscribing! You'll now receive study reminders 📚",
-      },
+      serviceWorkerPath: 'OneSignalSDKWorker.js',  // ✅ LOOKS IN ROOT
     });
     
-    // Check if user is logged in (Django template tag)
-    {% if request.user.is_authenticated %}
-    try {
-      OneSignal.login("{{ request.user.id }}");
-      OneSignal.setExternalUserId("{{ request.user.id }}");
-      console.log("OneSignal: User logged in as {{ request.user.id }}");
-    } catch (e) {
-      console.log("OneSignal login error:", e);
-    }
-    {% endif %}
+    // Force prompt to show
+    setTimeout(function() {
+      OneSignal.showSlidedownPrompt();
+      console.log("🎯 Showing slide prompt");
+    }, 5000);
+  });
+  
+  // Log OneSignal status
+  window.addEventListener('load', function() {
+    setTimeout(function() {
+      if (window.OneSignal) {
+        OneSignal.getSubscription().then(function(subscription) {
+          console.log("📱 Subscription status:", subscription);
+        });
+      }
+    }, 3000);
   });
 </script>
 

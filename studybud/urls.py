@@ -1,6 +1,20 @@
 from django.contrib import admin
 from django.urls import path, include
 from django.contrib.auth import views as auth_views
+from django.contrib import admin
+from django.urls import path, include
+from django.http import FileResponse
+import os
+from django.conf import settings
+from django.http import HttpResponseNotFound
+
+def serve_onesignal_worker(request, filename):
+    """Serve OneSignal worker files from root"""
+    file_path = os.path.join(settings.BASE_DIR, filename)
+    if os.path.exists(file_path):
+        return FileResponse(open(file_path, 'rb'), content_type='application/javascript')
+    return HttpResponseNotFound()
+
 
 
 urlpatterns = [
@@ -19,5 +33,10 @@ urlpatterns = [
     path('reset/done/', 
      auth_views.PasswordResetCompleteView.as_view(template_name='base/password_reset_complete.html'), 
      name='password_reset_complete'),
+     path('admin/', admin.site.urls),
+    path('', include('base.urls')),
+    # Serve OneSignal worker files
+    path('OneSignalSDKWorker.js', serve_onesignal_worker, {'filename': 'OneSignalSDKWorker.js'}),
+    path('OneSignalSDK.sw.js', serve_onesignal_worker, {'filename': 'OneSignalSDK.sw.js'}),
 
 ]
