@@ -275,47 +275,184 @@
         margin-top: 0.5rem;
     }
     
-    /* AI Study Assistant */
+    /* AI Study Assistant - UPGRADED */
     .ai-assistant {
         background: linear-gradient(145deg, rgba(113,198,221,0.2) 0%, #2a2a45 100%);
         border-radius: 1.5rem;
         padding: 1.5rem;
         margin-bottom: 2rem;
         border: 2px solid var(--color-main);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .ai-assistant::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        right: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+        animation: aiPulse 3s ease-in-out infinite;
+    }
+    
+    @keyframes aiPulse {
+        0%, 100% { opacity: 0.3; }
+        50% { opacity: 0.8; }
     }
     
     .ai-assistant h4 {
         color: var(--color-main);
-        font-size: 1.6rem;
-        margin-bottom: 1rem;
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
         display: flex;
         align-items: center;
-        gap: 0.5rem;
+        gap: 0.8rem;
     }
     
-    .ai-suggestion {
+    .ai-thinking {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid var(--color-main);
+        border-top-color: transparent;
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+        margin-left: 0.5rem;
+    }
+    
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+    
+    .ai-suggestion-container {
         background: var(--color-dark);
-        padding: 1rem;
+        padding: 1.5rem;
         border-radius: 1rem;
-        margin-bottom: 1rem;
         border-left: 4px solid var(--color-main);
+        margin-bottom: 1rem;
     }
     
-    .ai-suggestion p {
+    .ai-suggestion-title {
+        color: var(--color-main);
+        font-size: 1.6rem;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+    }
+    
+    .ai-suggestion-desc {
         color: var(--color-light);
         font-size: 1.4rem;
+        margin-bottom: 1rem;
+        line-height: 1.6;
     }
     
-    .ai-use-btn {
-        background: var(--color-main);
-        color: var(--color-dark);
-        border: none;
+    .ai-suggestion-meta {
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+        margin-bottom: 1rem;
+    }
+    
+    .ai-meta-item {
+        background: rgba(113,198,221,0.1);
         padding: 0.5rem 1rem;
         border-radius: 2rem;
-        cursor: pointer;
         font-size: 1.2rem;
+        color: var(--color-main);
+    }
+    
+    .ai-confidence {
+        display: inline-block;
+        padding: 0.3rem 0.8rem;
+        border-radius: 1rem;
+        font-size: 1.2rem;
+        font-weight: bold;
+    }
+    
+    .confidence-high {
+        background: rgba(38,222,129,0.2);
+        color: #26de81;
+    }
+    
+    .confidence-medium {
+        background: rgba(255,165,2,0.2);
+        color: #ffa502;
+    }
+    
+    .confidence-low {
+        background: rgba(255,71,87,0.2);
+        color: #ff4757;
+    }
+    
+    .ai-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+    }
+    
+    .ai-btn {
+        padding: 0.8rem 1.5rem;
+        border: none;
+        border-radius: 2rem;
+        font-size: 1.3rem;
         font-weight: 600;
-        margin-top: 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .ai-apply-btn {
+        background: var(--color-main);
+        color: var(--color-dark);
+    }
+    
+    .ai-apply-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(113,198,221,0.4);
+    }
+    
+    .ai-refresh-btn {
+        background: var(--color-dark-medium);
+        color: var(--color-light);
+    }
+    
+    .ai-refresh-btn:hover {
+        background: var(--color-main);
+        color: var(--color-dark);
+    }
+    
+    .ai-more-options {
+        margin-top: 1rem;
+    }
+    
+    .ai-option {
+        background: rgba(255,255,255,0.05);
+        padding: 1rem;
+        border-radius: 1rem;
+        margin-bottom: 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        border: 1px solid transparent;
+    }
+    
+    .ai-option:hover {
+        background: rgba(113,198,221,0.1);
+        border-color: var(--color-main);
+        transform: translateX(5px);
+    }
+    
+    .ai-option-title {
+        color: var(--color-light);
+        font-weight: 600;
+        font-size: 1.4rem;
+        margin-bottom: 0.3rem;
+    }
+    
+    .ai-option-desc {
+        color: var(--color-light-gray);
+        font-size: 1.2rem;
     }
     
     /* Break Reminder */
@@ -419,6 +556,14 @@
             font-size: 2.4rem;
             flex-direction: column;
         }
+        
+        .ai-actions {
+            flex-direction: column;
+        }
+        
+        .ai-btn {
+            width: 100%;
+        }
     }
 </style>
 
@@ -438,7 +583,7 @@
                 <span>⭐</span> +50 XP
             </span>
         </h1>
-        <p>✨ Advanced AI-powered study planner ✨</p>
+        <p>✨ Advanced AI-powered study planner with real push notifications ✨</p>
         
         <!-- Notification Status -->
         <div id="notificationStatus" class="notification-status">
@@ -447,14 +592,52 @@
         </div>
     </div>
     
-    <!-- AI Study Assistant -->
+    <!-- UPGRADED AI Study Assistant -->
     <div class="ai-assistant">
         <h4>
             <span>🤖</span> AI Study Assistant
+            <span class="ai-thinking" id="aiThinking" style="display: none;"></span>
         </h4>
-        <div class="ai-suggestion" id="aiSuggestion">
-            <p>Based on your previous study patterns, I suggest using the Pomodoro technique for this session. It will help you maintain focus and avoid burnout.</p>
-            <button type="button" class="ai-use-btn" onclick="applyAISuggestion()">Apply Suggestion</button>
+        
+        <div id="aiSuggestionContainer" class="ai-suggestion-container">
+            <div class="ai-suggestion-title" id="aiTitle">🎯 Personalized Study Plan</div>
+            <div class="ai-suggestion-desc" id="aiDescription">
+                Based on your learning patterns, I'm analyzing the best approach...
+            </div>
+            
+            <div class="ai-suggestion-meta" id="aiMeta">
+                <span class="ai-meta-item">⏱️ Optimal duration: 45 min</span>
+                <span class="ai-meta-item">📊 Focus level: High</span>
+            </div>
+            
+            <div class="ai-confidence confidence-high" id="aiConfidence">
+                🔥 95% match with your learning style
+            </div>
+            
+            <div class="ai-actions">
+                <button type="button" class="ai-btn ai-apply-btn" onclick="applyAISuggestion()">
+                    ✓ Apply AI Suggestion
+                </button>
+                <button type="button" class="ai-btn ai-refresh-btn" onclick="refreshAISuggestion()">
+                    ↻ Get New Suggestion
+                </button>
+            </div>
+        </div>
+        
+        <!-- More AI Options -->
+        <div class="ai-more-options" id="aiMoreOptions">
+            <div class="ai-option" onclick="selectAIOption(1)">
+                <div class="ai-option-title">📚 Deep Focus Session</div>
+                <div class="ai-option-desc">90 min with 15 min breaks - Best for complex topics</div>
+            </div>
+            <div class="ai-option" onclick="selectAIOption(2)">
+                <div class="ai-option-title">⚡ Quick Revision</div>
+                <div class="ai-option-desc">25 min sprints - Ideal for reviewing material</div>
+            </div>
+            <div class="ai-option" onclick="selectAIOption(3)">
+                <div class="ai-option-title">🧠 Active Learning</div>
+                <div class="ai-option-desc">Incorporate quizzes and self-testing</div>
+            </div>
         </div>
     </div>
     
@@ -477,25 +660,25 @@
                 <label>📌 Title <span style="color: var(--color-main);">*</span></label>
                 <div class="input-icon-wrapper">
                     <span class="input-icon">📝</span>
-                    <input type="text" name="title" class="form-control" placeholder="e.g., Chapter 5 Review" value="{{ plan.title|default:'' }}" required>
+                    <input type="text" name="title" id="title" class="form-control" placeholder="e.g., Chapter 5 Review" value="{{ plan.title|default:'' }}" required onkeyup="updateAIAnalysis()">
                 </div>
             </div>
             
             <div class="form-group">
                 <label>📖 Description</label>
-                <textarea name="description" class="form-control" rows="4" placeholder="What do you want to study? What are your goals?">{{ plan.description|default:'' }}</textarea>
+                <textarea name="description" id="description" class="form-control" rows="4" placeholder="What do you want to study? What are your goals?" onkeyup="updateAIAnalysis()">{{ plan.description|default:'' }}</textarea>
             </div>
             
             <div class="form-group">
                 <label>🔬 Subject <span style="color: var(--color-main);">*</span></label>
                 <div class="input-icon-wrapper">
                     <span class="input-icon">📚</span>
-                    <input type="text" name="subject" class="form-control" placeholder="e.g., Mathematics, Physics, Programming" value="{{ plan.subject|default:'' }}" required>
+                    <input type="text" name="subject" id="subject" class="form-control" placeholder="e.g., Mathematics, Physics, Programming" value="{{ plan.subject|default:'' }}" required onkeyup="updateAIAnalysis()">
                 </div>
             </div>
         </div>
         
-        <!-- Date & Time Section - FIXED: Removed today variable dependency -->
+        <!-- Date & Time Section -->
         <div class="form-section">
             <div class="section-title">
                 <svg viewBox="0 0 24 24" width="24" height="24" fill="var(--color-main)">
@@ -507,24 +690,24 @@
             <div class="datetime-group">
                 <div class="form-group">
                     <label>📅 Start Date</label>
-                    <input type="date" name="start_date" id="start_date" class="form-control" value="{{ plan.start_date|date:'Y-m-d'|default:'' }}" required>
+                    <input type="date" name="start_date" id="start_date" class="form-control" value="{{ plan.start_date|date:'Y-m-d'|default:'' }}" required onchange="calculateDuration(); updateAIAnalysis()">
                 </div>
                 
                 <div class="form-group">
                     <label>⏰ Start Time (24h IST)</label>
-                    <input type="time" name="start_time" id="start_time" class="form-control" value="{{ plan.start_date|time:'H:i'|default:'09:00' }}" required>
+                    <input type="time" name="start_time" id="start_time" class="form-control" value="{{ plan.start_date|time:'H:i'|default:'09:00' }}" required onchange="calculateDuration(); updateAIAnalysis()">
                 </div>
             </div>
             
             <div class="datetime-group">
                 <div class="form-group">
                     <label>📅 End Date</label>
-                    <input type="date" name="end_date" id="end_date" class="form-control" value="{{ plan.end_date|date:'Y-m-d'|default:'' }}" required>
+                    <input type="date" name="end_date" id="end_date" class="form-control" value="{{ plan.end_date|date:'Y-m-d'|default:'' }}" required onchange="calculateDuration(); updateAIAnalysis()">
                 </div>
                 
                 <div class="form-group">
                     <label>⏰ End Time (24h IST)</label>
-                    <input type="time" name="end_time" id="end_time" class="form-control" value="{{ plan.end_date|time:'H:i'|default:'10:00' }}" required>
+                    <input type="time" name="end_time" id="end_time" class="form-control" value="{{ plan.end_date|time:'H:i'|default:'10:00' }}" required onchange="calculateDuration(); updateAIAnalysis()">
                 </div>
             </div>
             
@@ -543,7 +726,7 @@
                 <svg viewBox="0 0 24 24" width="24" height="24" fill="var(--color-main)">
                     <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                 </svg>
-                Priority & Smart Reminders
+                Priority & Real Push Notifications
             </div>
             
             <div class="form-group">
@@ -563,7 +746,7 @@
             </div>
             
             <div class="form-group">
-                <label>🔔 Smart Reminder (Choose when to be notified)</label>
+                <label>🔔 Real Push Notifications (Choose when to be notified)</label>
                 <div class="reminder-options">
                     <div class="reminder-option {% if plan.reminder == 15 %}selected{% endif %}" onclick="selectReminder(this, 15)">15 min</div>
                     <div class="reminder-option {% if plan.reminder == 30 %}selected{% endif %}" onclick="selectReminder(this, 30)">30 min</div>
@@ -571,12 +754,16 @@
                     <div class="reminder-option {% if plan.reminder == 120 %}selected{% endif %}" onclick="selectReminder(this, 120)">2 hours</div>
                 </div>
                 <input type="hidden" name="reminder" id="reminder-input" value="{{ plan.reminder|default:60 }}">
-                <small style="color: var(--color-light-gray); display: block; margin-top: 0.5rem;">
-                    You will receive browser notifications at the chosen time
-                </small>
-                <small style="color: var(--color-light-gray); display: block; margin-top: 0.3rem;">
-                    📱 On mobile, you need to keep the browser open or allow notifications in browser settings
-                </small>
+                
+                <div style="margin-top: 1rem; padding: 1rem; background: rgba(38,222,129,0.1); border-radius: 1rem;">
+                    <p style="color: var(--color-light); font-size: 1.3rem;">
+                        <span style="color: #26de81;">✨ NEW: Real Push Notifications</span><br>
+                        • Works even when browser is closed<br>
+                        • Works on mobile when phone is locked<br>
+                        • Like WhatsApp/Instagram notifications<br>
+                        • Requires OneSignal setup (instructions below)
+                    </p>
+                </div>
             </div>
         </div>
         
@@ -714,6 +901,29 @@
             </div>
         </div>
         
+        <!-- OneSignal Setup Instructions -->
+        <div class="form-section" style="background: rgba(255,215,0,0.1); border-color: gold;">
+            <div class="section-title">
+                <span>📱</span>
+                Setup Real Push Notifications (OneSignal)
+            </div>
+            <ol style="color: var(--color-light); font-size: 1.4rem; line-height: 2;">
+                <li>Go to <a href="https://onesignal.com" target="_blank" style="color: var(--color-main);">OneSignal.com</a> and create free account</li>
+                <li>Create new app and get your App ID</li>
+                <li>Add this code to your base template:</li>
+            </ol>
+            <pre style="background: var(--color-dark); padding: 1rem; border-radius: 1rem; overflow-x: auto;">
+&lt;script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer&gt;&lt;/script&gt;
+&lt;script&gt;
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(function(OneSignal) {
+    OneSignal.init({
+      appId: "YOUR_APP_ID_HERE",
+    });
+  });
+&lt;/script&gt;</pre>
+        </div>
+        
         <button type="submit" class="submit-btn">
             <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
                 <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
@@ -750,6 +960,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Calculate initial duration
     calculateDuration();
+    
+    // Initial AI analysis
+    setTimeout(updateAIAnalysis, 500);
 });
 
 function checkNotificationPermission() {
@@ -764,13 +977,13 @@ function checkNotificationPermission() {
     
     if (Notification.permission === 'granted') {
         statusDiv.className = 'notification-status allowed';
-        statusText.innerHTML = '✅ Notifications enabled';
+        statusText.innerHTML = '✅ Browser notifications enabled (basic)';
     } else if (Notification.permission === 'denied') {
         statusDiv.className = 'notification-status denied';
         statusText.innerHTML = '❌ Notifications blocked - Enable in browser settings';
     } else {
         statusDiv.className = 'notification-status';
-        statusText.innerHTML = '🔔 Click to enable notifications';
+        statusText.innerHTML = '🔔 Click to enable basic notifications';
         statusDiv.style.cursor = 'pointer';
         statusDiv.onclick = requestNotificationPermission;
     }
@@ -781,7 +994,7 @@ function requestNotificationPermission() {
         checkNotificationPermission();
         if (permission === 'granted') {
             new Notification('StudyBud', {
-                body: 'Notifications enabled! You will receive reminders for your study plans.',
+                body: 'Basic notifications enabled! For real push notifications, set up OneSignal.',
                 icon: '/static/images/logo.svg'
             });
         }
@@ -794,6 +1007,7 @@ function selectPriority(element, value) {
     });
     element.classList.add('selected');
     document.getElementById('priority-input').value = value;
+    updateAIAnalysis();
 }
 
 function selectReminder(element, value) {
@@ -812,18 +1026,171 @@ function selectTechnique(element, value) {
     document.getElementById('technique-input').value = value;
 }
 
-function applyAISuggestion() {
-    // Apply Pomodoro technique
-    const pomodoroCard = Array.from(document.querySelectorAll('.technique-card')).find(
-        card => card.querySelector('.technique-name').textContent.includes('Pomodoro')
-    );
-    if (pomodoroCard) {
-        selectTechnique(pomodoroCard, 'pomodoro');
-    }
-    document.querySelector('select[name="break_reminder"]').value = '25';
-    document.querySelector('select[name="break_duration"]').value = '5';
+// UPGRADED AI Functions
+function updateAIAnalysis() {
+    const title = document.getElementById('title').value;
+    const subject = document.getElementById('subject').value;
+    const description = document.getElementById('description').value;
+    const startDate = document.getElementById('start_date').value;
+    const endDate = document.getElementById('end_date').value;
+    const priority = document.getElementById('priority-input').value;
     
-    alert('✅ AI suggestion applied! Pomodoro technique with 25min focus and 5min breaks.');
+    // Show thinking animation
+    document.getElementById('aiThinking').style.display = 'inline-block';
+    
+    // Simulate AI processing (in production, this would call a real AI API)
+    setTimeout(() => {
+        generateAISuggestion(title, subject, description, startDate, endDate, priority);
+        document.getElementById('aiThinking').style.display = 'none';
+    }, 800);
+}
+
+function generateAISuggestion(title, subject, description, startDate, endDate, priority) {
+    const aiTitle = document.getElementById('aiTitle');
+    const aiDesc = document.getElementById('aiDescription');
+    const aiMeta = document.getElementById('aiMeta');
+    const aiConfidence = document.getElementById('aiConfidence');
+    
+    // Calculate duration
+    let duration = 60; // default 60 min
+    if (startDate && endDate) {
+        const start = new Date(startDate + 'T' + document.getElementById('start_time').value);
+        const end = new Date(endDate + 'T' + document.getElementById('end_time').value);
+        duration = Math.round((end - start) / (1000 * 60));
+    }
+    
+    // AI Logic based on inputs
+    let technique = 'pomodoro';
+    let focusLevel = 'High';
+    let confidence = 95;
+    let suggestion = '';
+    
+    if (subject.toLowerCase().includes('math') || subject.toLowerCase().includes('physics')) {
+        technique = 'active_recall';
+        suggestion = 'For technical subjects like ' + subject + ', Active Recall works best. Practice problems every 15 minutes.';
+        focusLevel = 'Very High';
+    } else if (subject.toLowerCase().includes('programming') || subject.toLowerCase().includes('coding')) {
+        technique = 'pomodoro';
+        suggestion = subject + ' requires focused coding sessions. Use Pomodoro with 25min sprints.';
+        focusLevel = 'High';
+    } else if (subject.toLowerCase().includes('history') || subject.toLowerCase().includes('biology')) {
+        technique = 'spaced_repetition';
+        suggestion = 'For ' + subject + ', spaced repetition helps with memorization. Review key concepts at intervals.';
+        focusLevel = 'Medium';
+    } else if (description.toLowerCase().includes('teach') || description.toLowerCase().includes('explain')) {
+        technique = 'feynman';
+        suggestion = 'Perfect for Feynman Technique! Try explaining concepts in simple terms.';
+        focusLevel = 'High';
+    }
+    
+    // Adjust based on duration
+    if (duration > 120) {
+        suggestion += ' This is a long session. Take 15min breaks every hour to maintain focus.';
+        confidence -= 5;
+    } else if (duration < 30) {
+        suggestion += ' Short but effective! Maximize focus with no distractions.';
+        confidence += 3;
+    }
+    
+    // Adjust based on priority
+    if (priority == 1) {
+        suggestion += ' High priority! Start with the most challenging topics first.';
+        confidence += 2;
+    }
+    
+    // Update UI
+    aiTitle.innerHTML = `🎯 AI Analysis for ${subject || 'your study'}`;
+    aiDesc.innerHTML = suggestion || 'Based on your inputs, I recommend the Pomodoro technique with 25min focused sessions.';
+    
+    aiMeta.innerHTML = `
+        <span class="ai-meta-item">⏱️ Duration: ${duration} min</span>
+        <span class="ai-meta-item">📊 Focus: ${focusLevel}</span>
+        <span class="ai-meta-item">🎯 Technique: ${technique.replace('_', ' ')}</span>
+    `;
+    
+    let confidenceClass = 'confidence-high';
+    if (confidence < 70) confidenceClass = 'confidence-low';
+    else if (confidence < 85) confidenceClass = 'confidence-medium';
+    
+    aiConfidence.className = `ai-confidence ${confidenceClass}`;
+    aiConfidence.innerHTML = confidence > 90 ? '🔥 ' : '📊 ';
+    aiConfidence.innerHTML += `${confidence}% match with your learning style`;
+    
+    // Auto-select the recommended technique
+    const techniqueCards = document.querySelectorAll('.technique-card');
+    techniqueCards.forEach(card => {
+        if (card.querySelector('.technique-name').textContent.toLowerCase().includes(technique.replace('_', ' '))) {
+            card.click();
+        }
+    });
+}
+
+function refreshAISuggestion() {
+    updateAIAnalysis();
+}
+
+function applyAISuggestion() {
+    // Get current AI recommendation and apply all settings
+    const aiMeta = document.getElementById('aiMeta').innerText;
+    
+    // Extract technique from AI meta
+    if (aiMeta.includes('Pomodoro')) {
+        selectTechnique(document.querySelector('[data-technique="pomodoro"]'), 'pomodoro');
+        document.querySelector('select[name="break_reminder"]').value = '25';
+        document.querySelector('select[name="break_duration"]').value = '5';
+    } else if (aiMeta.includes('Active Recall')) {
+        selectTechnique(document.querySelector('[data-technique="active_recall"]'), 'active_recall');
+    } else if (aiMeta.includes('Spaced Repetition')) {
+        selectTechnique(document.querySelector('[data-technique="spaced_repetition"]'), 'spaced_repetition');
+    } else if (aiMeta.includes('Feynman')) {
+        selectTechnique(document.querySelector('[data-technique="feynman"]'), 'feynman');
+    }
+    
+    // Set priority based on confidence
+    const confidenceText = document.getElementById('aiConfidence').innerText;
+    if (confidenceText.includes('95') || confidenceText.includes('High')) {
+        selectPriority(document.querySelector('[data-priority="high"]'), 1);
+    } else if (confidenceText.includes('Medium')) {
+        selectPriority(document.querySelector('[data-priority="medium"]'), 2);
+    }
+    
+    // Show success message
+    const notification = new Notification('AI Assistant', {
+        body: '✅ AI suggestions applied to your study plan!',
+        icon: '/static/images/logo.svg'
+    });
+}
+
+function selectAIOption(option) {
+    const aiDesc = document.getElementById('aiDescription');
+    const aiMeta = document.getElementById('aiMeta');
+    
+    if (option === 1) {
+        aiDesc.innerHTML = 'Deep Focus Session: 90 minutes of uninterrupted study with strategic 15-minute breaks. Best for complex topics like mathematics or programming.';
+        aiMeta.innerHTML = `
+            <span class="ai-meta-item">⏱️ Duration: 90 min</span>
+            <span class="ai-meta-item">📊 Focus: Maximum</span>
+            <span class="ai-meta-item">🎯 Breaks: 15 min</span>
+        `;
+        document.querySelector('select[name="break_reminder"]').value = '90';
+        document.querySelector('select[name="break_duration"]').value = '15';
+    } else if (option === 2) {
+        aiDesc.innerHTML = 'Quick Revision: 25-minute sprints perfect for reviewing material before exams. High intensity, short duration.';
+        aiMeta.innerHTML = `
+            <span class="ai-meta-item">⏱️ Duration: 25 min</span>
+            <span class="ai-meta-item">📊 Focus: High</span>
+            <span class="ai-meta-item">🎯 Technique: Sprint</span>
+        `;
+        selectTechnique(document.querySelector('[data-technique="pomodoro"]'), 'pomodoro');
+    } else if (option === 3) {
+        aiDesc.innerHTML = 'Active Learning: Incorporate quizzes and self-testing every 15 minutes. Best for memorization-based subjects.';
+        aiMeta.innerHTML = `
+            <span class="ai-meta-item">⏱️ Duration: 45 min</span>
+            <span class="ai-meta-item">📊 Focus: Active</span>
+            <span class="ai-meta-item">🎯 Tests: Every 15 min</span>
+        `;
+        selectTechnique(document.querySelector('[data-technique="active_recall"]'), 'active_recall');
+    }
 }
 
 // Calculate duration in 24-hour format

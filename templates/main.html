@@ -12,7 +12,7 @@
 
   <body>
     <!-- Toast notifications container -->
-<div class="toast-container" id="toastContainer"></div>
+    <div class="toast-container" id="toastContainer"></div>
    
     {% include 'navbar.html' %}
   
@@ -30,8 +30,8 @@
 
     {% endblock %}
     
-     <script src="{%static 'js/script.js' %}"></script>
-     <script>
+    <script src="{%static 'js/script.js' %}"></script>
+    <script>
       
 // Toast notification system
 function showToast(message, type = 'info', title = '') {
@@ -176,6 +176,88 @@ function getCookie(name) {
 }
 </script>
 
+<!-- OneSignal Push Notifications -->
+<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+<script>
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  OneSignalDeferred.push(async function(OneSignal) {
+    await OneSignal.init({
+      appId: "9a9d316f-aaeb-4eca-95ee-c70a32e1b3d1", // ✅ Your App ID
+      safari_web_id: "",
+      notifyButton: {
+        enable: true,
+      },
+      allowLocalhostAsSecureOrigin: true,
+      welcomeNotification: {
+        title: "StudyBud",
+        message: "Thanks for subscribing! You'll now receive study reminders 📚",
+      },
+    });
+    
+    // Check if user is logged in (Django template tag)
+    {% if request.user.is_authenticated %}
+    try {
+      OneSignal.login("{{ request.user.id }}");
+      OneSignal.setExternalUserId("{{ request.user.id }}");
+      console.log("OneSignal: User logged in as {{ request.user.id }}");
+    } catch (e) {
+      console.log("OneSignal login error:", e);
+    }
+    {% endif %}
+  });
+</script>
+
+<!-- OneSignal Permission Check Script -->
+<script>
+// Check if user has granted permission
+document.addEventListener('DOMContentLoaded', function() {
+    // Check OneSignal status after a short delay to ensure it's loaded
+    setTimeout(function() {
+        if (window.OneSignal) {
+            OneSignal.Notifications.permissionNative.then(function(permission) {
+                console.log('OneSignal permission status:', permission);
+                
+                // You can show a toast based on permission status
+                if (permission === 'granted') {
+                    // Optional: Show a welcome toast for notifications
+                    // showToast('Notifications enabled! You\'ll receive study reminders.', 'success', '🔔 Notifications On');
+                } else if (permission === 'denied') {
+                    // Optional: Show a warning
+                    // showToast('Notifications are blocked. Enable them in browser settings to get reminders.', 'warning', '⚠️ Notifications Off');
+                }
+            }).catch(function(error) {
+                console.log('Error checking OneSignal permission:', error);
+            });
+            
+            // Get the current subscription state
+            OneSignal.User.PushSubscription.addEventListener('change', function (subscription) {
+                console.log('Push subscription changed:', subscription);
+                if (subscription.token) {
+                    console.log('User is subscribed with token:', subscription.token);
+                }
+            });
+        } else {
+            console.log('OneSignal not loaded yet');
+        }
+    }, 1000); // Wait 1 second for OneSignal to load
+});
+
+// Optional: Function to manually trigger notification prompt
+function enableNotifications() {
+    if (window.OneSignal) {
+        OneSignal.Notifications.requestPermission();
+    } else {
+        alert("Notification system is still loading. Please try again in a moment.");
+    }
+}
+
+// Optional: Check if service workers are supported
+if ('serviceWorker' in navigator) {
+    console.log('Service Worker is supported');
+} else {
+    console.log('Service Worker is not supported - notifications may not work');
+}
+</script>
+
   </body>
 </html>
-
