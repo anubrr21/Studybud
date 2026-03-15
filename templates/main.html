@@ -24,282 +24,61 @@
     </ul>
     {% endif %}
     
-
     {% block content %}
-
-
     {% endblock %}
     
-    <script src="{%static 'js/script.js' %}"></script>
+    <script src="{% static 'js/script.js' %}"></script>
+    
+    <!-- ONE SIGNAL - KEEP IT SIMPLE -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js"></script>
     <script>
-      
-// Toast notification system
-function showToast(message, type = 'info', title = '') {
-    const container = document.getElementById('toastContainer');
-    
-    // Set title based on type
-    if (!title) {
-        switch(type) {
-            case 'success':
-                title = 'Success!';
-                break;
-            case 'error':
-                title = 'Error!';
-                break;
-            case 'warning':
-                title = 'Warning!';
-                break;
-            default:
-                title = 'Info';
-        }
-    }
-    
-    // Create toast element
-    const toast = document.createElement('div');
-    toast.className = `toast ${type}`;
-    
-    // Set icon based on type
-    let icon = '';
-    if (type === 'success') {
-        icon = '<path d="M20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4C12.76,4 13.5,4.11 14.2,4.31L15.77,2.74C14.61,2.26 13.34,2 12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12M7.91,10.08L6.5,11.5L11,16L21,6L19.59,4.58L11,13.17L7.91,10.08Z"/>';
-    } else if (type === 'error') {
-        icon = '<path d="M12,2C17.53,2 22,6.47 22,12C22,17.53 17.53,22 12,22C6.47,22 2,17.53 2,12C2,6.47 6.47,2 12,2M15.59,7L12,10.59L8.41,7L7,8.41L10.59,12L7,15.59L8.41,17L12,13.41L15.59,17L17,15.59L13.41,12L17,8.41L15.59,7Z"/>';
-    } else if (type === 'warning') {
-        icon = '<path d="M12,2L1,21H23M12,6L19.53,19H4.47M11,10V14H13V10M11,16V18H13V16"/>';
-    } else {
-        icon = '<path d="M12,2A10,10 0 0,1 22,12A10,10 0 0,1 12,22A10,10 0 0,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20A8,8 0 0,0 20,12A8,8 0 0,0 12,4M11,16.5L16.5,11L15.08,9.58L11,13.67L8.92,11.59L7.5,13L11,16.5Z"/>';
-    }
-    
-    toast.innerHTML = `
-        <div class="toast-icon">
-            <svg viewBox="0 0 24 24">${icon}</svg>
-        </div>
-        <div class="toast-content">
-            <div class="toast-title">${title}</div>
-            <div class="toast-message">${message}</div>
-        </div>
-        <button class="toast-close" onclick="this.parentElement.classList.add('hide'); setTimeout(() => this.parentElement.remove(), 300);">&times;</button>
-    `;
-    
-    container.appendChild(toast);
-    
-    // Auto remove after 5 seconds
-    setTimeout(() => {
-        if (toast.parentElement) {
-            toast.classList.add('hide');
-            setTimeout(() => {
-                if (toast.parentElement) {
-                    toast.remove();
-                }
-            }, 300);
-        }
-    }, 5000);
-}
-
-// Replace Django messages with toasts
-document.addEventListener('DOMContentLoaded', function() {
-    // Check for Django messages in the page
-    const messages = document.querySelectorAll('.messages .message');
-    if (messages.length > 0) {
-        messages.forEach(msg => {
-            const text = msg.textContent.trim();
-            if (msg.classList.contains('success')) {
-                showToast(text, 'success');
-            } else if (msg.classList.contains('error')) {
-                showToast(text, 'error');
-            } else {
-                showToast(text, 'info');
-            }
-            msg.remove(); // Remove original message
+      // Initialize OneSignal - that's ALL you need
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      window.OneSignalDeferred.push(function(OneSignal) {
+        OneSignal.init({
+          appId: "9a9d316f-aaeb-4eca-95ee-c70a32e1b3d1",
         });
-    }
-    
-    // Check for welcome message
-    const welcomeMsg = document.querySelector('.welcome-message');
-    if (welcomeMsg) {
-        const text = welcomeMsg.textContent.trim();
-        if (text.includes('Welcome back')) {
-            showToast(text, 'success', 'Welcome Back! 👋');
-        } else if (text.includes('Welcome')) {
-            showToast(text, 'success', 'Welcome! 🎉');
-        }
-        welcomeMsg.remove();
-    }
-});
-
-
-document.addEventListener("DOMContentLoaded", function () {
-
-  document.querySelectorAll(".like-btn").forEach(button => {
-
-    button.addEventListener("click", function () {
-
-      const roomId = this.dataset.room;
-
-      fetch(`/like-room/${roomId}/`, {
-        method: "POST",
-        headers: {
-          "X-CSRFToken": getCookie("csrftoken"),
-          "Content-Type": "application/json"
-        }
-      })
-      .then(response => response.json())
-      .then(data => {
-        document.getElementById(`like-count-${roomId}`).innerText = data.total_likes;
-
-        if (data.liked) {
-          button.innerHTML = "❤️";
-        } else {
-          button.innerHTML = "🤍";
-        }
       });
-
-    });
-
-  });
-
-});
-
-function getCookie(name) {
-  let cookieValue = null;
-  if (document.cookie && document.cookie !== '') {
-    const cookies = document.cookie.split(';');
-    for (let cookie of cookies) {
-      cookie = cookie.trim();
-      if (cookie.substring(0, name.length + 1) === (name + '=')) {
-        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-        break;
-      }
-    }
-  }
-  return cookieValue;
-}
-</script>
-
-<!-- OneSignal Push Notifications - FINAL WORKING VERSION -->
-<script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-<script>
-  console.log("🔵 OneSignal script starting...");
-  
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  window.OneSignalDeferred.push(function(OneSignal) {
-    console.log("🟢 OneSignal initializing...");
+    </script>
     
-    OneSignal.init({
-      appId: "9a9d316f-aaeb-4eca-95ee-c70a32e1b3d1",
-      safari_web_id: "",
-      notifyButton: {
-        enable: true,
-      },
-      allowLocalhostAsSecureOrigin: true,
-      serviceWorkerParam: { scope: '/' },
-      serviceWorkerPath: '/OneSignalSDKWorker.js',
-    });
-    
-    console.log("✅ OneSignal init called");
-    
-    // Check permission status - CORRECT WAY (property, not function)
-    setTimeout(() => {
-      const permission = OneSignal.Notifications.permission;
-      console.log("📱 Permission status:", permission);
-      
-      if (permission === 'default') {
-        console.log("🎯 Will show prompt in 3 seconds...");
-        setTimeout(() => {
-          OneSignal.Notifications.requestPermission();
-        }, 3000);
-      }
-    }, 2000);
-    
-    // Listen for subscription changes
-    OneSignal.Notifications.addEventListener('permissionChange', (permission) => {
-      console.log('🔔 Permission changed:', permission);
-      if (permission === 'granted') {
-        console.log('✅ User subscribed!');
-        if (typeof showToast === 'function') {
-          showToast("Notifications enabled! You'll receive study reminders.", "success", "🔔 Notifications On");
+    <!-- Toast notification functions -->
+    <script>
+    function showToast(message, type = 'info', title = '') {
+        const container = document.getElementById('toastContainer');
+        
+        if (!title) {
+            switch(type) {
+                case 'success': title = 'Success!'; break;
+                case 'error': title = 'Error!'; break;
+                case 'warning': title = 'Warning!'; break;
+                default: title = 'Info';
+            }
         }
-      }
+        
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        
+        toast.innerHTML = `
+            <div class="toast-content">
+                <div class="toast-title">${title}</div>
+                <div class="toast-message">${message}</div>
+            </div>
+            <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>
+        `;
+        
+        container.appendChild(toast);
+        
+        setTimeout(() => toast.remove(), 5000);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const messages = document.querySelectorAll('.messages li');
+        messages.forEach(msg => {
+            showToast(msg.textContent, 'info');
+            msg.remove();
+        });
     });
-    
-    {% if request.user.is_authenticated %}
-    try {
-      OneSignal.login("{{ request.user.id }}");
-      console.log("👤 User logged in:", "{{ request.user.id }}");
-    } catch (e) {
-      console.log("Login error:", e);
-    }
-    {% endif %}
-  });
+    </script>
 
-  // Check if service workers are supported
-  if ('serviceWorker' in navigator) {
-    console.log('✅ Service Worker is supported');
-    
-    // Test if worker files are accessible
-    fetch('/OneSignalSDKWorker.js')
-      .then(res => {
-        if (res.ok) {
-          console.log('✅ Worker file accessible');
-        } else {
-          console.log('❌ Worker file not accessible:', res.status);
-        }
-      })
-      .catch(err => console.log('❌ Worker fetch error:', err));
-  } else {
-    console.log('❌ Service Worker not supported');
-  }
-</script>
-
-<!-- Manual notification trigger button -->
-<button id="enableNotificationsBtn" style="display: none;" onclick="enableNotifications()">Enable Study Reminders</button>
-
-<script>
-// Manual function to enable notifications
-function enableNotifications() {
-  if (window.OneSignal) {
-    OneSignal.Notifications.requestPermission();
-  } else {
-    alert("OneSignal not loaded yet. Please wait a moment.");
-  }
-}
-
-// Show manual button after 5 seconds if not subscribed
-setTimeout(() => {
-  if (window.OneSignal) {
-    const permission = OneSignal.Notifications.permission;
-    if (permission === 'default') {
-      // Auto-prompt didn't work, show manual button
-      const btn = document.getElementById('enableNotificationsBtn');
-      btn.style.display = 'block';
-      btn.style.position = 'fixed';
-      btn.style.bottom = '20px';
-      btn.style.right = '20px';
-      btn.style.zIndex = '9999';
-      btn.style.padding = '12px 24px';
-      btn.style.background = 'linear-gradient(135deg, #71c6dd 0%, #4fa3b8 100%)';
-      btn.style.color = '#1a1a2b';
-      btn.style.border = 'none';
-      btn.style.borderRadius = '50px';
-      btn.style.fontWeight = 'bold';
-      btn.style.fontSize = '16px';
-      btn.style.cursor = 'pointer';
-      btn.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)';
-      btn.style.animation = 'pulse 2s infinite';
-      
-      // Add pulse animation
-      const style = document.createElement('style');
-      style.innerHTML = `
-        @keyframes pulse {
-          0% { transform: scale(1); }
-          50% { transform: scale(1.05); }
-          100% { transform: scale(1); }
-        }
-      `;
-      document.head.appendChild(style);
-    }
-  }
-}, 5000);
-</script>
-</body>
+  </body>
 </html>
