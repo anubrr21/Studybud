@@ -176,82 +176,126 @@ function getCookie(name) {
 }
 </script>
 
-<!-- OneSignal Push Notifications -->
-<!-- OneSignal Push Notifications - FIXED VERSION -->
+<!-- OneSignal Push Notifications - FULLY FIXED VERSION -->
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>
- window.OneSignalDeferred = window.OneSignalDeferred || [];
-
-OneSignalDeferred.push(async function(OneSignal) {
-
-  console.log("🟢 Initializing OneSignal");
-
-  await OneSignal.init({
-    appId: "9a9d316f-aaeb-4eca-95ee-c70a32e1b3d1",
-    notifyButton: { enable: true },
-    allowLocalhostAsSecureOrigin: true,
+  console.log("🔵 OneSignal script starting...");
+  
+  window.OneSignalDeferred = window.OneSignalDeferred || [];
+  window.OneSignalDeferred.push(async function(OneSignal) {
+    console.log("🟢 OneSignal initializing...");
+    
+    try {
+      await OneSignal.init({
+        appId: "9a9d316f-aaeb-4eca-95ee-c70a32e1b3d1",
+        safari_web_id: "",
+        notifyButton: {
+          enable: true,
+        },
+        allowLocalhostAsSecureOrigin: true,
+        serviceWorkerParam: { scope: '/' },
+        serviceWorkerPath: '/OneSignalSDKWorker.js',
+      });
+      
+      console.log("✅ OneSignal initialized successfully");
+      
+      // Check if notifications are supported
+      if (!OneSignal.Notifications) {
+        console.log("❌ Notifications not supported in this browser");
+        return;
+      }
+      
+      // Get permission status - FIXED: using getPermission() instead of .permission
+      const permission = await OneSignal.Notifications.getPermission();
+      console.log("📱 Permission status:", permission);
+      
+      // Show prompt if not decided
+      if (permission === 'default') {
+        console.log("🎯 Showing notification prompt in 3 seconds...");
+        setTimeout(() => {
+          OneSignal.Notifications.requestPermission();
+        }, 3000);
+      }
+      
+      // Get subscription state
+      try {
+        const subscription = await OneSignal.User.PushSubscription;
+        console.log("📬 Subscription:", subscription);
+      } catch (e) {
+        console.log("Subscription check:", e);
+      }
+      
+      {% if request.user.is_authenticated %}
+      try {
+        OneSignal.login("{{ request.user.id }}");
+        console.log("👤 User logged in:", "{{ request.user.id }}");
+      } catch (e) {
+        console.log("Login error:", e);
+      }
+      {% endif %}
+      
+    } catch (error) {
+      console.error("❌ OneSignal init error:", error);
+    }
   });
 
-  const permission = await OneSignal.Notifications.permission;
-  console.log("🔔 Notification permission:", permission);
-
-});
+  // Check if service workers are supported
+  if ('serviceWorker' in navigator) {
+    console.log('✅ Service Worker is supported');
+    
+    // Test if worker files are accessible
+    fetch('/OneSignalSDKWorker.js')
+      .then(res => {
+        if (res.ok) {
+          console.log('✅ Worker file accessible');
+        } else {
+          console.log('❌ Worker file not accessible:', res.status);
+        }
+      })
+      .catch(err => console.log('❌ Worker fetch error:', err));
+  } else {
+    console.log('❌ Service Worker not supported');
+  }
 </script>
 
-<!-- OneSignal Permission Check Script -->
+<!-- Manual notification trigger button (hidden by default) -->
+<button id="enableNotificationsBtn" style="display: none;" onclick="enableNotifications()">Enable Notifications</button>
+
 <script>
-// Check if user has granted permission
-document.addEventListener('DOMContentLoaded', function() {
-    // Check OneSignal status after a short delay to ensure it's loaded
-    setTimeout(function() {
-       if (window.OneSignal) {
-    OneSignal.Notifications.permission.then(function(permission) {
-
-        console.log("OneSignal permission status:", permission);
-
-        if (permission === "granted") {
-            // Optional success toast
-            // showToast("Notifications enabled!", "success", "🔔 Notifications On");
-        }
-
-        if (permission === "denied") {
-            // Optional warning toast
-            // showToast("Notifications are blocked in browser settings.", "warning", "⚠️ Notifications Off");
-        }
-
-    }).catch(function(error) {
-        console.log("Error checking permission:", error);
-    });
-
-            
-            // Get the current subscription state
-            OneSignal.User.PushSubscription.addEventListener('change', function (subscription) {
-                console.log('Push subscription changed:', subscription);
-                if (subscription.token) {
-                    console.log('User is subscribed with token:', subscription.token);
-                }
-            });
-        } else {
-            console.log('OneSignal not loaded yet');
-        }
-    }, 1000); // Wait 1 second for OneSignal to load
-});
-
-// Optional: Function to manually trigger notification prompt
+// Manual function to enable notifications
 function enableNotifications() {
-    if (window.OneSignal) {
-        OneSignal.Notifications.requestPermission();
-    } else {
-        alert("Notification system is still loading. Please try again in a moment.");
-    }
+  if (window.OneSignal) {
+    OneSignal.Notifications.requestPermission();
+  } else {
+    alert("OneSignal not loaded yet. Please wait a moment.");
+  }
 }
 
-// Optional: Check if service workers are supported
-if ('serviceWorker' in navigator) {
-    console.log('Service Worker is supported');
-} else {
-    console.log('Service Worker is not supported - notifications may not work');
-}
+// Show manual button if auto-prompt fails
+setTimeout(() => {
+  if (window.OneSignal) {
+    OneSignal.Notifications.getPermission().then(permission => {
+      if (permission === 'default') {
+        // Auto-prompt failed, show manual button
+        const btn = document.getElementById('enableNotificationsBtn');
+        btn.style.display = 'block';
+        btn.style.position = 'fixed';
+        btn.style.bottom = '20px';
+        btn.style.right = '20px';
+        btn.style.zIndex = '9999';
+        btn.style.padding = '10px 20px';
+        btn.style.background = 'linear-gradient(135deg, var(--color-main) 0%, #4fa3b8 100%)';
+        btn.style.color = 'var(--color-dark)';
+        btn.style.border = 'none';
+        btn.style.borderRadius = '30px';
+        btn.style.fontWeight = 'bold';
+        btn.style.cursor = 'pointer';
+        btn.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)';
+        btn.innerText = '🔔 Enable Study Reminders';
+      }
+    });
+  }
+}, 5000);
 </script>
 
   </body>
