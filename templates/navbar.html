@@ -23,10 +23,10 @@
       </label>
     </form>
     {% if request.user.is_authenticated %}
-<a href="{% url 'test-push' %}" 
-   style="position:fixed; bottom:80px; right:20px; z-index:9999; padding:10px 20px; background:#ff4757; color:white; border-radius:50px; text-decoration:none; font-weight:bold;">
-   🔔 TEST PUSH
-</a>
+<button onclick="subscribeToNotifications()" 
+        style="position:fixed; bottom:20px; left:20px; z-index:9999; padding:15px 30px; background:#71c6dd; color:black; border:none; border-radius:50px; font-weight:bold; font-size:16px; cursor:pointer; box-shadow:0 4px 15px rgba(0,0,0,0.3);">
+    🔔 CLICK TO ENABLE PUSH NOTIFICATIONS
+</button>
 {% endif %}
 
     <!-- Menu -->
@@ -186,6 +186,21 @@
         }
       });
     });
+    function subscribeToNotifications() {
+    if (window.OneSignal) {
+        OneSignal.Notifications.requestPermission()
+            .then(accepted => {
+                if (accepted) {
+                    alert("✅ Success! You're now subscribed to notifications!");
+                    console.log("Subscribed successfully!");
+                } else {
+                    alert("❌ You declined notifications. You can enable them later in browser settings.");
+                }
+            });
+    } else {
+        alert("OneSignal not loaded yet. Please wait a moment.");
+    }
+}
 
     // Update navbar unread count for messages
     function updateNavUnreadCount() {

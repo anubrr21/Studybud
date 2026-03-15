@@ -42,6 +42,9 @@ def test_push_notification(request):
     if not request.user.is_authenticated:
         return JsonResponse({'error': 'Not logged in'}, status=401)
     
+    # First check if user has a push subscription
+    print(f"🔔 Testing push for user {request.user.id}")
+    
     result = send_push_notification(
         user_id=request.user.id,
         title="🧪 TEST NOTIFICATION",
@@ -51,11 +54,11 @@ def test_push_notification(request):
         sender_name="System"
     )
     
-    if result and result.get('id'):
-        return JsonResponse({'success': True, 'result': result})
-    else:
-        return JsonResponse({'success': False, 'error': 'Failed to send', 'result': result})
-
+    return JsonResponse({
+        'success': result and result.get('id'),
+        'user_id': request.user.id,
+        'result': result
+    })
 # ============================================
 # PUSH NOTIFICATION FUNCTION
 # ============================================

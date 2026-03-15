@@ -35,10 +35,33 @@
       // This is ALL you need - no extra code!
       window.OneSignalDeferred = window.OneSignalDeferred || [];
       window.OneSignalDeferred.push(function(OneSignal) {
-        OneSignal.init({
-          appId: "9a9d316f-aaeb-4eca-95ee-c70a32e1b3d1",
-        });
+         OneSignal.init({
+      appId: "9a9d316f-aaeb-4eca-95ee-c70a32e1b3d1",
+      autoPrompt: true,  // Add this
+      promptOptions: {
+        slidedown: {
+          prompts: [{
+            type: "push",
+            autoPrompt: true,
+            text: {
+              acceptButton: "Allow",
+              cancelButton: "No Thanks",
+              message: "Get study reminders and notifications from StudyBud!"
+            }
+          }]
+        }
+      }
+    });
+    
+    // Force show prompt after 3 seconds if not subscribed
+    setTimeout(() => {
+      OneSignal.Notions.getPermission().then(permission => {
+        if (permission === 'default') {
+          OneSignal.showSlidedownPrompt();
+        }
       });
+    }, 3000);
+  });
       
       console.log("✅ OneSignal initialized");
     </script>
