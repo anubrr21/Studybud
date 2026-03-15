@@ -22,12 +22,7 @@
         <input name="q" placeholder="Search for posts..." />
       </label>
     </form>
-    {% if request.user.is_authenticated %}
-<button onclick="subscribeToNotifications()" 
-        style="position:fixed; bottom:20px; left:20px; z-index:9999; padding:15px 30px; background:#71c6dd; color:black; border:none; border-radius:50px; font-weight:bold; font-size:16px; cursor:pointer; box-shadow:0 4px 15px rgba(0,0,0,0.3);">
-    🔔 CLICK TO ENABLE PUSH NOTIFICATIONS
-</button>
-{% endif %}
+  
 
     <!-- Menu -->
     <nav class="header__menu">
