@@ -73,6 +73,7 @@
         align-items: center;
         justify-content: center;
         gap: 1rem;
+        flex-wrap: wrap;
     }
     
     .form-header p {
@@ -339,6 +340,28 @@
         margin-left: 1rem;
     }
     
+    /* Notification Status */
+    .notification-status {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 2rem;
+        font-size: 1.2rem;
+        margin-top: 1rem;
+        background: rgba(255,255,255,0.1);
+    }
+    
+    .notification-status.allowed {
+        background: rgba(38,222,129,0.2);
+        color: #26de81;
+    }
+    
+    .notification-status.denied {
+        background: rgba(255,71,87,0.2);
+        color: #ff4757;
+    }
+    
     /* Submit Button */
     .submit-btn {
         width: 100%;
@@ -391,6 +414,11 @@
         .break-settings {
             grid-template-columns: 1fr;
         }
+        
+        .form-header h1 {
+            font-size: 2.4rem;
+            flex-direction: column;
+        }
     }
 </style>
 
@@ -411,6 +439,12 @@
             </span>
         </h1>
         <p>✨ Advanced AI-powered study planner ✨</p>
+        
+        <!-- Notification Status -->
+        <div id="notificationStatus" class="notification-status">
+            <span>🔔</span>
+            <span id="notificationText">Checking notification permission...</span>
+        </div>
     </div>
     
     <!-- AI Study Assistant -->
@@ -420,7 +454,7 @@
         </h4>
         <div class="ai-suggestion" id="aiSuggestion">
             <p>Based on your previous study patterns, I suggest using the Pomodoro technique for this session. It will help you maintain focus and avoid burnout.</p>
-            <button class="ai-use-btn" onclick="applyAISuggestion()">Apply Suggestion</button>
+            <button type="button" class="ai-use-btn" onclick="applyAISuggestion()">Apply Suggestion</button>
         </div>
     </div>
     
@@ -461,7 +495,7 @@
             </div>
         </div>
         
-        <!-- Date & Time Section -->
+        <!-- Date & Time Section - FIXED: Removed today variable dependency -->
         <div class="form-section">
             <div class="section-title">
                 <svg viewBox="0 0 24 24" width="24" height="24" fill="var(--color-main)">
@@ -473,24 +507,24 @@
             <div class="datetime-group">
                 <div class="form-group">
                     <label>📅 Start Date</label>
-                    <input type="date" name="start_date" class="form-control" value="{{ plan.start_date|date:'Y-m-d'|default:today|date:'Y-m-d' }}" required>
+                    <input type="date" name="start_date" id="start_date" class="form-control" value="{{ plan.start_date|date:'Y-m-d'|default:'' }}" required>
                 </div>
                 
                 <div class="form-group">
                     <label>⏰ Start Time (24h IST)</label>
-                    <input type="time" name="start_time" class="form-control" value="{{ plan.start_date|time:'H:i'|default:'09:00' }}" required>
+                    <input type="time" name="start_time" id="start_time" class="form-control" value="{{ plan.start_date|time:'H:i'|default:'09:00' }}" required>
                 </div>
             </div>
             
             <div class="datetime-group">
                 <div class="form-group">
                     <label>📅 End Date</label>
-                    <input type="date" name="end_date" class="form-control" value="{{ plan.end_date|date:'Y-m-d'|default:today|date:'Y-m-d' }}" required>
+                    <input type="date" name="end_date" id="end_date" class="form-control" value="{{ plan.end_date|date:'Y-m-d'|default:'' }}" required>
                 </div>
                 
                 <div class="form-group">
                     <label>⏰ End Time (24h IST)</label>
-                    <input type="time" name="end_time" class="form-control" value="{{ plan.end_date|time:'H:i'|default:'10:00' }}" required>
+                    <input type="time" name="end_time" id="end_time" class="form-control" value="{{ plan.end_date|time:'H:i'|default:'10:00' }}" required>
                 </div>
             </div>
             
@@ -537,7 +571,12 @@
                     <div class="reminder-option {% if plan.reminder == 120 %}selected{% endif %}" onclick="selectReminder(this, 120)">2 hours</div>
                 </div>
                 <input type="hidden" name="reminder" id="reminder-input" value="{{ plan.reminder|default:60 }}">
-                <small style="color: var(--color-light-gray); display: block; margin-top: 0.5rem;">You will receive browser notifications at the chosen time</small>
+                <small style="color: var(--color-light-gray); display: block; margin-top: 0.5rem;">
+                    You will receive browser notifications at the chosen time
+                </small>
+                <small style="color: var(--color-light-gray); display: block; margin-top: 0.3rem;">
+                    📱 On mobile, you need to keep the browser open or allow notifications in browser settings
+                </small>
             </div>
         </div>
         
@@ -685,6 +724,70 @@
 </div>
 
 <script>
+// Set today's date as default if no date is provided
+document.addEventListener('DOMContentLoaded', function() {
+    // Get today's date in YYYY-MM-DD format
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, '0');
+    const day = String(today.getDate()).padStart(2, '0');
+    const todayStr = `${year}-${month}-${day}`;
+    
+    // Set default dates if empty
+    const startDateInput = document.getElementById('start_date');
+    const endDateInput = document.getElementById('end_date');
+    
+    if (!startDateInput.value) {
+        startDateInput.value = todayStr;
+    }
+    
+    if (!endDateInput.value) {
+        endDateInput.value = todayStr;
+    }
+    
+    // Check notification permission
+    checkNotificationPermission();
+    
+    // Calculate initial duration
+    calculateDuration();
+});
+
+function checkNotificationPermission() {
+    const statusDiv = document.getElementById('notificationStatus');
+    const statusText = document.getElementById('notificationText');
+    
+    if (!('Notification' in window)) {
+        statusDiv.className = 'notification-status denied';
+        statusText.innerHTML = '❌ Notifications not supported';
+        return;
+    }
+    
+    if (Notification.permission === 'granted') {
+        statusDiv.className = 'notification-status allowed';
+        statusText.innerHTML = '✅ Notifications enabled';
+    } else if (Notification.permission === 'denied') {
+        statusDiv.className = 'notification-status denied';
+        statusText.innerHTML = '❌ Notifications blocked - Enable in browser settings';
+    } else {
+        statusDiv.className = 'notification-status';
+        statusText.innerHTML = '🔔 Click to enable notifications';
+        statusDiv.style.cursor = 'pointer';
+        statusDiv.onclick = requestNotificationPermission;
+    }
+}
+
+function requestNotificationPermission() {
+    Notification.requestPermission().then(permission => {
+        checkNotificationPermission();
+        if (permission === 'granted') {
+            new Notification('StudyBud', {
+                body: 'Notifications enabled! You will receive reminders for your study plans.',
+                icon: '/static/images/logo.svg'
+            });
+        }
+    });
+}
+
 function selectPriority(element, value) {
     document.querySelectorAll('.priority-option').forEach(opt => {
         opt.classList.remove('selected');
@@ -711,7 +814,12 @@ function selectTechnique(element, value) {
 
 function applyAISuggestion() {
     // Apply Pomodoro technique
-    selectTechnique(document.querySelector('[data-technique="pomodoro"]'), 'pomodoro');
+    const pomodoroCard = Array.from(document.querySelectorAll('.technique-card')).find(
+        card => card.querySelector('.technique-name').textContent.includes('Pomodoro')
+    );
+    if (pomodoroCard) {
+        selectTechnique(pomodoroCard, 'pomodoro');
+    }
     document.querySelector('select[name="break_reminder"]').value = '25';
     document.querySelector('select[name="break_duration"]').value = '5';
     
@@ -720,10 +828,10 @@ function applyAISuggestion() {
 
 // Calculate duration in 24-hour format
 function calculateDuration() {
-    const startDate = document.querySelector('input[name="start_date"]').value;
-    const startTime = document.querySelector('input[name="start_time"]').value;
-    const endDate = document.querySelector('input[name="end_date"]').value;
-    const endTime = document.querySelector('input[name="end_time"]').value;
+    const startDate = document.getElementById('start_date').value;
+    const startTime = document.getElementById('start_time').value;
+    const endDate = document.getElementById('end_date').value;
+    const endTime = document.getElementById('end_time').value;
     
     if (startDate && startTime && endDate && endTime) {
         const start = new Date(`${startDate}T${startTime}`);
@@ -740,20 +848,24 @@ function calculateDuration() {
             } else {
                 display.textContent = diffHours.toFixed(1) + ' hours';
             }
+        } else {
+            document.getElementById('durationDisplay').textContent = 'Invalid duration';
         }
     }
 }
 
-document.querySelectorAll('input[name="start_time"], input[name="end_time"], input[name="start_date"], input[name="end_date"]').forEach(input => {
-    input.addEventListener('change', calculateDuration);
-});
+// Add event listeners for duration calculation
+document.getElementById('start_date').addEventListener('change', calculateDuration);
+document.getElementById('start_time').addEventListener('change', calculateDuration);
+document.getElementById('end_date').addEventListener('change', calculateDuration);
+document.getElementById('end_time').addEventListener('change', calculateDuration);
 
 // Form validation
 document.getElementById('studyPlanForm').addEventListener('submit', function(e) {
-    const startDate = document.querySelector('input[name="start_date"]').value;
-    const endDate = document.querySelector('input[name="end_date"]').value;
-    const startTime = document.querySelector('input[name="start_time"]').value;
-    const endTime = document.querySelector('input[name="end_time"]').value;
+    const startDate = document.getElementById('start_date').value;
+    const endDate = document.getElementById('end_date').value;
+    const startTime = document.getElementById('start_time').value;
+    const endTime = document.getElementById('end_time').value;
     
     const start = new Date(`${startDate}T${startTime}`);
     const end = new Date(`${endDate}T${endTime}`);
@@ -761,14 +873,20 @@ document.getElementById('studyPlanForm').addEventListener('submit', function(e) 
     if (end <= start) {
         e.preventDefault();
         alert('❌ End time must be after start time!');
+        return;
+    }
+    
+    // Show notification permission reminder if not granted
+    if ('Notification' in window && Notification.permission !== 'granted') {
+        const confirmSubmit = confirm('Notifications are not enabled. You won\'t receive reminders. Continue anyway?');
+        if (!confirmSubmit) {
+            e.preventDefault();
+            requestNotificationPermission();
+        }
     }
 });
 
-// Request notification permission
-if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
-    Notification.requestPermission();
-}
-
+// Initial calculation
 calculateDuration();
 </script>
 
