@@ -80,4 +80,5 @@ path('api/today-plans/', views.api_today_plans, name='api-today-plans'),
     path('api/study-stats/', views.api_study_stats, name='api-study-stats'),
     path('check-plan-reminders/', views.check_plan_reminders, name='check-plan-reminders'),
     path('mark-plan-complete/<int:plan_id>/', views.mark_plan_complete, name='mark-plan-complete'),
+    path('test-push/', views.test_push_notification, name='test-push'),
 ]

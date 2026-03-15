@@ -34,6 +34,27 @@ from PIL import Image
 import io
 from .emails import send_verification_email, send_password_reset_email
 from django.contrib.auth.views import PasswordResetView
+from django.views.decorators.csrf import csrf_exempt
+
+@csrf_exempt
+def test_push_notification(request):
+    """TEST ENDPOINT - Send a test push notification to current user"""
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'Not logged in'}, status=401)
+    
+    result = send_push_notification(
+        user_id=request.user.id,
+        title="🧪 TEST NOTIFICATION",
+        message="This is a test push notification from StudyBud!",
+        url="/notifications/",
+        notification_type="test",
+        sender_name="System"
+    )
+    
+    if result and result.get('id'):
+        return JsonResponse({'success': True, 'result': result})
+    else:
+        return JsonResponse({'success': False, 'error': 'Failed to send', 'result': result})
 
 # ============================================
 # PUSH NOTIFICATION FUNCTION
