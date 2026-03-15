@@ -180,38 +180,22 @@ function getCookie(name) {
 <!-- OneSignal Push Notifications - FIXED VERSION -->
 <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 <script>
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(function(OneSignal) {
-    console.log("🟢 Initializing OneSignal...");
-    
-    OneSignal.init({
-      appId: "9a9d316f-aaeb-4eca-95ee-c70a32e1b3d1",
-      safari_web_id: "",
-      notifyButton: {
-        enable: true,
-      },
-      allowLocalhostAsSecureOrigin: true,
-      serviceWorkerParam: { scope: '/' },
-      serviceWorkerPath: 'OneSignalSDKWorker.js',  // ✅ LOOKS IN ROOT
-    });
-    
-    // Force prompt to show
-    setTimeout(function() {
-      OneSignal.showSlidedownPrompt();
-      console.log("🎯 Showing slide prompt");
-    }, 5000);
+ window.OneSignalDeferred = window.OneSignalDeferred || [];
+
+OneSignalDeferred.push(async function(OneSignal) {
+
+  console.log("🟢 Initializing OneSignal");
+
+  await OneSignal.init({
+    appId: "9a9d316f-aaeb-4eca-95ee-c70a32e1b3d1",
+    notifyButton: { enable: true },
+    allowLocalhostAsSecureOrigin: true,
   });
-  
-  // Log OneSignal status
-  window.addEventListener('load', function() {
-    setTimeout(function() {
-      if (window.OneSignal) {
-        OneSignal.getSubscription().then(function(subscription) {
-          console.log("📱 Subscription status:", subscription);
-        });
-      }
-    }, 3000);
-  });
+
+  const permission = await OneSignal.Notifications.permission;
+  console.log("🔔 Notification permission:", permission);
+
+});
 </script>
 
 <!-- OneSignal Permission Check Script -->
@@ -220,21 +204,25 @@ function getCookie(name) {
 document.addEventListener('DOMContentLoaded', function() {
     // Check OneSignal status after a short delay to ensure it's loaded
     setTimeout(function() {
-        if (window.OneSignal) {
-            OneSignal.Notifications.permissionNative.then(function(permission) {
-                console.log('OneSignal permission status:', permission);
-                
-                // You can show a toast based on permission status
-                if (permission === 'granted') {
-                    // Optional: Show a welcome toast for notifications
-                    // showToast('Notifications enabled! You\'ll receive study reminders.', 'success', '🔔 Notifications On');
-                } else if (permission === 'denied') {
-                    // Optional: Show a warning
-                    // showToast('Notifications are blocked. Enable them in browser settings to get reminders.', 'warning', '⚠️ Notifications Off');
-                }
-            }).catch(function(error) {
-                console.log('Error checking OneSignal permission:', error);
-            });
+       if (window.OneSignal) {
+    OneSignal.Notifications.permission.then(function(permission) {
+
+        console.log("OneSignal permission status:", permission);
+
+        if (permission === "granted") {
+            // Optional success toast
+            // showToast("Notifications enabled!", "success", "🔔 Notifications On");
+        }
+
+        if (permission === "denied") {
+            // Optional warning toast
+            // showToast("Notifications are blocked in browser settings.", "warning", "⚠️ Notifications Off");
+        }
+
+    }).catch(function(error) {
+        console.log("Error checking permission:", error);
+    });
+
             
             // Get the current subscription state
             OneSignal.User.PushSubscription.addEventListener('change', function (subscription) {
