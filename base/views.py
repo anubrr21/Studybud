@@ -27,6 +27,7 @@ import os
 import mimetypes
 import subprocess
 import sys
+import json 
 from PIL import Image
 import io
 from .emails import send_verification_email, send_password_reset_email
@@ -1424,27 +1425,177 @@ def calendar_data(request):
 
 
 @login_required
-def today_plans_api(request):
-    """API endpoint for today's plans (used in dashboard)"""
-    today = timezone.now().date()
-    day_start = timezone.make_aware(datetime.combine(today, datetime.min.time()))
-    day_end = timezone.make_aware(datetime.combine(today, datetime.max.time()))
+
+
+def api_today_plans(request):
+    """API endpoint for today's plans"""
+    if not request.user.is_authenticated:
+        return JsonResponse({'plans': []})
     
+    today = timezone.now().date()
     plans = StudyPlan.objects.filter(
         user=request.user,
-        start_date__lte=day_end,
-        end_date__gte=day_start
-    ).order_by('start_date')[:5]
+        start_date__date=today,
+        status='pending'
+    ).order_by('start_date')
     
-    plan_data = []
+    plans_data = []
     for plan in plans:
-        plan_data.append({
+        plans_data.append({
             'id': plan.id,
             'title': plan.title,
             'subject': plan.subject,
             'start_time': plan.start_date.strftime('%I:%M %p'),
             'end_time': plan.end_date.strftime('%I:%M %p'),
-            'status': plan.status,
         })
     
-    return JsonResponse({'plans': plan_data})
+    return JsonResponse({'plans': plans_data})
+
+def api_weekly_stats(request):
+    """API endpoint for weekly stats"""
+    if not request.user.is_authenticated:
+        return JsonResponse({'total_hours': 0, 'total_plans': 0})
+    
+    # Get start of week (Monday)
+    today = timezone.now().date()
+    start_of_week = today - timedelta(days=today.weekday())
+    end_of_week = start_of_week + timedelta(days=6)
+    
+    # Get completed plans this week
+    completed_plans = StudyPlan.objects.filter(
+        user=request.user,
+        status='completed',
+        end_date__date__gte=start_of_week,
+        end_date__date__lte=end_of_week
+    )
+    
+    total_hours = 0
+    for plan in completed_plans:
+        duration = plan.end_date - plan.start_date
+        total_hours += duration.total_seconds() / 3600
+    
+    return JsonResponse({
+        'total_hours': round(total_hours, 1),
+        'total_plans': completed_plans.count()
+    })
+
+def api_study_stats(request):
+    """API endpoint for study stats"""
+    if not request.user.is_authenticated:
+        return JsonResponse({
+            'today_minutes': 0,
+            'week_minutes': 0,
+            'plans_today': 0,
+            'upcoming_count': 0,
+            'total_hours': 0,
+            'completed_plans': 0,
+            'current_streak': 0
+        })
+    
+    today = timezone.now().date()
+    
+    # Today's study time
+    today_plans = StudyPlan.objects.filter(
+        user=request.user,
+        start_date__date=today,
+        status='completed'
+    )
+    today_minutes = 0
+    for plan in today_plans:
+        duration = plan.end_date - plan.start_date
+        today_minutes += duration.total_seconds() / 60
+    
+    # This week's study time
+    start_of_week = today - timedelta(days=today.weekday())
+    week_plans = StudyPlan.objects.filter(
+        user=request.user,
+        status='completed',
+        end_date__date__gte=start_of_week
+    )
+    week_minutes = 0
+    for plan in week_plans:
+        duration = plan.end_date - plan.start_date
+        week_minutes += duration.total_seconds() / 60
+    
+    # Counts
+    plans_today = StudyPlan.objects.filter(
+        user=request.user,
+        start_date__date=today
+    ).count()
+    
+    upcoming_count = StudyPlan.objects.filter(
+        user=request.user,
+        start_date__gt=timezone.now(),
+        status='pending'
+    ).count()
+    
+    # Calculate streak (simplified)
+    current_streak = 0
+    check_date = today
+    while True:
+        has_plan = StudyPlan.objects.filter(
+            user=request.user,
+            status='completed',
+            end_date__date=check_date
+        ).exists()
+        if has_plan:
+            current_streak += 1
+            check_date -= timedelta(days=1)
+        else:
+            break
+    
+    return JsonResponse({
+        'today_minutes': round(today_minutes),
+        'week_minutes': round(week_minutes),
+        'plans_today': plans_today,
+        'upcoming_count': upcoming_count,
+        'total_hours': round(week_minutes / 60, 1),
+        'completed_plans': week_plans.count(),
+        'current_streak': current_streak
+    })
+
+def check_plan_reminders(request):
+    """Check and send reminders for upcoming plans"""
+    if not request.user.is_authenticated:
+        return JsonResponse({'reminders_sent': []})
+    
+    now = timezone.now()
+    reminders_sent = []
+    
+    # Find plans starting in the next hour with reminders
+    plans = StudyPlan.objects.filter(
+        user=request.user,
+        start_date__gt=now,
+        start_date__lt=now + timedelta(hours=1),
+        reminder__gt=0,
+        notification_sent=False
+    )
+    
+    for plan in plans:
+        reminder_minutes = plan.reminder
+        notification_time = plan.start_date - timedelta(minutes=reminder_minutes)
+        
+        # If it's time to send (within 1 minute of target)
+        if abs((notification_time - now).total_seconds()) < 60:
+            reminders_sent.append({
+                'id': plan.id,
+                'title': plan.title,
+                'time': plan.start_date.strftime('%I:%M %p')
+            })
+            plan.notification_sent = True
+            plan.save()
+    
+    return JsonResponse({'reminders_sent': reminders_sent})
+
+def mark_plan_complete(request, plan_id):
+    """Mark a study plan as complete"""
+    if not request.user.is_authenticated:
+        return JsonResponse({'success': False, 'error': 'Not authenticated'})
+    
+    try:
+        plan = StudyPlan.objects.get(id=plan_id, user=request.user)
+        plan.status = 'completed'
+        plan.save()
+        return JsonResponse({'success': True})
+    except StudyPlan.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Plan not found'})

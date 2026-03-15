@@ -74,5 +74,10 @@ path('update-plan-status/<int:plan_id>/', views.update_plan_status, name='update
 path('start-study-session/<int:plan_id>/', views.start_study_session, name='start-study-session'),
 path('end-study-session/<int:session_id>/', views.end_study_session, name='end-study-session'),
 path('calendar-data/', views.calendar_data, name='calendar-data'),
-path('api/today-plans/', views.today_plans_api, name='today-plans-api'),
+path('api/today-plans/', views.api_today_plans, name='api-today-plans'),
+
+    path('api/weekly-stats/', views.api_weekly_stats, name='api-weekly-stats'),
+    path('api/study-stats/', views.api_study_stats, name='api-study-stats'),
+    path('check-plan-reminders/', views.check_plan_reminders, name='check-plan-reminders'),
+    path('mark-plan-complete/<int:plan_id>/', views.mark_plan_complete, name='mark-plan-complete'),
 ]

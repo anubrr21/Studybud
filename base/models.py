@@ -345,6 +345,8 @@ class StudyPlan(models.Model):
     # Timestamps
     created = models.DateTimeField(auto_now_add=True)
     updated = models.DateTimeField(auto_now=True)
+
+    notification_sent = models.BooleanField(default=False)
     
     class Meta:
         ordering = ['start_date', 'priority']

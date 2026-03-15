@@ -188,6 +188,8 @@ function getCookie(name) {
         enable: true,
       },
       allowLocalhostAsSecureOrigin: true,
+      serviceWorkerParam: { scope: '/' },
+      serviceWorkerPath: '/static/js/OneSignalSDKWorker.js', 
       welcomeNotification: {
         title: "StudyBud",
         message: "Thanks for subscribing! You'll now receive study reminders 📚",
