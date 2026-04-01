@@ -1200,17 +1200,17 @@
             <div class="cal-weekday">Fri</div>
             <div class="cal-weekday">Sat</div>
             <div class="cal-weekday">Sun</div>
-            {% for day in calendar_days %}
-            <div class="cal-day
-                {% if day.date == current_date %}selected{% endif %}
-                {% if day.is_today %}today{% endif %}
-                {% if day.has_plans %}has-plans{% endif %}
-                {% if day.all_completed %}completed-day{% endif %}
-                {% if day.other_month %}other-month{% endif %}"
-                 onclick="window.location.href='?date={{ day.date|date:\"Y-m-d\" }}'">
-                {{ day.day }}
-            </div>
-            {% endfor %}
+           {% for day in calendar_days %}
+<div class="cal-day
+    {% if day.date == current_date %}selected{% endif %}
+    {% if day.is_today %}today{% endif %}
+    {% if day.has_plans %}has-plans{% endif %}
+    {% if day.all_completed %}completed-day{% endif %}
+    {% if day.other_month %}other-month{% endif %}"
+     onclick="window.location.href='?date={{ day.date|date:'Y-m-d' }}'">
+    {{ day.day }}
+</div>
+{% endfor %}
         </div>
     </div>
 
