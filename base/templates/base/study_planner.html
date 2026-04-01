@@ -3,276 +3,441 @@
 
 {% block content %}
 <style>
-    /* Main Container */
-    .planner-container {
-        max-width: 1400px;
-        margin: 2rem auto;
-        padding: 0 2rem;
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+    :root {
+        --planner-accent: #71c6dd;
+        --planner-accent-2: #4fa3b8;
+        --planner-danger: #ff4757;
+        --planner-warning: #ffa502;
+        --planner-success: #26de81;
+        --planner-dark: var(--color-dark, #1a1a2e);
+        --planner-dark-med: var(--color-dark-medium, #2d2d3f);
+        --planner-light: var(--color-light, #e8e8f0);
+        --planner-gray: var(--color-light-gray, #a0a0b8);
+        --radius-lg: 20px;
+        --radius-xl: 28px;
+        --shadow-glow: 0 0 30px rgba(113,198,221,0.15);
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    
-    /* Back Button */
-    .back-button {
+
+    * { box-sizing: border-box; }
+
+    .planner-wrap {
+        font-family: 'Space Grotesk', sans-serif;
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 2rem 2.4rem 4rem;
+    }
+
+    /* ── Toast Notification System ── */
+    #toast-container {
+        position: fixed;
+        top: 2rem;
+        right: 2rem;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        pointer-events: none;
+    }
+
+    .toast {
+        background: linear-gradient(135deg, #1e1e2e, #2a2a40);
+        border-radius: 14px;
+        padding: 1.4rem 2rem;
+        color: var(--planner-light);
+        font-size: 1.4rem;
+        font-weight: 500;
+        border-left: 4px solid var(--planner-accent);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        transform: translateX(120%);
+        transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        pointer-events: all;
+        max-width: 360px;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+    }
+
+    .toast.show { transform: translateX(0); }
+    .toast.success { border-left-color: var(--planner-success); }
+    .toast.error { border-left-color: var(--planner-danger); }
+    .toast.warning { border-left-color: var(--planner-warning); }
+    .toast-icon { font-size: 2rem; }
+    .toast-msg { flex: 1; }
+
+    /* ── Back Button ── */
+    .back-btn {
         display: inline-flex;
         align-items: center;
         gap: 0.8rem;
-        color: var(--color-light);
+        color: var(--planner-light);
         text-decoration: none;
-        font-size: 1.6rem;
+        font-size: 1.5rem;
+        font-weight: 500;
         margin-bottom: 2rem;
-        padding: 1rem 2rem;
-        background: linear-gradient(145deg, var(--color-dark) 0%, #2a2a38 100%);
-        border-radius: 30px;
-        transition: all 0.3s ease;
+        padding: 0.9rem 1.8rem;
+        background: rgba(255,255,255,0.05);
+        border-radius: 50px;
         border: 1px solid rgba(113,198,221,0.2);
+        transition: var(--transition);
     }
-    
-    .back-button:hover {
-        transform: translateX(-5px);
-        border-color: var(--color-main);
-        box-shadow: 0 5px 15px rgba(113,198,221,0.2);
+
+    .back-btn:hover {
+        transform: translateX(-4px);
+        border-color: var(--planner-accent);
+        background: rgba(113,198,221,0.1);
     }
-    
-    /* Header Section */
+
+    /* ── Page Header ── */
     .planner-header {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        margin-bottom: 2.5rem;
+        margin-bottom: 2.8rem;
         flex-wrap: wrap;
         gap: 1.5rem;
     }
-    
-    .planner-header h1 {
-        font-size: 3.2rem;
-        color: var(--color-main);
+
+    .planner-title {
         display: flex;
         align-items: center;
         gap: 1.2rem;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
     }
-    
-    /* Date Navigation */
-    .date-navigation {
+
+    .planner-title h1 {
+        font-size: 3rem;
+        font-weight: 700;
+        color: var(--planner-accent);
+        letter-spacing: -0.5px;
+    }
+
+    .live-clock {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 1.4rem;
+        color: var(--planner-gray);
+        background: rgba(255,255,255,0.05);
+        padding: 0.5rem 1.2rem;
+        border-radius: 20px;
+        margin-top: 0.4rem;
+    }
+
+    /* ── Date Navigation ── */
+    .date-nav {
         display: flex;
         align-items: center;
-        gap: 1.2rem;
-        background: linear-gradient(145deg, var(--color-dark) 0%, #2a2a38 100%);
-        padding: 0.8rem 2rem;
+        gap: 1rem;
+        background: rgba(255,255,255,0.05);
+        padding: 0.8rem 1.6rem;
         border-radius: 50px;
-        box-shadow: 0 10px 20px rgba(0,0,0,0.3), 0 0 0 1px var(--color-main) inset;
+        border: 1px solid rgba(113,198,221,0.2);
     }
-    
+
     .date-nav-btn {
-        background: linear-gradient(145deg, var(--color-dark-medium) 0%, var(--color-dark) 100%);
+        background: rgba(255,255,255,0.08);
         border: none;
-        color: var(--color-light);
-        width: 3.5rem;
-        height: 3.5rem;
+        color: var(--planner-light);
+        width: 3.6rem;
+        height: 3.6rem;
         border-radius: 50%;
         cursor: pointer;
-        font-size: 2rem;
+        font-size: 1.8rem;
         display: flex;
         align-items: center;
         justify-content: center;
-        transition: all 0.3s ease;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        transition: var(--transition);
         text-decoration: none;
     }
-    
+
     .date-nav-btn:hover {
-        background: var(--color-main);
-        color: var(--color-dark);
-        transform: translateY(-2px);
-        box-shadow: 0 6px 12px rgba(113,198,221,0.4);
+        background: var(--planner-accent);
+        color: #1a1a2e;
+        transform: scale(1.1);
     }
-    
-    .current-date {
-        font-size: 1.8rem;
+
+    .current-date-label {
+        font-size: 1.6rem;
         font-weight: 600;
-        color: var(--color-light);
-        min-width: 240px;
+        color: var(--planner-light);
+        min-width: 220px;
         text-align: center;
     }
-    
-    /* Calendar View - Like Create Study Plan */
-    .calendar-view {
-        background: linear-gradient(145deg, var(--color-dark) 0%, #2a2a38 100%);
+
+    .today-btn {
+        background: rgba(113,198,221,0.15);
+        border: 1px solid rgba(113,198,221,0.3);
         border-radius: 20px;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        border: 1px solid rgba(113,198,221,0.2);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+        color: var(--planner-accent);
+        font-size: 1.3rem;
+        font-weight: 600;
+        padding: 0.5rem 1.2rem;
+        cursor: pointer;
+        transition: var(--transition);
+        text-decoration: none;
     }
-    
-    .calendar-header {
+
+    .today-btn:hover {
+        background: var(--planner-accent);
+        color: #1a1a2e;
+    }
+
+    /* ── Create Button ── */
+    .create-btn {
+        background: linear-gradient(135deg, var(--planner-accent), var(--planner-accent-2));
+        color: #1a1a2e;
+        padding: 1.2rem 2.4rem;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 1.5rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.8rem;
+        transition: var(--transition);
+        box-shadow: 0 8px 20px rgba(113,198,221,0.3);
+    }
+
+    .create-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 12px 28px rgba(113,198,221,0.5);
+    }
+
+    /* ── Stats Grid ── */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.6rem;
+        margin-bottom: 2.8rem;
+    }
+
+    .stat-card {
+        background: linear-gradient(145deg, rgba(255,255,255,0.05), rgba(255,255,255,0.02));
+        padding: 1.8rem 2rem;
+        border-radius: var(--radius-lg);
+        display: flex;
+        align-items: center;
+        gap: 1.4rem;
+        border: 1px solid rgba(255,255,255,0.08);
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        bottom: 0; left: 0; right: 0;
+        height: 3px;
+        background: linear-gradient(90deg, var(--planner-accent), transparent);
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+
+    .stat-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-glow); }
+    .stat-card:hover::before { opacity: 1; }
+
+    .stat-icon { font-size: 3rem; }
+
+    .stat-info h3 {
+        color: var(--planner-gray);
+        font-size: 1.3rem;
+        font-weight: 500;
+        margin-bottom: 0.3rem;
+    }
+
+    .stat-info p {
+        color: var(--planner-accent);
+        font-size: 2.4rem;
+        font-weight: 700;
+        font-family: 'JetBrains Mono', monospace;
+    }
+
+    .stat-change {
+        font-size: 1.2rem;
+        color: var(--planner-success);
+        margin-top: 0.2rem;
+    }
+
+    /* ── Progress Bar ── */
+    .progress-section {
+        background: rgba(255,255,255,0.04);
+        border-radius: var(--radius-lg);
+        padding: 1.8rem 2rem;
+        margin-bottom: 2.8rem;
+        border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .progress-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.2rem;
+    }
+
+    .progress-header h3 {
+        color: var(--planner-light);
+        font-size: 1.6rem;
+        font-weight: 600;
+    }
+
+    .progress-pct {
+        color: var(--planner-accent);
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 1.6rem;
+        font-weight: 700;
+    }
+
+    .progress-track {
+        background: rgba(255,255,255,0.08);
+        border-radius: 10px;
+        height: 12px;
+        overflow: hidden;
+    }
+
+    .progress-fill {
+        height: 100%;
+        border-radius: 10px;
+        background: linear-gradient(90deg, var(--planner-accent), #4fa3b8, #26de81);
+        background-size: 200% 100%;
+        animation: shimmer 2s infinite;
+        transition: width 1s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes shimmer {
+        0% { background-position: 200% 0; }
+        100% { background-position: -200% 0; }
+    }
+
+    .progress-labels {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 0.8rem;
+    }
+
+    .progress-label {
+        font-size: 1.2rem;
+        color: var(--planner-gray);
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    /* ── Calendar ── */
+    .calendar-section {
+        background: rgba(255,255,255,0.04);
+        border-radius: var(--radius-xl);
+        padding: 2rem 2.4rem;
+        margin-bottom: 2.8rem;
+        border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .calendar-top {
         display: flex;
         justify-content: space-between;
         align-items: center;
         margin-bottom: 2rem;
-        padding-bottom: 1rem;
-        border-bottom: 2px solid rgba(113,198,221,0.3);
     }
-    
-    .calendar-header h2 {
-        color: var(--color-main);
-        font-size: 2.2rem;
+
+    .calendar-top h2 {
+        color: var(--planner-accent);
+        font-size: 2rem;
         font-weight: 700;
     }
-    
-    .calendar-nav {
+
+    .cal-nav {
         display: flex;
-        gap: 0.5rem;
+        gap: 0.6rem;
     }
-    
+
     .calendar-grid {
         display: grid;
         grid-template-columns: repeat(7, 1fr);
-        gap: 0.8rem;
-        margin-top: 1rem;
+        gap: 0.6rem;
     }
-    
-    .calendar-weekday {
+
+    .cal-weekday {
         text-align: center;
-        color: var(--color-main);
+        color: var(--planner-accent);
+        font-size: 1.3rem;
         font-weight: 600;
-        padding: 1rem;
-        font-size: 1.4rem;
-        background: rgba(113,198,221,0.1);
+        padding: 0.8rem;
+        background: rgba(113,198,221,0.08);
         border-radius: 10px;
     }
-    
-    .calendar-day {
+
+    .cal-day {
         aspect-ratio: 1;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        background: var(--color-dark-medium);
-        border-radius: 10px;
+        background: rgba(255,255,255,0.04);
+        border-radius: 12px;
         cursor: pointer;
-        transition: all 0.3s ease;
-        position: relative;
+        transition: var(--transition);
         border: 2px solid transparent;
+        font-size: 1.5rem;
         font-weight: 500;
+        color: var(--planner-light);
+        position: relative;
     }
-    
-    .calendar-day:hover {
+
+    .cal-day:hover {
+        border-color: var(--planner-accent);
+        background: rgba(113,198,221,0.1);
         transform: translateY(-2px);
-        border-color: var(--color-main);
-        box-shadow: 0 5px 15px rgba(113,198,221,0.3);
     }
-    
-    .calendar-day.selected {
-        background: linear-gradient(135deg, var(--color-main) 0%, #4fa3b8 100%);
-        color: var(--color-dark);
-        font-weight: bold;
-        border-color: white;
+
+    .cal-day.today {
+        border-color: rgba(113,198,221,0.5);
+        background: rgba(113,198,221,0.08);
     }
-    
-    .calendar-day.has-plans {
-        position: relative;
-        font-weight: bold;
-    }
-    
-    .calendar-day.has-plans::after {
-        content: '📚';
-        position: absolute;
-        bottom: 2px;
-        font-size: 1rem;
-    }
-    
-    .calendar-day.selected.has-plans::after {
-        color: var(--color-dark);
-    }
-    
-    .calendar-day-number {
-        font-size: 1.6rem;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
-    }
-    
-    /* Create Button */
-    .create-btn {
-        background: linear-gradient(135deg, var(--color-main) 0%, #4fa3b8 100%);
-        color: var(--color-dark);
-        padding: 1.2rem 2.5rem;
-        border-radius: 50px;
-        text-decoration: none;
+
+    .cal-day.selected {
+        background: linear-gradient(135deg, var(--planner-accent), var(--planner-accent-2));
+        color: #1a1a2e;
         font-weight: 700;
-        font-size: 1.6rem;
-        display: inline-flex;
-        align-items: center;
-        gap: 1rem;
-        transition: all 0.3s ease;
-        border: 2px solid #ffffff;
-        box-shadow: 0 8px 16px rgba(113,198,221,0.3);
+        border-color: transparent;
     }
-    
-    .create-btn:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 12px 24px rgba(113,198,221,0.5);
+
+    .cal-day.other-month { color: rgba(255,255,255,0.2); }
+    .cal-day.has-plans::after {
+        content: '';
+        position: absolute;
+        bottom: 4px;
+        width: 6px; height: 6px;
+        border-radius: 50%;
+        background: var(--planner-accent);
     }
-    
-    /* Stats Grid */
-    .stats-grid {
+
+    .cal-day.selected.has-plans::after { background: #1a1a2e; }
+
+    .cal-day.completed-day { border-color: rgba(38,222,129,0.4); }
+    .cal-day.completed-day::before {
+        content: '✓';
+        position: absolute;
+        top: 2px; right: 4px;
+        font-size: 1rem;
+        color: var(--planner-success);
+    }
+
+    /* ── Main Layout ── */
+    .main-layout {
         display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        gap: 2rem;
-        margin-bottom: 3rem;
-    }
-    
-    .stat-card {
-        background: linear-gradient(145deg, var(--color-dark) 0%, #2a2a38 100%);
-        padding: 2rem;
-        border-radius: 20px;
-        display: flex;
-        align-items: center;
-        gap: 1.5rem;
-        border-left: 6px solid var(--color-main);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-    }
-    
-    .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 15px 30px rgba(113,198,221,0.2);
-    }
-    
-    .stat-icon {
-        font-size: 3.2rem;
-    }
-    
-    .stat-info h3 {
-        color: var(--color-light-gray);
-        font-size: 1.4rem;
-        margin-bottom: 0.5rem;
-    }
-    
-    .stat-info p {
-        color: var(--color-main);
-        font-size: 2.4rem;
-        font-weight: 800;
-    }
-    
-    /* Main Content Layout */
-    .main-content {
-        display: grid;
-        grid-template-columns: 1fr 320px;
+        grid-template-columns: 1fr 340px;
         gap: 2rem;
     }
-    
-    /* Timeline Section */
+
+    /* ── Timeline ── */
     .timeline-section {
-        background: linear-gradient(145deg, var(--color-dark) 0%, #2a2a38 100%);
-        border-radius: 30px;
-        padding: 2rem;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.4);
-        border: 1px solid rgba(113,198,221,0.2);
+        background: rgba(255,255,255,0.04);
+        border-radius: var(--radius-xl);
+        padding: 2rem 2.4rem;
+        border: 1px solid rgba(255,255,255,0.08);
     }
-    
-    .timeline-header {
+
+    .timeline-top {
         display: flex;
         justify-content: space-between;
         align-items: center;
@@ -280,705 +445,1485 @@
         flex-wrap: wrap;
         gap: 1rem;
     }
-    
-    .timeline-header h2 {
-        color: var(--color-main);
-        font-size: 2.2rem;
+
+    .timeline-top h2 {
+        color: var(--planner-accent);
+        font-size: 2rem;
         font-weight: 700;
     }
-    
-    /* Subject Filter */
-    .filter-select {
-        background: var(--color-dark-medium);
-        border: 2px solid var(--color-dark-light);
-        border-radius: 30px;
-        padding: 1rem 2rem;
-        color: var(--color-light);
-        font-size: 1.4rem;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        min-width: 200px;
+
+    .tl-controls {
+        display: flex;
+        gap: 1rem;
+        align-items: center;
     }
-    
-    .filter-select:hover,
+
+    .filter-select {
+        background: rgba(255,255,255,0.06);
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 30px;
+        padding: 0.8rem 1.6rem;
+        color: var(--planner-light);
+        font-size: 1.4rem;
+        font-family: 'Space Grotesk', sans-serif;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
     .filter-select:focus {
-        border-color: var(--color-main);
+        border-color: var(--planner-accent);
         outline: none;
         box-shadow: 0 0 0 3px rgba(113,198,221,0.2);
     }
-    
-    /* Timeline - 24 Hour Format */
-    .timeline {
+
+    .view-toggle {
         display: flex;
-        flex-direction: column;
-        gap: 1rem;
-        max-height: 600px;
-        overflow-y: auto;
-        padding-right: 1rem;
+        background: rgba(255,255,255,0.06);
+        border-radius: 30px;
+        padding: 4px;
+        border: 1px solid rgba(255,255,255,0.1);
     }
-    
-    .timeline::-webkit-scrollbar {
-        width: 6px;
-    }
-    
-    .timeline::-webkit-scrollbar-track {
-        background: var(--color-dark-medium);
-        border-radius: 10px;
-    }
-    
-    .timeline::-webkit-scrollbar-thumb {
-        background: var(--color-main);
-        border-radius: 10px;
-    }
-    
-    .timeline-hour {
-        display: grid;
-        grid-template-columns: 80px 1fr;
-        gap: 1rem;
-        min-height: 80px;
-        border-bottom: 1px solid rgba(113,198,221,0.1);
-        padding: 0.5rem 0;
-    }
-    
-    .hour-label {
-        color: var(--color-main);
-        font-size: 1.4rem;
+
+    .view-btn {
+        padding: 0.6rem 1.4rem;
+        border: none;
+        background: transparent;
+        color: var(--planner-gray);
+        border-radius: 24px;
+        cursor: pointer;
+        font-size: 1.3rem;
         font-weight: 600;
+        transition: var(--transition);
+        font-family: 'Space Grotesk', sans-serif;
+    }
+
+    .view-btn.active {
+        background: var(--planner-accent);
+        color: #1a1a2e;
+    }
+
+    /* Timeline Scroll */
+    .timeline-scroll {
+        max-height: 620px;
+        overflow-y: auto;
+        padding-right: 0.4rem;
+    }
+
+    .timeline-scroll::-webkit-scrollbar { width: 5px; }
+    .timeline-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.04); border-radius: 10px; }
+    .timeline-scroll::-webkit-scrollbar-thumb { background: var(--planner-accent); border-radius: 10px; }
+
+    .tl-hour {
+        display: grid;
+        grid-template-columns: 72px 1fr;
+        gap: 1rem;
+        min-height: 72px;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        padding: 0.6rem 0;
+        position: relative;
+    }
+
+    .tl-hour.current-hour {
+        background: rgba(113,198,221,0.04);
+        border-radius: 12px;
+    }
+
+    .tl-hour.current-hour .hour-label {
+        color: var(--planner-accent);
+        font-weight: 700;
+    }
+
+    .hour-label {
+        color: var(--planner-gray);
+        font-size: 1.3rem;
+        font-weight: 600;
+        font-family: 'JetBrains Mono', monospace;
         padding-top: 0.5rem;
         text-align: right;
-        font-family: monospace;
+        padding-right: 0.8rem;
     }
-    
-    .hour-plans {
+
+    .hour-plans { display: flex; flex-direction: column; gap: 0.8rem; }
+
+    /* Current time indicator */
+    .current-time-line {
+        position: absolute;
+        left: 72px; right: 0;
+        height: 2px;
+        background: linear-gradient(90deg, var(--planner-accent), transparent);
+        z-index: 5;
+    }
+
+    .current-time-line::before {
+        content: '';
+        position: absolute;
+        left: -5px; top: -4px;
+        width: 10px; height: 10px;
+        border-radius: 50%;
+        background: var(--planner-accent);
+        box-shadow: 0 0 8px var(--planner-accent);
+    }
+
+    /* ── Plan Cards ── */
+    .plan-card {
+        background: rgba(255,255,255,0.06);
+        border-radius: 16px;
+        padding: 1.4rem 1.6rem;
+        border-left: 5px solid;
+        cursor: pointer;
+        transition: var(--transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .plan-card:hover {
+        transform: translateX(6px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.3);
+    }
+
+    .plan-card.priority-high { border-left-color: var(--planner-danger); }
+    .plan-card.priority-medium { border-left-color: var(--planner-warning); }
+    .plan-card.priority-low { border-left-color: var(--planner-success); }
+
+    .plan-card.completed {
+        opacity: 0.65;
+        background: rgba(38,222,129,0.05);
+        border-left-color: var(--planner-success) !important;
+    }
+
+    .plan-card.completed .plan-title { text-decoration: line-through; }
+
+    .plan-card.overdue {
+        background: rgba(255,71,87,0.08);
+        border-left-color: var(--planner-danger) !important;
+        animation: pulse-border 2s infinite;
+    }
+
+    @keyframes pulse-border {
+        0%, 100% { box-shadow: 0 0 0 0 rgba(255,71,87,0.3); }
+        50% { box-shadow: 0 0 0 4px rgba(255,71,87,0); }
+    }
+
+    .plan-card.in-progress {
+        border-left-color: var(--planner-accent) !important;
+        background: rgba(113,198,221,0.06);
+    }
+
+    .plan-card.in-progress::before {
+        content: '● IN PROGRESS';
+        position: absolute;
+        top: 0.8rem; right: 1rem;
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--planner-accent);
+        letter-spacing: 0.5px;
+        animation: blink 1.5s infinite;
+    }
+
+    @keyframes blink {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.3; }
+    }
+
+    .plan-badges {
+        display: flex;
+        gap: 0.6rem;
+        margin-bottom: 0.8rem;
+        flex-wrap: wrap;
+    }
+
+    .plan-badge {
+        font-size: 1.1rem;
+        font-weight: 700;
+        padding: 0.2rem 0.8rem;
+        border-radius: 20px;
+        letter-spacing: 0.3px;
+    }
+
+    .badge-high { background: rgba(255,71,87,0.15); color: var(--planner-danger); }
+    .badge-medium { background: rgba(255,165,2,0.15); color: var(--planner-warning); }
+    .badge-low { background: rgba(38,222,129,0.15); color: var(--planner-success); }
+    .badge-done { background: rgba(38,222,129,0.15); color: var(--planner-success); }
+    .badge-overdue { background: rgba(255,71,87,0.15); color: var(--planner-danger); }
+    .badge-technique {
+        background: rgba(113,198,221,0.12);
+        color: var(--planner-accent);
+    }
+
+    .plan-time {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 1.2rem;
+        color: var(--planner-accent);
+        font-weight: 600;
+        margin-bottom: 0.4rem;
+    }
+
+    .plan-title {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--planner-light);
+        margin-bottom: 0.3rem;
+    }
+
+    .plan-meta {
+        font-size: 1.3rem;
+        color: var(--planner-gray);
+        display: flex;
+        align-items: center;
+        gap: 1.4rem;
+        margin-bottom: 1rem;
+        flex-wrap: wrap;
+    }
+
+    /* Session countdown */
+    .session-countdown {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 1.2rem;
+        padding: 0.4rem 1rem;
+        background: rgba(113,198,221,0.1);
+        border-radius: 20px;
+        color: var(--planner-accent);
+        display: inline-block;
+        margin-bottom: 0.8rem;
+    }
+
+    /* Duration bar */
+    .duration-bar-wrap {
+        background: rgba(255,255,255,0.06);
+        border-radius: 6px;
+        height: 6px;
+        margin-bottom: 1rem;
+        overflow: hidden;
+    }
+
+    .duration-bar-fill {
+        height: 100%;
+        border-radius: 6px;
+        background: linear-gradient(90deg, var(--planner-accent), var(--planner-success));
+        transition: width 1s ease;
+    }
+
+    .plan-actions {
+        display: flex;
+        gap: 0.8rem;
+        flex-wrap: wrap;
+    }
+
+    .action-btn {
+        padding: 0.7rem 1.4rem;
+        border: none;
+        border-radius: 20px;
+        font-size: 1.25rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        font-family: 'Space Grotesk', sans-serif;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-complete { background: var(--planner-success); color: #1a1a2e; }
+    .btn-complete:hover { background: #20c76e; transform: translateY(-2px); }
+
+    .btn-edit { background: rgba(113,198,221,0.15); color: var(--planner-accent); border: 1px solid rgba(113,198,221,0.3); }
+    .btn-edit:hover { background: var(--planner-accent); color: #1a1a2e; transform: translateY(-2px); }
+
+    .btn-delete { background: rgba(255,71,87,0.12); color: var(--planner-danger); border: 1px solid rgba(255,71,87,0.2); }
+    .btn-delete:hover { background: var(--planner-danger); color: white; transform: translateY(-2px); }
+
+    .btn-start { background: rgba(113,198,221,0.2); color: var(--planner-accent); border: 1px solid rgba(113,198,221,0.4); }
+    .btn-start:hover { background: var(--planner-accent); color: #1a1a2e; transform: translateY(-2px); }
+
+    /* Empty state */
+    .empty-hour {
+        padding: 1.2rem;
+        text-align: center;
+        color: rgba(255,255,255,0.12);
+        font-size: 1.3rem;
+        font-style: italic;
+    }
+
+    .empty-day {
+        padding: 4rem;
+        text-align: center;
+        background: rgba(255,255,255,0.03);
+        border-radius: 20px;
+        border: 2px dashed rgba(255,255,255,0.1);
+        margin: 2rem 0;
+    }
+
+    .empty-day p:first-child { font-size: 3rem; margin-bottom: 1rem; }
+    .empty-day p { font-size: 1.5rem; color: var(--planner-gray); margin: 0.4rem 0; }
+
+    /* ── Sidebar ── */
+    .sidebar { display: flex; flex-direction: column; gap: 2rem; }
+
+    .sidebar-card {
+        background: rgba(255,255,255,0.04);
+        border-radius: var(--radius-xl);
+        padding: 2rem;
+        border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .sidebar-header {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        margin-bottom: 1.6rem;
+        padding-bottom: 1.2rem;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .sidebar-header h3 {
+        font-size: 1.7rem;
+        font-weight: 700;
+        color: var(--planner-accent);
+    }
+
+    .sidebar-header.danger h3 { color: var(--planner-danger); }
+
+    .sidebar-list {
         display: flex;
         flex-direction: column;
         gap: 0.8rem;
+        max-height: 280px;
+        overflow-y: auto;
+        padding-right: 0.4rem;
     }
-    
-    /* Plan Cards */
-    .plan-card {
-        background: linear-gradient(145deg, var(--color-dark-medium) 0%, #3a3a4a 100%);
-        border-radius: 16px;
+
+    .sidebar-list::-webkit-scrollbar { width: 4px; }
+    .sidebar-list::-webkit-scrollbar-thumb { background: var(--planner-accent); border-radius: 10px; }
+
+    .sidebar-item {
+        background: rgba(255,255,255,0.04);
         padding: 1.2rem;
-        border-left: 6px solid;
+        border-radius: 14px;
+        transition: var(--transition);
+        border-left: 3px solid transparent;
         cursor: pointer;
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     }
-    
-    .plan-card:hover {
-        transform: translateX(8px) scale(1.02);
-        box-shadow: 0 8px 16px rgba(113,198,221,0.3);
-    }
-    
-    .plan-card.high-priority {
-        border-left-color: #ff4757;
-    }
-    
-    .plan-card.medium-priority {
-        border-left-color: #ffa502;
-    }
-    
-    .plan-card.low-priority {
-        border-left-color: #26de81;
-    }
-    
-    .plan-card.completed {
-        opacity: 0.7;
-        background: linear-gradient(145deg, #2a2a35 0%, #22222d 100%);
-    }
-    
-    .plan-card.completed::after {
-        content: '✓';
-        position: absolute;
-        top: 1rem;
-        right: 1rem;
-        color: #26de81;
-        font-size: 1.8rem;
-        font-weight: bold;
-    }
-    
-    .plan-card.overdue {
-        border-left-color: #ff4757;
-        background: linear-gradient(145deg, rgba(255,71,87,0.1) 0%, #2a2a38 100%);
-    }
-    
-    .plan-time {
-        color: var(--color-main);
+
+    .sidebar-item:hover { transform: translateX(4px); border-left-color: var(--planner-accent); background: rgba(255,255,255,0.06); }
+    .sidebar-item.overdue-item:hover { border-left-color: var(--planner-danger); }
+
+    .item-title { font-size: 1.4rem; font-weight: 600; color: var(--planner-light); margin-bottom: 0.4rem; }
+    .item-time { font-size: 1.2rem; color: var(--planner-gray); font-family: 'JetBrains Mono', monospace; }
+    .item-subject { font-size: 1.2rem; color: var(--planner-accent); margin-top: 0.2rem; }
+
+    .sidebar-empty {
+        color: var(--planner-gray);
         font-size: 1.3rem;
+        padding: 1rem;
+        text-align: center;
+    }
+
+    /* ── Study Streak Card ── */
+    .streak-card {
+        background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,165,0,0.05));
+        border: 1px solid rgba(255,215,0,0.2);
+        border-radius: var(--radius-xl);
+        padding: 1.8rem 2rem;
+        text-align: center;
+    }
+
+    .streak-number {
+        font-size: 4.8rem;
+        font-weight: 800;
+        font-family: 'JetBrains Mono', monospace;
+        background: linear-gradient(135deg, #ffd700, #ff8c00);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        line-height: 1;
+    }
+
+    .streak-label { font-size: 1.4rem; color: var(--planner-gray); margin-top: 0.5rem; }
+    .streak-days {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+        margin-top: 1.2rem;
+    }
+
+    .streak-dot {
+        width: 28px; height: 28px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        background: rgba(255,255,255,0.06);
+        color: var(--planner-gray);
         font-weight: 600;
-        margin-bottom: 0.5rem;
-        display: flex;
+    }
+
+    .streak-dot.done { background: linear-gradient(135deg, #ffd700, #ff8c00); color: #1a1a2e; }
+    .streak-dot.today { background: rgba(113,198,221,0.2); color: var(--planner-accent); border: 2px solid var(--planner-accent); }
+
+    /* ── Focus Mode Modal ── */
+    .focus-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.85);
+        backdrop-filter: blur(12px);
+        z-index: 9000;
+        display: none;
         align-items: center;
-        gap: 0.5rem;
-        font-family: monospace;
+        justify-content: center;
     }
-    
-    .plan-time::before {
-        content: '⏰';
+
+    .focus-overlay.active { display: flex; }
+
+    .focus-modal {
+        background: linear-gradient(145deg, #1a1a2e, #16213e);
+        border-radius: 30px;
+        padding: 3rem;
+        border: 1px solid rgba(113,198,221,0.3);
+        text-align: center;
+        max-width: 500px;
+        width: 90%;
+        box-shadow: 0 30px 60px rgba(0,0,0,0.6);
     }
-    
-    .plan-title {
-        color: var(--color-light);
-        font-size: 1.6rem;
+
+    .focus-title {
+        font-size: 2.4rem;
         font-weight: 700;
-        margin-bottom: 0.3rem;
+        color: var(--planner-accent);
+        margin-bottom: 0.5rem;
     }
-    
-    .plan-subject {
-        color: var(--color-light-gray);
-        font-size: 1.3rem;
-        margin-bottom: 0.8rem;
-        display: flex;
+
+    .focus-subject { font-size: 1.6rem; color: var(--planner-gray); margin-bottom: 2.5rem; }
+
+    .focus-timer {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 7rem;
+        font-weight: 700;
+        color: var(--planner-light);
+        line-height: 1;
+        margin-bottom: 2rem;
+        text-shadow: 0 0 40px rgba(113,198,221,0.3);
+    }
+
+    .focus-timer.urgent { color: var(--planner-danger); animation: urgentPulse 1s infinite; }
+
+    @keyframes urgentPulse {
+        0%, 100% { text-shadow: 0 0 40px rgba(255,71,87,0.3); }
+        50% { text-shadow: 0 0 60px rgba(255,71,87,0.8); }
+    }
+
+    .focus-progress {
+        width: 100%;
+        height: 8px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 10px;
+        overflow: hidden;
+        margin-bottom: 2rem;
+    }
+
+    .focus-progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, var(--planner-accent), var(--planner-success));
+        border-radius: 10px;
+        transition: width 1s linear;
+    }
+
+    .focus-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+    .focus-btn {
+        padding: 1rem 2.4rem;
+        border-radius: 50px;
+        font-size: 1.5rem;
+        font-weight: 700;
+        border: none;
+        cursor: pointer;
+        font-family: 'Space Grotesk', sans-serif;
+        transition: var(--transition);
+    }
+
+    .focus-btn-primary { background: var(--planner-accent); color: #1a1a2e; }
+    .focus-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(113,198,221,0.4); }
+
+    .focus-btn-secondary { background: rgba(255,255,255,0.08); color: var(--planner-light); }
+    .focus-btn-secondary:hover { background: rgba(255,255,255,0.15); }
+
+    .focus-btn-danger { background: rgba(255,71,87,0.15); color: var(--planner-danger); }
+    .focus-btn-danger:hover { background: var(--planner-danger); color: white; }
+
+    .focus-notes {
+        width: 100%;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 14px;
+        padding: 1rem 1.4rem;
+        color: var(--planner-light);
+        font-size: 1.4rem;
+        font-family: 'Space Grotesk', sans-serif;
+        resize: vertical;
+        margin-top: 1.5rem;
+        min-height: 80px;
+    }
+
+    .focus-notes:focus { outline: none; border-color: var(--planner-accent); }
+
+    /* ── Notification Permission Banner ── */
+    .notif-banner {
+        display: none;
+        background: linear-gradient(135deg, rgba(113,198,221,0.15), rgba(113,198,221,0.05));
+        border: 1px solid rgba(113,198,221,0.3);
+        border-radius: var(--radius-lg);
+        padding: 1.4rem 2rem;
+        margin-bottom: 2rem;
         align-items: center;
-        gap: 0.5rem;
-    }
-    
-    .plan-subject::before {
-        content: '📚';
-    }
-    
-    .plan-actions {
-        display: flex;
-        gap: 1rem;
-        margin-top: 1rem;
+        gap: 1.5rem;
         flex-wrap: wrap;
     }
-    
-    .plan-action-btn {
-        padding: 0.8rem 1.5rem;
+
+    .notif-banner.show { display: flex; }
+    .notif-banner p { color: var(--planner-light); font-size: 1.4rem; flex: 1; }
+
+    .notif-allow-btn {
+        background: var(--planner-accent);
+        color: #1a1a2e;
         border: none;
-        border-radius: 20px;
-        font-size: 1.2rem;
-        font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    
-    .complete-btn {
-        background: #26de81;
-        color: var(--color-dark);
-    }
-    
-    .complete-btn:hover {
-        background: #20ba6e;
-        transform: translateY(-2px);
-    }
-    
-    .edit-btn {
-        background: var(--color-main);
-        color: var(--color-dark);
-    }
-    
-    .edit-btn:hover {
-        background: #4fa3b8;
-        transform: translateY(-2px);
-    }
-    
-    .delete-btn {
-        background: #ff4757;
-        color: white;
-    }
-    
-    .delete-btn:hover {
-        background: #e63e4d;
-        transform: translateY(-2px);
-    }
-    
-    /* Empty State */
-    .empty-state {
-        background: linear-gradient(145deg, var(--color-dark-medium) 0%, #2a2a38 100%);
-        border-radius: 16px;
-        padding: 3rem;
-        text-align: center;
-        border: 2px dashed var(--color-dark-light);
-    }
-    
-    .empty-state p {
-        color: var(--color-light-gray);
-        font-size: 1.6rem;
-        margin: 0.5rem 0;
-    }
-    
-    /* Sidebar */
-    .sidebar {
-        display: flex;
-        flex-direction: column;
-        gap: 2rem;
-    }
-    
-    .upcoming-card, .overdue-card {
-        background: linear-gradient(145deg, var(--color-dark) 0%, #2a2a38 100%);
-        border-radius: 24px;
-        padding: 2rem;
-        box-shadow: 0 15px 30px rgba(0,0,0,0.3);
-        border: 1px solid rgba(113,198,221,0.2);
-    }
-    
-    .upcoming-header, .overdue-header {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        margin-bottom: 2rem;
-        padding-bottom: 1rem;
-        border-bottom: 2px solid rgba(113,198,221,0.3);
-    }
-    
-    .upcoming-header span, .overdue-header span {
-        font-size: 2.4rem;
-    }
-    
-    .upcoming-header h3 {
-        color: var(--color-main);
-        font-size: 1.8rem;
-        font-weight: 700;
-    }
-    
-    .overdue-header h3 {
-        color: #ff4757;
-        font-size: 1.8rem;
-        font-weight: 700;
-    }
-    
-    .upcoming-list, .overdue-list {
-        display: flex;
-        flex-direction: column;
-        gap: 1rem;
-        max-height: 300px;
-        overflow-y: auto;
-        padding-right: 0.5rem;
-    }
-    
-    .upcoming-list::-webkit-scrollbar,
-    .overdue-list::-webkit-scrollbar {
-        width: 4px;
-    }
-    
-    .upcoming-list::-webkit-scrollbar-track,
-    .overdue-list::-webkit-scrollbar-track {
-        background: var(--color-dark-medium);
-        border-radius: 10px;
-    }
-    
-    .upcoming-list::-webkit-scrollbar-thumb,
-    .overdue-list::-webkit-scrollbar-thumb {
-        background: var(--color-main);
-        border-radius: 10px;
-    }
-    
-    .upcoming-item, .overdue-item {
-        background: linear-gradient(145deg, var(--color-dark-medium) 0%, #323240 100%);
-        padding: 1.2rem;
-        border-radius: 16px;
-        transition: all 0.3s ease;
-        border-left: 4px solid transparent;
-        cursor: pointer;
-    }
-    
-    .upcoming-item:hover {
-        transform: translateX(5px);
-        border-left-color: var(--color-main);
-    }
-    
-    .overdue-item:hover {
-        transform: translateX(5px);
-        border-left-color: #ff4757;
-    }
-    
-    .item-title {
-        color: var(--color-light);
-        font-weight: 600;
+        border-radius: 30px;
+        padding: 0.8rem 2rem;
         font-size: 1.4rem;
-        margin-bottom: 0.5rem;
+        font-weight: 700;
+        cursor: pointer;
+        font-family: 'Space Grotesk', sans-serif;
+        transition: var(--transition);
     }
-    
-    .item-time {
-        color: var(--color-light-gray);
-        font-size: 1.2rem;
-        display: flex;
+
+    .notif-allow-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(113,198,221,0.4); }
+
+    .notif-dismiss {
+        background: none;
+        border: none;
+        color: var(--planner-gray);
+        font-size: 1.8rem;
+        cursor: pointer;
+        padding: 0.4rem;
+        line-height: 1;
+    }
+
+    /* ── Delete Confirm Modal ── */
+    .confirm-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.7);
+        backdrop-filter: blur(8px);
+        z-index: 9100;
+        display: none;
         align-items: center;
-        gap: 0.5rem;
+        justify-content: center;
     }
-    
-    .item-time::before {
-        content: '⏰';
+
+    .confirm-overlay.active { display: flex; }
+
+    .confirm-box {
+        background: linear-gradient(145deg, #1a1a2e, #16213e);
+        border: 1px solid rgba(255,71,87,0.3);
+        border-radius: 24px;
+        padding: 3rem;
+        max-width: 420px;
+        width: 90%;
+        text-align: center;
     }
-    
-    /* Mobile Responsive */
-    @media (max-width: 768px) {
-        .planner-container {
-            padding: 1rem;
-        }
-        
-        .planner-header {
-            flex-direction: column;
-            align-items: stretch;
-        }
-        
-        .date-navigation {
-            justify-content: space-between;
-        }
-        
-        .main-content {
-            grid-template-columns: 1fr;
-        }
-        
-        .stats-grid {
-            grid-template-columns: 1fr;
-        }
-        
-        .calendar-grid {
-            gap: 0.5rem;
-        }
-        
-        .calendar-weekday {
-            padding: 0.5rem;
-            font-size: 1.2rem;
-        }
-        
-        .calendar-day-number {
-            font-size: 1.4rem;
-        }
-        
-        .timeline-hour {
-            grid-template-columns: 1fr;
-        }
-        
-        .hour-label {
-            text-align: left;
-            padding-left: 1rem;
-            background: rgba(113,198,221,0.1);
-            border-radius: 20px;
-            margin-bottom: 0.5rem;
-        }
-        
-        .plan-actions {
-            flex-direction: column;
-        }
-        
-        .plan-action-btn {
-            width: 100%;
-            justify-content: center;
-        }
+
+    .confirm-box h3 { font-size: 2.2rem; color: var(--planner-danger); margin-bottom: 1rem; }
+    .confirm-box p { font-size: 1.5rem; color: var(--planner-gray); margin-bottom: 2rem; }
+    .confirm-actions { display: flex; gap: 1rem; justify-content: center; }
+
+    /* ── Responsive ── */
+    @media (max-width: 960px) {
+        .main-layout { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 640px) {
+        .planner-wrap { padding: 1.5rem 1.2rem; }
+        .planner-header { flex-direction: column; align-items: stretch; }
+        .date-nav { justify-content: space-between; }
+        .stats-grid { grid-template-columns: 1fr 1fr; }
+        .calendar-grid { gap: 0.4rem; }
+        .cal-weekday { padding: 0.5rem; font-size: 1.1rem; }
+        .tl-hour { grid-template-columns: 52px 1fr; }
     }
 </style>
 
-<div class="planner-container">
-    <!-- Back Button -->
-    <a href="{% url 'home' %}" class="back-button">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
-        </svg>
-        Back to Home
+<!-- Toast Container -->
+<div id="toast-container"></div>
+
+<!-- Focus Mode Modal -->
+<div class="focus-overlay" id="focusOverlay">
+    <div class="focus-modal">
+        <div class="focus-title" id="focusPlanTitle">Focus Session</div>
+        <div class="focus-subject" id="focusPlanSubject">Subject</div>
+        <div class="focus-timer" id="focusTimer">00:00:00</div>
+        <div class="focus-progress">
+            <div class="focus-progress-fill" id="focusProgressFill" style="width:0%"></div>
+        </div>
+        <div id="focusPhase" style="font-size:1.4rem;color:var(--planner-gray);margin-bottom:1.5rem;">📚 Study Phase</div>
+        <div class="focus-actions">
+            <button class="focus-btn focus-btn-primary" id="focusPauseBtn" onclick="toggleFocusPause()">⏸ Pause</button>
+            <button class="focus-btn focus-btn-secondary" onclick="completeFocusSession()">✅ Complete</button>
+            <button class="focus-btn focus-btn-danger" onclick="exitFocusMode()">✕ Exit</button>
+        </div>
+        <textarea class="focus-notes" placeholder="Quick notes during session..." id="focusNotes"></textarea>
+    </div>
+</div>
+
+<!-- Delete Confirm Modal -->
+<div class="confirm-overlay" id="confirmOverlay">
+    <div class="confirm-box">
+        <h3>🗑️ Delete Plan?</h3>
+        <p>This cannot be undone. Are you sure you want to delete this study plan?</p>
+        <div class="confirm-actions">
+            <button class="focus-btn focus-btn-danger" id="confirmDeleteBtn" onclick="confirmDelete()">Yes, Delete</button>
+            <button class="focus-btn focus-btn-secondary" onclick="closeConfirm()">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<div class="planner-wrap">
+    <!-- Back -->
+    <a href="{% url 'home' %}" class="back-btn">
+        ← Back to Home
     </a>
-    
+
+    <!-- Notification Permission Banner -->
+    <div class="notif-banner" id="notifBanner">
+        <span style="font-size:2.4rem;">🔔</span>
+        <p><strong>Enable notifications</strong> to get reminders when your study sessions are about to start.</p>
+        <button class="notif-allow-btn" onclick="requestNotifPermission()">Enable Notifications</button>
+        <button class="notif-dismiss" onclick="document.getElementById('notifBanner').classList.remove('show')">✕</button>
+    </div>
+
     <!-- Header -->
     <div class="planner-header">
-        <h1>
-            <svg viewBox="0 0 24 24" width="32" height="32" fill="var(--color-main)">
-                <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V9h14v10zM7 11h5v5H7v-5z"/>
-            </svg>
-            Study Planner
-        </h1>
-        
-        <div class="date-navigation">
-            <a href="?date={{ prev_date|date:'Y-m-d' }}" class="date-nav-btn">←</a>
-            <span class="current-date">{{ current_date|date:"l, F j, Y" }}</span>
-            <a href="?date={{ next_date|date:'Y-m-d' }}" class="date-nav-btn">→</a>
+        <div class="planner-title">
+            <div>
+                <h1>📅 Study Planner</h1>
+                <div class="live-clock" id="liveClock">Loading...</div>
+            </div>
         </div>
-        
+
+        <div class="date-nav">
+            <a href="?date={{ prev_date|date:'Y-m-d' }}" class="date-nav-btn">←</a>
+            <span class="current-date-label">{{ current_date|date:"l, F j, Y" }}</span>
+            <a href="?date={{ next_date|date:'Y-m-d' }}" class="date-nav-btn">→</a>
+            <a href="?" class="today-btn">Today</a>
+        </div>
+
         <a href="{% url 'create-study-plan' %}" class="create-btn">
-            <span>+</span> Create Study Plan
+            + Create Study Plan
         </a>
     </div>
-    
-    <!-- Stats Cards -->
+
+    <!-- Stats -->
     <div class="stats-grid">
         <div class="stat-card">
-            <div class="stat-icon">📚</div>
+            <div class="stat-icon">⏱️</div>
             <div class="stat-info">
                 <h3>Today's Study Time</h3>
-                <p id="today-study-time">{{ total_study_time }} min</p>
+                <p id="statTodayTime">{{ total_study_time }} min</p>
             </div>
         </div>
-        
         <div class="stat-card">
-            <div class="stat-icon">📊</div>
+            <div class="stat-icon">📈</div>
             <div class="stat-info">
                 <h3>This Week</h3>
-                <p id="week-study-time">{{ week_study_time }} min</p>
+                <p id="statWeekTime">{{ week_study_time }} min</p>
             </div>
         </div>
-        
         <div class="stat-card">
             <div class="stat-icon">✅</div>
             <div class="stat-info">
-                <h3>Plans Today</h3>
-                <p id="plans-today">{{ plans_count }}</p>
+                <h3>Completed Today</h3>
+                <p id="statCompleted">{{ completed_count|default:0 }}</p>
             </div>
         </div>
-        
         <div class="stat-card">
-            <div class="stat-icon">⏰</div>
+            <div class="stat-icon">📚</div>
+            <div class="stat-info">
+                <h3>Plans Today</h3>
+                <p id="statPlansToday">{{ plans_count }}</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">🔮</div>
             <div class="stat-info">
                 <h3>Upcoming</h3>
-                <p id="upcoming-count">{{ upcoming_plans.count }}</p>
+                <p id="statUpcoming">{{ upcoming_plans.count }}</p>
             </div>
         </div>
     </div>
-    
-    <!-- Calendar View - Like Create Study Plan -->
-    <div class="calendar-view">
-        <div class="calendar-header">
+
+    <!-- Daily Progress -->
+    {% if plans_count > 0 %}
+    <div class="progress-section">
+        <div class="progress-header">
+            <h3>📊 Today's Progress</h3>
+            <span class="progress-pct" id="progressPct">
+                {% if plans_count > 0 %}
+                    {% widthratio completed_count plans_count 100 %}%
+                {% else %}0%{% endif %}
+            </span>
+        </div>
+        <div class="progress-track">
+            <div class="progress-fill" id="progressFill"
+                 style="width: {% if plans_count > 0 %}{% widthratio completed_count plans_count 100 %}{% else %}0{% endif %}%">
+            </div>
+        </div>
+        <div class="progress-labels">
+            <span class="progress-label">✅ {{ completed_count|default:0 }} completed</span>
+            <span class="progress-label">📋 {{ plans_count }} total</span>
+            <span class="progress-label">⏳ {{ overdue_plans|length }} overdue</span>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Calendar -->
+    <div class="calendar-section">
+        <div class="calendar-top">
             <h2>{{ current_date|date:"F Y" }}</h2>
-            <div class="calendar-nav">
+            <div class="cal-nav">
                 <a href="?month={{ prev_month }}" class="date-nav-btn">←</a>
                 <a href="?month={{ next_month }}" class="date-nav-btn">→</a>
             </div>
         </div>
-        
         <div class="calendar-grid">
-            <div class="calendar-weekday">Mon</div>
-            <div class="calendar-weekday">Tue</div>
-            <div class="calendar-weekday">Wed</div>
-            <div class="calendar-weekday">Thu</div>
-            <div class="calendar-weekday">Fri</div>
-            <div class="calendar-weekday">Sat</div>
-            <div class="calendar-weekday">Sun</div>
-            
+            <div class="cal-weekday">Mon</div>
+            <div class="cal-weekday">Tue</div>
+            <div class="cal-weekday">Wed</div>
+            <div class="cal-weekday">Thu</div>
+            <div class="cal-weekday">Fri</div>
+            <div class="cal-weekday">Sat</div>
+            <div class="cal-weekday">Sun</div>
             {% for day in calendar_days %}
-            <div class="calendar-day {% if day.date == current_date %}selected{% endif %} {% if day.has_plans %}has-plans{% endif %}"
-                 data-url="?date={{ day.date|date:'Y-m-d' }}"
-                 onclick="window.location.href=this.dataset.url">
-                <span class="calendar-day-number">{{ day.day }}</span>
+            <div class="cal-day
+                {% if day.date == current_date %}selected{% endif %}
+                {% if day.is_today %}today{% endif %}
+                {% if day.has_plans %}has-plans{% endif %}
+                {% if day.all_completed %}completed-day{% endif %}
+                {% if day.other_month %}other-month{% endif %}"
+                 onclick="window.location.href='?date={{ day.date|date:\"Y-m-d\" }}'">
+                {{ day.day }}
             </div>
             {% endfor %}
         </div>
     </div>
-    
+
     <!-- Main Content -->
-    <div class="main-content">
-        <!-- Timeline Section -->
+    <div class="main-layout">
+
+        <!-- Timeline -->
         <div class="timeline-section">
-            <div class="timeline-header">
+            <div class="timeline-top">
                 <h2>📅 {{ current_date|date:"F j, Y" }}</h2>
-                <div class="subject-filter">
-                    <select class="filter-select" id="subjectFilter">
+                <div class="tl-controls">
+                    <select class="filter-select" id="subjectFilter" onchange="filterBySubject(this.value)">
                         <option value="all">All Subjects</option>
                         {% for subject in subjects %}
                         <option value="{{ subject }}">{{ subject }}</option>
                         {% endfor %}
                     </select>
+                    <div class="view-toggle">
+                        <button class="view-btn active" id="viewTimeline" onclick="setView('timeline')">Timeline</button>
+                        <button class="view-btn" id="viewList" onclick="setView('list')">List</button>
+                    </div>
                 </div>
             </div>
-            
-            <div class="timeline" id="timeline">
-                {% for hour in "01234567891011121314151617181920212223"|make_list %}
-                <div class="timeline-hour">
-                    <div class="hour-label">{{ hour|stringformat:"02d" }}:00</div>
+
+            <div class="timeline-scroll" id="timelineContainer">
+                {% if not plans %}
+                <div class="empty-day">
+                    <p>📭</p>
+                    <p>No study plans for this day.</p>
+                    <p style="font-size:1.3rem;">Click <strong>+ Create Study Plan</strong> to schedule one!</p>
+                </div>
+                {% else %}
+                {% for hour_num in hour_range %}
+                <div class="tl-hour {% if hour_num == current_hour %}current-hour{% endif %}" id="hour-{{ hour_num }}">
+                    <div class="hour-label">
+                        {% if hour_num < 10 %}0{{ hour_num }}{% else %}{{ hour_num }}{% endif %}:00
+                    </div>
                     <div class="hour-plans">
-                        {% with hour_int=hour|add:0 %}
-                            {% for plan in plans %}
-                                {% if plan.start_date.hour == hour_int %}
-                                <div class="plan-card 
-                                    {% if plan.priority == 1 %}high-priority{% elif plan.priority == 2 %}medium-priority{% else %}low-priority{% endif %}
-                                    {% if plan.status == 'completed' %}completed{% endif %}
-                                    {% if plan.status == 'overdue' %}overdue{% endif %}"
-                                     data-plan-id="{{ plan.id }}">
-                                    <div class="plan-time">
-                                        {{ plan.start_date|time:"H:i" }} - {{ plan.end_date|time:"H:i" }}
-                                    </div>
-                                    <div class="plan-title">{{ plan.title }}</div>
-                                    <div class="plan-subject">{{ plan.subject }}</div>
-                                    
-                                    <div class="plan-actions">
-                                        {% if plan.status == 'overdue' or plan.status == 'pending' and plan.end_date < now %}
-                                        <button class="plan-action-btn complete-btn" onclick="markPlanComplete('{{ plan.id }}', event)">
-                                            ✓ Mark Complete
-                                        </button>
-                                        {% endif %}
-                                        {% if plan.status != 'completed' %}
-                                        <button class="plan-action-btn edit-btn" onclick="editPlan('{{ plan.id }}', event)">
-                                            ✎ Edit
-                                        </button>
-                                        {% endif %}
-                                    </div>
-                                </div>
+                        {% for plan in plans %}
+                        {% if plan.start_date.hour == hour_num %}
+                        <div class="plan-card
+                            {% if plan.priority == 1 %}priority-high{% elif plan.priority == 2 %}priority-medium{% else %}priority-low{% endif %}
+                            {% if plan.status == 'completed' %}completed{% elif plan.is_in_progress %}in-progress{% elif plan.status == 'overdue' %}overdue{% endif %}"
+                             data-plan-id="{{ plan.id }}"
+                             data-subject="{{ plan.subject }}"
+                             data-start="{{ plan.start_date|date:'H:i' }}"
+                             data-end="{{ plan.end_date|date:'H:i' }}"
+                             data-title="{{ plan.title }}"
+                             data-duration="{{ plan.duration_minutes }}">
+
+                            <div class="plan-badges">
+                                {% if plan.priority == 1 %}
+                                    <span class="plan-badge badge-high">🔥 High</span>
+                                {% elif plan.priority == 2 %}
+                                    <span class="plan-badge badge-medium">📌 Medium</span>
+                                {% else %}
+                                    <span class="plan-badge badge-low">📝 Low</span>
                                 {% endif %}
-                            {% empty %}
-                                {% if forloop.first %}
-                                <div class="empty-state">
-                                    <p>✨ No plans scheduled for this day</p>
-                                    <p>Click "Create Study Plan" to add one</p>
-                                </div>
+                                {% if plan.status == 'completed' %}
+                                    <span class="plan-badge badge-done">✅ Done</span>
+                                {% elif plan.status == 'overdue' %}
+                                    <span class="plan-badge badge-overdue">⚠️ Overdue</span>
                                 {% endif %}
-                            {% endfor %}
-                        {% endwith %}
+                                {% if plan.technique %}
+                                    <span class="plan-badge badge-technique">{{ plan.technique }}</span>
+                                {% endif %}
+                            </div>
+
+                            <div class="plan-time">
+                                {{ plan.start_date|time:"H:i" }} → {{ plan.end_date|time:"H:i" }}
+                            </div>
+
+                            <div class="plan-title">{{ plan.title }}</div>
+
+                            <div class="plan-meta">
+                                <span>📚 {{ plan.subject }}</span>
+                                {% if plan.duration_minutes %}
+                                <span>⏱️ {{ plan.duration_minutes }} min</span>
+                                {% endif %}
+                            </div>
+
+                            {% if plan.is_in_progress %}
+                            <div class="session-countdown" id="countdown-{{ plan.id }}">
+                                Calculating...
+                            </div>
+                            <div class="duration-bar-wrap">
+                                <div class="duration-bar-fill" id="bar-{{ plan.id }}" style="width:0%"></div>
+                            </div>
+                            {% endif %}
+
+                            <div class="plan-actions">
+                                {% if plan.status != 'completed' %}
+                                <button class="action-btn btn-complete"
+                                        onclick="markComplete('{{ plan.id }}', event)">
+                                    ✓ Mark Complete
+                                </button>
+                                {% if plan.is_in_progress %}
+                                <button class="action-btn btn-start"
+                                        onclick="startFocusMode('{{ plan.id }}','{{ plan.title }}','{{ plan.subject }}','{{ plan.duration_minutes|default:60 }}')">
+                                    🎯 Focus Mode
+                                </button>
+                                {% endif %}
+                                {% endif %}
+                                <button class="action-btn btn-edit"
+                                        onclick="editPlan('{{ plan.id }}', event)">
+                                    ✎ Edit
+                                </button>
+                                <button class="action-btn btn-delete"
+                                        onclick="showDeleteConfirm('{{ plan.id }}', event)">
+                                    🗑
+                                </button>
+                            </div>
+                        </div>
+                        {% endif %}
+                        {% endfor %}
                     </div>
                 </div>
                 {% endfor %}
+                {% endif %}
             </div>
         </div>
-        
+
         <!-- Sidebar -->
         <div class="sidebar">
-            <div class="upcoming-card">
-                <div class="upcoming-header">
+
+            <!-- Study Streak -->
+            <div class="streak-card">
+                <div style="font-size:1.4rem;font-weight:600;color:var(--planner-gray);margin-bottom:0.5rem;">🔥 Study Streak</div>
+                <div class="streak-number">{{ streak|default:0 }}</div>
+                <div class="streak-label">consecutive days</div>
+                <div class="streak-days" id="streakDays"></div>
+            </div>
+
+            <!-- Upcoming Plans -->
+            <div class="sidebar-card">
+                <div class="sidebar-header">
                     <span>📅</span>
                     <h3>Upcoming Plans</h3>
                 </div>
-                <div class="upcoming-list" id="upcoming-list">
+                <div class="sidebar-list">
                     {% for plan in upcoming_plans %}
-                    <div class="upcoming-item" onclick="editPlan('{{ plan.id }}')">
+                    <div class="sidebar-item" onclick="editPlan('{{ plan.id }}')">
                         <div class="item-title">{{ plan.title }}</div>
-                        <div class="item-time">{{ plan.start_date|date:"M d, H:i" }}</div>
+                        <div class="item-subject">{{ plan.subject }}</div>
+                        <div class="item-time">{{ plan.start_date|date:"M d" }} at {{ plan.start_date|time:"H:i" }}</div>
                     </div>
                     {% empty %}
-                    <p style="color: var(--color-light-gray); padding: 1rem;">No upcoming plans</p>
+                    <div class="sidebar-empty">✨ No upcoming plans</div>
                     {% endfor %}
                 </div>
             </div>
-            
-            <div class="overdue-card">
-                <div class="overdue-header">
+
+            <!-- Overdue Plans -->
+            {% if overdue_plans %}
+            <div class="sidebar-card">
+                <div class="sidebar-header danger">
                     <span>⚠️</span>
                     <h3>Overdue</h3>
                 </div>
-                <div class="overdue-list" id="overdue-list">
+                <div class="sidebar-list">
                     {% for plan in overdue_plans %}
-                    <div class="overdue-item">
+                    <div class="sidebar-item overdue-item">
                         <div class="item-title">{{ plan.title }}</div>
-                        <div class="item-time">Due: {{ plan.end_date|date:"M d, H:i" }}</div>
-                        <button class="plan-action-btn complete-btn" style="margin-top: 0.5rem; width: 100%;" onclick="markPlanComplete('{{ plan.id }}', event)">
+                        <div class="item-subject">{{ plan.subject }}</div>
+                        <div class="item-time" style="color:var(--planner-danger);">Due {{ plan.end_date|timesince }} ago</div>
+                        <button class="action-btn btn-complete"
+                                style="margin-top:0.8rem;width:100%;justify-content:center;"
+                                onclick="markComplete('{{ plan.id }}', event)">
                             ✓ Mark Complete
                         </button>
                     </div>
-                    {% empty %}
-                    <p style="color: var(--color-light-gray); padding: 1rem;">No overdue plans</p>
                     {% endfor %}
                 </div>
             </div>
+            {% endif %}
+
+            <!-- Quick Tips -->
+            <div class="sidebar-card">
+                <div class="sidebar-header">
+                    <span>💡</span>
+                    <h3>Study Tips</h3>
+                </div>
+                <div id="studyTip" style="color:var(--planner-gray);font-size:1.4rem;line-height:1.7;"></div>
+                <button onclick="nextTip()" style="background:none;border:1px solid rgba(255,255,255,0.1);border-radius:20px;color:var(--planner-accent);font-size:1.2rem;padding:0.5rem 1.2rem;cursor:pointer;margin-top:1.2rem;font-family:'Space Grotesk',sans-serif;transition:all 0.3s;">
+                    Next Tip →
+                </button>
+            </div>
+
         </div>
     </div>
 </div>
 
 <script>
-// Set Indian Timezone
-const indianTimezone = 'Asia/Kolkata';
+// ─── Config ───────────────────────────────────────────────────────────────────
+const CSRF = '{{ csrf_token }}';
+const IST_TIMEZONE = 'Asia/Kolkata';
 
-// Format date in Indian timezone
-function getIndianTime() {
-    return new Date().toLocaleString('en-US', { timeZone: indianTimezone });
+// ─── Live Clock ───────────────────────────────────────────────────────────────
+function updateClock() {
+    const now = new Date();
+    const ist = new Date(now.toLocaleString('en-US', { timeZone: IST_TIMEZONE }));
+    const h = String(ist.getHours()).padStart(2,'0');
+    const m = String(ist.getMinutes()).padStart(2,'0');
+    const s = String(ist.getSeconds()).padStart(2,'0');
+    const el = document.getElementById('liveClock');
+    if (el) el.textContent = `IST ${h}:${m}:${s}`;
+}
+setInterval(updateClock, 1000);
+updateClock();
+
+// ─── Toast System ─────────────────────────────────────────────────────────────
+function showToast(msg, type='info', duration=4000) {
+    const icons = { success:'✅', error:'❌', warning:'⚠️', info:'ℹ️' };
+    const container = document.getElementById('toast-container');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    toast.innerHTML = `<span class="toast-icon">${icons[type]||'ℹ️'}</span><span class="toast-msg">${msg}</span>`;
+    container.appendChild(toast);
+    requestAnimationFrame(() => { requestAnimationFrame(() => { toast.classList.add('show'); }); });
+    setTimeout(() => {
+        toast.classList.remove('show');
+        setTimeout(() => toast.remove(), 400);
+    }, duration);
 }
 
-// Mark plan as complete
-function markPlanComplete(planId, event) {
-    if (event) {
-        event.stopPropagation();
+// ─── Notification System ──────────────────────────────────────────────────────
+function checkNotifPermission() {
+    if (!('Notification' in window)) return;
+    if (Notification.permission === 'default') {
+        document.getElementById('notifBanner').classList.add('show');
     }
-    
+}
+
+function requestNotifPermission() {
+    Notification.requestPermission().then(perm => {
+        document.getElementById('notifBanner').classList.remove('show');
+        if (perm === 'granted') {
+            showToast('Notifications enabled! You will receive study reminders.', 'success');
+            scheduleReminders();
+        } else {
+            showToast('Notifications blocked. Enable from browser settings.', 'warning');
+        }
+    });
+}
+
+function sendBrowserNotif(title, body, delay=0) {
+    if (Notification.permission !== 'granted') return;
+    setTimeout(() => {
+        new Notification(title, {
+            body,
+            icon: '/static/images/logo.svg',
+            badge: '/static/images/logo.svg',
+            tag: 'studybud-reminder'
+        });
+    }, delay);
+}
+
+// Schedule reminders for upcoming plans
+function scheduleReminders() {
+    const planCards = document.querySelectorAll('.plan-card');
+    const now = new Date(new Date().toLocaleString('en-US', { timeZone: IST_TIMEZONE }));
+
+    planCards.forEach(card => {
+        const start = card.dataset.start;
+        const title = card.dataset.title;
+        const subject = card.dataset.subject;
+        if (!start || !title) return;
+
+        const today = now.toISOString().split('T')[0];
+        const startTime = new Date(`${today}T${start}:00`);
+        const reminderTime = new Date(startTime.getTime() - 15 * 60 * 1000); // 15 min before
+
+        const msUntilReminder = reminderTime - now;
+        if (msUntilReminder > 0 && msUntilReminder < 4 * 60 * 60 * 1000) {
+            setTimeout(() => {
+                sendBrowserNotif(
+                    `⏰ Study Reminder: ${title}`,
+                    `Starting in 15 minutes! Subject: ${subject}`,
+                    0
+                );
+                showToast(`⏰ Upcoming: <strong>${title}</strong> starts in 15 minutes!`, 'warning', 8000);
+            }, msUntilReminder);
+        }
+
+        // Also notify at start time
+        const msUntilStart = startTime - now;
+        if (msUntilStart > 0 && msUntilStart < 4 * 60 * 60 * 1000) {
+            setTimeout(() => {
+                sendBrowserNotif(`📚 Time to Study: ${title}`, `Subject: ${subject} — Start your session now!`, 0);
+                showToast(`📚 <strong>${title}</strong> is starting now!`, 'info', 8000);
+            }, msUntilStart);
+        }
+    });
+}
+
+// ─── Mark Complete ─────────────────────────────────────────────────────────────
+function markComplete(planId, event) {
+    if (event) event.stopPropagation();
+
     fetch(`/mark-plan-complete/${planId}/`, {
         method: 'POST',
-        headers: {
-            'X-CSRFToken': '{{ csrf_token }}',
-            'Content-Type': 'application/json'
+        headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' }
+    })
+    .then(res => {
+        if (!res.ok) throw new Error('Network error');
+        return res.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // Animate the card
+            const card = document.querySelector(`[data-plan-id="${planId}"]`);
+            if (card) {
+                card.style.transition = 'all 0.5s ease';
+                card.style.transform = 'scale(0.97)';
+                card.classList.add('completed');
+                card.classList.remove('in-progress', 'overdue');
+
+                // Remove complete button, update badges
+                const completeBtns = card.querySelectorAll('.btn-complete');
+                completeBtns.forEach(b => b.remove());
+
+                const badges = card.querySelector('.plan-badges');
+                if (badges) {
+                    const overdueB = badges.querySelector('.badge-overdue');
+                    if (overdueB) overdueB.remove();
+                    if (!badges.querySelector('.badge-done')) {
+                        const done = document.createElement('span');
+                        done.className = 'plan-badge badge-done';
+                        done.textContent = '✅ Done';
+                        badges.appendChild(done);
+                    }
+                }
+
+                // Remove countdown
+                const countdown = document.getElementById(`countdown-${planId}`);
+                if (countdown) countdown.remove();
+                const bar = document.getElementById(`bar-${planId}`);
+                if (bar) bar.parentElement.remove();
+            }
+
+            // Update all sidebar overdue items
+            const overdueItem = document.querySelector(`.overdue-item [onclick*="${planId}"]`);
+            if (overdueItem) overdueItem.closest('.sidebar-item').remove();
+
+            showToast('🎉 Great work! Plan marked as complete!', 'success');
+            sendBrowserNotif('StudyBud', '✅ Study session completed! Keep it up!');
+            updateStats();
+        } else {
+            showToast(data.message || 'Could not mark complete. Try again.', 'error');
         }
+    })
+    .catch(err => {
+        console.error(err);
+        showToast('Network error. Please try again.', 'error');
+    });
+}
+
+// ─── Delete Plan ───────────────────────────────────────────────────────────────
+let pendingDeleteId = null;
+
+function showDeleteConfirm(planId, event) {
+    if (event) event.stopPropagation();
+    pendingDeleteId = planId;
+    document.getElementById('confirmOverlay').classList.add('active');
+}
+
+function closeConfirm() {
+    pendingDeleteId = null;
+    document.getElementById('confirmOverlay').classList.remove('active');
+}
+
+function confirmDelete() {
+    if (!pendingDeleteId) return;
+    const planId = pendingDeleteId;
+    closeConfirm();
+
+    fetch(`/delete-study-plan/${planId}/`, {
+        method: 'POST',
+        headers: { 'X-CSRFToken': CSRF, 'Content-Type': 'application/json' }
     })
     .then(res => res.json())
     .then(data => {
         if (data.success) {
-            // Update stats
+            const card = document.querySelector(`[data-plan-id="${planId}"]`);
+            if (card) {
+                card.style.transition = 'all 0.4s ease';
+                card.style.opacity = '0';
+                card.style.transform = 'translateX(-20px) scale(0.95)';
+                setTimeout(() => card.closest('.tl-hour') ? null : null, 400);
+                setTimeout(() => card.remove(), 400);
+            }
+            showToast('Plan deleted.', 'warning');
             updateStats();
-            
-            // Show success message
-            alert('Plan marked as complete! 🎉');
-            
-            // Reload page to reflect changes
-            location.reload();
+        } else {
+            showToast('Failed to delete. Try again.', 'error');
         }
     })
-    .catch(error => {
-        console.error('Error marking plan complete:', error);
-        alert('Failed to mark plan as complete. Please try again.');
-    });
+    .catch(() => showToast('Network error.', 'error'));
 }
 
-// Edit plan - FIXED
+// ─── Edit Plan ─────────────────────────────────────────────────────────────────
 function editPlan(planId, event) {
-    if (event) {
-        event.stopPropagation();
-    }
-    // Use the correct URL pattern - redirect to create-study-plan with edit parameter
+    if (event) event.stopPropagation();
     window.location.href = `{% url 'create-study-plan' %}?edit=${planId}`;
 }
 
-// Update all stats
+// ─── Subject Filter ───────────────────────────────────────────────────────────
+function filterBySubject(subject) {
+    document.querySelectorAll('.plan-card').forEach(card => {
+        const cardSubject = card.dataset.subject || '';
+        card.style.display = (subject === 'all' || cardSubject === subject) ? '' : 'none';
+    });
+
+    // Hide empty hours
+    document.querySelectorAll('.tl-hour').forEach(hour => {
+        const plans = hour.querySelectorAll('.plan-card:not([style*="none"])');
+        hour.style.display = plans.length === 0 && subject !== 'all' ? 'none' : '';
+    });
+}
+
+// ─── View Toggle ─────────────────────────────────────────────────────────────
+function setView(type) {
+    document.getElementById('viewTimeline').classList.toggle('active', type === 'timeline');
+    document.getElementById('viewList').classList.toggle('active', type === 'list');
+
+    const container = document.getElementById('timelineContainer');
+    if (type === 'list') {
+        container.querySelectorAll('.tl-hour').forEach(hour => {
+            const hasPlans = hour.querySelectorAll('.plan-card').length > 0;
+            hour.style.display = hasPlans ? '' : 'none';
+        });
+    } else {
+        container.querySelectorAll('.tl-hour').forEach(hour => {
+            hour.style.display = '';
+        });
+    }
+}
+
+// ─── Update Stats ─────────────────────────────────────────────────────────────
 function updateStats() {
     fetch('/api/study-stats/')
         .then(res => res.json())
         .then(data => {
-            document.getElementById('today-study-time').textContent = data.today_minutes + ' min';
-            document.getElementById('week-study-time').textContent = data.week_minutes + ' min';
-            document.getElementById('plans-today').textContent = data.plans_today;
-            document.getElementById('upcoming-count').textContent = data.upcoming_count;
+            const safe = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+            safe('statTodayTime', (data.today_minutes || 0) + ' min');
+            safe('statWeekTime', (data.week_minutes || 0) + ' min');
+            safe('statCompleted', data.completed_today || 0);
+            safe('statPlansToday', data.plans_today || 0);
+            safe('statUpcoming', data.upcoming_count || 0);
+
+            // Update progress bar
+            const total = data.plans_today || 0;
+            const done = data.completed_today || 0;
+            const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+            const fill = document.getElementById('progressFill');
+            const pctEl = document.getElementById('progressPct');
+            if (fill) fill.style.width = pct + '%';
+            if (pctEl) pctEl.textContent = pct + '%';
         })
-        .catch(error => console.error('Error updating stats:', error));
+        .catch(() => {}); // silent fail
 }
 
-// Subject filter
-document.getElementById('subjectFilter').addEventListener('change', function() {
-    const subject = this.value;
-    const plans = document.querySelectorAll('.plan-card');
-    
-    plans.forEach(plan => {
-        const planSubject = plan.querySelector('.plan-subject')?.textContent;
-        if (subject === 'all' || planSubject === subject) {
-            plan.style.display = 'block';
-        } else {
-            plan.style.display = 'none';
-        }
-    });
-});
+// ─── In-Progress Countdowns ───────────────────────────────────────────────────
+function updateCountdowns() {
+    const now = new Date(new Date().toLocaleString('en-US', { timeZone: IST_TIMEZONE }));
+    const today = now.toISOString().split('T')[0];
 
-// Check for reminders and overdue plans
-document.addEventListener('DOMContentLoaded', function() {
-    updateStats();
-    
-    // Check for plans that need reminders
+    document.querySelectorAll('.plan-card.in-progress').forEach(card => {
+        const endStr = card.dataset.end;
+        const duration = parseInt(card.dataset.duration) || 60;
+        const startStr = card.dataset.start;
+        if (!endStr || !startStr) return;
+
+        const endTime = new Date(`${today}T${endStr}:00`);
+        const startTime = new Date(`${today}T${startStr}:00`);
+        const remaining = Math.max(0, Math.floor((endTime - now) / 1000));
+        const elapsed = Math.max(0, Math.floor((now - startTime) / 1000));
+        const totalSecs = duration * 60;
+        const progress = Math.min(100, (elapsed / totalSecs) * 100);
+
+        const countdown = document.getElementById(`countdown-${card.dataset.planId}`);
+        const bar = document.getElementById(`bar-${card.dataset.planId}`);
+
+        if (countdown) {
+            if (remaining > 0) {
+                const h = Math.floor(remaining / 3600);
+                const m = Math.floor((remaining % 3600) / 60);
+                const s = remaining % 60;
+                const parts = h > 0
+                    ? `${h}h ${String(m).padStart(2,'0')}m remaining`
+                    : `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')} remaining`;
+                countdown.textContent = '⏳ ' + parts;
+                if (remaining < 300) countdown.style.color = 'var(--planner-danger)';
+            } else {
+                countdown.textContent = '⌛ Session ended';
+            }
+        }
+
+        if (bar) bar.style.width = progress + '%';
+    });
+}
+setInterval(updateCountdowns, 1000);
+
+// ─── Scroll to Current Hour ───────────────────────────────────────────────────
+function scrollToCurrentHour() {
+    const now = new Date(new Date().toLocaleString('en-US', { timeZone: IST_TIMEZONE }));
+    const currentHour = now.getHours();
+    const hourEl = document.getElementById(`hour-${currentHour}`);
+    const scroll = document.querySelector('.timeline-scroll');
+    if (hourEl && scroll) {
+        scroll.scrollTop = hourEl.offsetTop - 100;
+    }
+}
+
+// ─── Current Hour Indicator ───────────────────────────────────────────────────
+function updateCurrentHourHighlight() {
+    const now = new Date(new Date().toLocaleString('en-US', { timeZone: IST_TIMEZONE }));
+    const h = now.getHours();
+    const m = now.getMinutes();
+    document.querySelectorAll('.tl-hour').forEach(hour => hour.classList.remove('current-hour'));
+    const currentEl = document.getElementById(`hour-${h}`);
+    if (currentEl) {
+        currentEl.classList.add('current-hour');
+        // Remove old time line
+        const oldLine = currentEl.querySelector('.current-time-line');
+        if (oldLine) oldLine.remove();
+        // Add new time line at minute position
+        const pct = m / 60;
+        const line = document.createElement('div');
+        line.className = 'current-time-line';
+        line.style.top = `${pct * 100}%`;
+        currentEl.appendChild(line);
+    }
+}
+setInterval(updateCurrentHourHighlight, 60000);
+
+// ─── Focus Mode ───────────────────────────────────────────────────────────────
+let focusInterval = null;
+let focusSeconds = 0;
+let focusTotalSeconds = 0;
+let focusPaused = false;
+let currentFocusPlanId = null;
+
+function startFocusMode(planId, title, subject, durationMin) {
+    currentFocusPlanId = planId;
+    focusTotalSeconds = parseInt(durationMin) * 60;
+    focusSeconds = 0;
+    focusPaused = false;
+
+    document.getElementById('focusPlanTitle').textContent = title;
+    document.getElementById('focusPlanSubject').textContent = '📚 ' + subject;
+    document.getElementById('focusTimer').textContent = '00:00:00';
+    document.getElementById('focusProgressFill').style.width = '0%';
+    document.getElementById('focusPhase').textContent = '📚 Study Phase';
+    document.getElementById('focusPauseBtn').textContent = '⏸ Pause';
+    document.getElementById('focusNotes').value = '';
+
+    document.getElementById('focusOverlay').classList.add('active');
+
+    if (focusInterval) clearInterval(focusInterval);
+    focusInterval = setInterval(updateFocusTimer, 1000);
+}
+
+function updateFocusTimer() {
+    if (focusPaused) return;
+    focusSeconds++;
+
+    const h = Math.floor(focusSeconds / 3600);
+    const m = Math.floor((focusSeconds % 3600) / 60);
+    const s = focusSeconds % 60;
+    const timer = document.getElementById('focusTimer');
+    timer.textContent = `${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+
+    const pct = Math.min(100, (focusSeconds / focusTotalSeconds) * 100);
+    document.getElementById('focusProgressFill').style.width = pct + '%';
+
+    const remaining = focusTotalSeconds - focusSeconds;
+    if (remaining <= 300 && remaining > 0) {
+        timer.classList.add('urgent');
+        document.getElementById('focusPhase').textContent = '⚡ Final stretch!';
+    }
+
+    if (remaining <= 0) {
+        clearInterval(focusInterval);
+        document.getElementById('focusPhase').textContent = '🎉 Session Complete!';
+        timer.classList.remove('urgent');
+        sendBrowserNotif('🎉 Study session complete!', `Great job studying ${document.getElementById('focusPlanSubject').textContent}!`);
+        showToast('🎉 Session complete! Excellent work!', 'success');
+    }
+}
+
+function toggleFocusPause() {
+    focusPaused = !focusPaused;
+    document.getElementById('focusPauseBtn').textContent = focusPaused ? '▶ Resume' : '⏸ Pause';
+    document.getElementById('focusPhase').textContent = focusPaused ? '⏸ Paused' : '📚 Study Phase';
+}
+
+function completeFocusSession() {
+    clearInterval(focusInterval);
+    document.getElementById('focusOverlay').classList.remove('active');
+    if (currentFocusPlanId) markComplete(currentFocusPlanId, null);
+}
+
+function exitFocusMode() {
+    clearInterval(focusInterval);
+    document.getElementById('focusOverlay').classList.remove('active');
+    currentFocusPlanId = null;
+}
+
+// ─── Study Streak Dots ────────────────────────────────────────────────────────
+function renderStreakDots() {
+    const container = document.getElementById('streakDays');
+    if (!container) return;
+    const days = ['M','T','W','T','F','S','S'];
+    const now = new Date(new Date().toLocaleString('en-US', { timeZone: IST_TIMEZONE }));
+    const dow = (now.getDay() + 6) % 7; // Monday=0
+    const streak = parseInt('{{ streak|default:0 }}') || 0;
+
+    container.innerHTML = '';
+    days.forEach((d, i) => {
+        const dot = document.createElement('div');
+        dot.className = 'streak-dot';
+        dot.textContent = d;
+        if (i === dow) dot.classList.add('today');
+        else if (i < dow && i >= dow - Math.min(streak, dow)) dot.classList.add('done');
+        container.appendChild(dot);
+    });
+}
+
+// ─── Study Tips ───────────────────────────────────────────────────────────────
+const TIPS = [
+    "🧠 Use Active Recall — close the book and try to remember what you just read.",
+    "🍅 Try Pomodoro: 25 min focus, 5 min break. Your brain loves short sprints.",
+    "😴 Sleep consolidates memory. Never sacrifice sleep for late-night cramming.",
+    "✍️ Write by hand when memorizing — it activates more brain regions than typing.",
+    "🔄 Review material at increasing intervals: 1 day, 3 days, 1 week, 1 month.",
+    "📱 Put your phone in another room. Notifications kill deep focus.",
+    "💧 Stay hydrated — even mild dehydration reduces concentration by 20%.",
+    "🎯 One task at a time. Multitasking reduces learning efficiency by 40%.",
+    "🌿 A 10-minute walk before studying boosts memory and concentration.",
+    "📝 Teaching others what you've learned is the fastest way to master it.",
+];
+let tipIndex = 0;
+
+function showTip() {
+    const el = document.getElementById('studyTip');
+    if (el) el.textContent = TIPS[tipIndex];
+}
+
+function nextTip() {
+    tipIndex = (tipIndex + 1) % TIPS.length;
+    showTip();
+}
+
+// ─── Check Reminders from Server ──────────────────────────────────────────────
+function checkServerReminders() {
     fetch('/check-plan-reminders/', {
         method: 'POST',
-        headers: {
-            'X-CSRFToken': '{{ csrf_token }}'
-        }
+        headers: { 'X-CSRFToken': CSRF }
     })
     .then(res => res.json())
     .then(data => {
-        if (data.reminders_sent && data.reminders_sent.length > 0) {
-            // Show browser notifications
-            if (Notification.permission === 'granted') {
-                data.reminders_sent.forEach(reminder => {
-                    new Notification('Study Reminder', {
-                        body: `Time to study: ${reminder.title}`,
-                        icon: '/static/images/logo.svg'
-                    });
-                });
-            }
+        if (data.reminders && data.reminders.length > 0) {
+            data.reminders.forEach(r => {
+                showToast(`⏰ Reminder: <strong>${r.title}</strong> starts in ${r.minutes_until} min`, 'warning', 8000);
+                sendBrowserNotif(`⏰ Study Reminder`, `${r.title} starts in ${r.minutes_until} minutes!`);
+            });
         }
     })
-    .catch(err => console.log('Reminder check failed:', err));
+    .catch(() => {});
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+    checkNotifPermission();
+    updateStats();
+    updateCurrentHourHighlight();
+    updateCountdowns();
+    renderStreakDots();
+    showTip();
+
+    // Scroll to current hour
+    setTimeout(scrollToCurrentHour, 300);
+
+    // Schedule client-side reminders if permission already granted
+    if (Notification.permission === 'granted') {
+        scheduleReminders();
+    }
+
+    // Check server-side reminders
+    checkServerReminders();
+
+    // Randomize tip
+    tipIndex = Math.floor(Math.random() * TIPS.length);
+    showTip();
 });
 
-// Refresh stats every minute
+// Refresh stats every 60s
 setInterval(updateStats, 60000);
+// Check reminders every 5 min
+setInterval(checkServerReminders, 300000);
 
-// Request notification permission
-if (Notification.permission !== 'granted' && Notification.permission !== 'denied') {
-    Notification.requestPermission();
-}
+// Close confirm on backdrop click
+document.getElementById('confirmOverlay').addEventListener('click', function(e) {
+    if (e.target === this) closeConfirm();
+});
+
+// Close focus on Escape
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeConfirm();
+        exitFocusMode();
+    }
+});
 </script>
 {% endblock %}

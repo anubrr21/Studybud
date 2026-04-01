@@ -3,1258 +3,1593 @@
 
 {% block content %}
 <style>
-    /* Main Container with Glass Morphism */
-    .form-container {
+    @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap');
+
+    :root {
+        --accent: #71c6dd;
+        --accent-2: #4fa3b8;
+        --danger: #ff4757;
+        --warning: #ffa502;
+        --success: #26de81;
+        --bg-dark: var(--color-dark, #1a1a2e);
+        --bg-med: var(--color-dark-medium, #2d2d3f);
+        --text: var(--color-light, #e8e8f0);
+        --muted: var(--color-light-gray, #a0a0b8);
+        --radius: 18px;
+        --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    * { box-sizing: border-box; }
+
+    .csp-wrap {
+        font-family: 'Space Grotesk', sans-serif;
         max-width: 900px;
-        margin: 3rem auto;
-        background: linear-gradient(145deg, var(--color-dark) 0%, #2a2a38 100%);
-        border-radius: 3rem;
-        padding: 3rem;
-        box-shadow: 0 30px 60px rgba(0,0,0,0.5), 0 0 0 1px var(--color-main) inset;
-        border: 1px solid rgba(113,198,221,0.3);
-        position: relative;
-        overflow: hidden;
+        margin: 0 auto;
+        padding: 2.4rem 2rem 5rem;
     }
-    
-    /* Animated Background Effect */
-    .form-container::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        right: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(113,198,221,0.1) 0%, transparent 70%);
-        animation: rotate 20s linear infinite;
-        pointer-events: none;
-    }
-    
-    @keyframes rotate {
-        from { transform: rotate(0deg); }
-        to { transform: rotate(360deg); }
-    }
-    
-    /* Back Button */
-    .back-button {
+
+    /* ── Back Button ── */
+    .back-btn {
         display: inline-flex;
         align-items: center;
         gap: 0.8rem;
-        color: var(--color-light);
+        color: var(--text);
         text-decoration: none;
-        font-size: 1.6rem;
-        margin-bottom: 2rem;
-        padding: 1rem 2rem;
-        background: linear-gradient(145deg, var(--color-dark) 0%, #2a2a38 100%);
-        border-radius: 30px;
-        transition: all 0.3s ease;
+        font-size: 1.5rem;
+        font-weight: 500;
+        margin-bottom: 2.4rem;
+        padding: 0.9rem 1.8rem;
+        background: rgba(255,255,255,0.05);
+        border-radius: 50px;
         border: 1px solid rgba(113,198,221,0.2);
+        transition: var(--transition);
     }
-    
-    .back-button:hover {
-        transform: translateX(-5px);
-        border-color: var(--color-main);
-        box-shadow: 0 5px 15px rgba(113,198,221,0.2);
+
+    .back-btn:hover {
+        transform: translateX(-4px);
+        border-color: var(--accent);
+        background: rgba(113,198,221,0.08);
     }
-    
-    /* Header Section */
-    .form-header {
-        margin-bottom: 3rem;
+
+    /* ── Header ── */
+    .csp-header {
         text-align: center;
-        position: relative;
-        z-index: 2;
+        margin-bottom: 3rem;
     }
-    
-    .form-header h1 {
-        color: var(--color-main);
+
+    .csp-header h1 {
         font-size: 3.2rem;
-        margin-bottom: 1rem;
-        text-shadow: 0 0 20px rgba(113,198,221,0.5);
+        font-weight: 800;
+        color: var(--accent);
+        letter-spacing: -0.5px;
+        margin-bottom: 0.8rem;
+        line-height: 1.1;
+    }
+
+    .csp-header p {
+        color: var(--muted);
+        font-size: 1.5rem;
+        line-height: 1.6;
+    }
+
+    .xp-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background: linear-gradient(135deg, rgba(255,215,0,0.15), rgba(255,165,0,0.1));
+        border: 1px solid rgba(255,215,0,0.3);
+        color: #ffd700;
+        padding: 0.5rem 1.4rem;
+        border-radius: 20px;
+        font-size: 1.4rem;
+        font-weight: 700;
+        margin-top: 0.8rem;
+        display: inline-flex;
+    }
+
+    /* ── Notification Status ── */
+    .notif-status {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: var(--radius);
+        padding: 1.2rem 1.6rem;
+        margin-bottom: 2rem;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .notif-status:hover { border-color: var(--accent); }
+    .notif-status.granted { border-color: rgba(38,222,129,0.4); background: rgba(38,222,129,0.05); }
+    .notif-status.denied { border-color: rgba(255,71,87,0.3); background: rgba(255,71,87,0.05); }
+
+    .notif-status-dot {
+        width: 10px; height: 10px;
+        border-radius: 50%;
+        background: var(--warning);
+        flex-shrink: 0;
+    }
+
+    .notif-status.granted .notif-status-dot { background: var(--success); }
+    .notif-status.denied .notif-status-dot { background: var(--danger); }
+    .notif-status-text { font-size: 1.4rem; color: var(--text); flex: 1; }
+    .notif-status-action { font-size: 1.3rem; color: var(--accent); font-weight: 600; }
+
+    /* ── AI Assistant ── */
+    .ai-panel {
+        background: linear-gradient(145deg, rgba(113,198,221,0.08), rgba(113,198,221,0.03));
+        border: 1px solid rgba(113,198,221,0.25);
+        border-radius: 22px;
+        padding: 2rem;
+        margin-bottom: 2.4rem;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .ai-panel::after {
+        content: '';
+        position: absolute;
+        top: -40%;
+        right: -30%;
+        width: 300px; height: 300px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(113,198,221,0.08) 0%, transparent 70%);
+        pointer-events: none;
+        animation: aiGlow 4s ease-in-out infinite;
+    }
+
+    @keyframes aiGlow {
+        0%, 100% { opacity: 0.5; transform: scale(1); }
+        50% { opacity: 1; transform: scale(1.1); }
+    }
+
+    .ai-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 1.6rem;
+    }
+
+    .ai-header h3 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--accent);
+        flex: 1;
+    }
+
+    .ai-spin {
+        width: 18px; height: 18px;
+        border: 2px solid rgba(113,198,221,0.3);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 0.8s linear infinite;
+        display: none;
+    }
+
+    .ai-spin.active { display: block; }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .ai-result {
+        background: rgba(255,255,255,0.04);
+        border-radius: 14px;
+        padding: 1.6rem;
+        border-left: 4px solid var(--accent);
+        margin-bottom: 1.2rem;
+    }
+
+    .ai-result-title {
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--text);
+        margin-bottom: 0.8rem;
+    }
+
+    .ai-result-desc {
+        font-size: 1.4rem;
+        color: var(--muted);
+        line-height: 1.7;
+        margin-bottom: 1.2rem;
+    }
+
+    .ai-tags {
+        display: flex;
+        gap: 0.8rem;
+        flex-wrap: wrap;
+        margin-bottom: 1.2rem;
+    }
+
+    .ai-tag {
+        background: rgba(113,198,221,0.1);
+        border: 1px solid rgba(113,198,221,0.2);
+        color: var(--accent);
+        padding: 0.3rem 1rem;
+        border-radius: 20px;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+
+    .confidence-bar {
+        height: 6px;
+        background: rgba(255,255,255,0.08);
+        border-radius: 6px;
+        overflow: hidden;
+        margin-bottom: 0.6rem;
+    }
+
+    .confidence-fill {
+        height: 100%;
+        border-radius: 6px;
+        background: linear-gradient(90deg, var(--accent), var(--success));
+        transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    .confidence-label {
+        font-size: 1.2rem;
+        color: var(--muted);
+        margin-bottom: 1.2rem;
+    }
+
+    .ai-actions {
+        display: flex;
+        gap: 0.8rem;
+        flex-wrap: wrap;
+    }
+
+    .ai-btn {
+        padding: 0.8rem 1.6rem;
+        border-radius: 20px;
+        font-size: 1.3rem;
+        font-weight: 700;
+        border: none;
+        cursor: pointer;
+        font-family: 'Space Grotesk', sans-serif;
+        transition: var(--transition);
+    }
+
+    .ai-btn-primary { background: var(--accent); color: #1a1a2e; }
+    .ai-btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(113,198,221,0.4); }
+
+    .ai-btn-ghost { background: rgba(255,255,255,0.06); color: var(--text); }
+    .ai-btn-ghost:hover { background: rgba(255,255,255,0.12); }
+
+    /* Quick options */
+    .ai-quick-opts {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.8rem;
+        margin-top: 1.2rem;
+    }
+
+    .ai-quick-opt {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 14px;
+        padding: 1.2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: var(--transition);
+    }
+
+    .ai-quick-opt:hover { border-color: var(--accent); background: rgba(113,198,221,0.08); transform: translateY(-2px); }
+    .ai-quick-opt.selected { border-color: var(--accent); background: rgba(113,198,221,0.12); }
+
+    .aq-icon { font-size: 2.2rem; margin-bottom: 0.4rem; }
+    .aq-name { font-size: 1.3rem; font-weight: 700; color: var(--text); }
+    .aq-desc { font-size: 1.1rem; color: var(--muted); margin-top: 0.3rem; }
+
+    /* ── Form Sections ── */
+    .form-section {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 22px;
+        padding: 2.4rem;
+        margin-bottom: 2rem;
+        transition: var(--transition);
+    }
+
+    .form-section:focus-within {
+        border-color: rgba(113,198,221,0.3);
+        box-shadow: 0 0 0 4px rgba(113,198,221,0.06);
+    }
+
+    .section-heading {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        margin-bottom: 2rem;
+        padding-bottom: 1.2rem;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .section-heading h2 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--accent);
+    }
+
+    /* ── Form Controls ── */
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.4rem;
+    }
+
+    .form-group { margin-bottom: 1.6rem; }
+    .form-group:last-child { margin-bottom: 0; }
+
+    .form-group label {
+        display: block;
+        color: var(--text);
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin-bottom: 0.7rem;
+    }
+
+    .form-group label .req { color: var(--accent); margin-left: 0.3rem; }
+
+    .fc {
+        width: 100%;
+        padding: 1.1rem 1.4rem;
+        background: rgba(255,255,255,0.06);
+        border: 1.5px solid rgba(255,255,255,0.1);
+        border-radius: var(--radius);
+        color: var(--text);
+        font-size: 1.45rem;
+        font-family: 'Space Grotesk', sans-serif;
+        transition: var(--transition);
+    }
+
+    .fc:focus {
+        border-color: var(--accent);
+        outline: none;
+        box-shadow: 0 0 0 4px rgba(113,198,221,0.12);
+        background: rgba(113,198,221,0.05);
+    }
+
+    .fc::placeholder { color: rgba(255,255,255,0.25); }
+
+    .fc-time {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 1.5rem;
+        letter-spacing: 1px;
+    }
+
+    .fc-icon-wrap { position: relative; }
+    .fc-icon-wrap .fc-icon {
+        position: absolute;
+        left: 1.2rem;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 1.6rem;
+        pointer-events: none;
+    }
+
+    .fc-icon-wrap .fc { padding-left: 3.8rem; }
+
+    /* Duration display */
+    .duration-display {
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 1rem;
-        flex-wrap: wrap;
-    }
-    
-    .form-header p {
-        color: var(--color-light-gray);
-        font-size: 1.6rem;
-        background: rgba(113,198,221,0.1);
-        padding: 1rem 2rem;
-        border-radius: 5rem;
-        display: inline-block;
-        border: 1px solid rgba(113,198,221,0.3);
-    }
-    
-    /* Form Sections */
-    .form-section {
-        background: rgba(45,45,57,0.7);
-        backdrop-filter: blur(10px);
-        border-radius: 2rem;
-        padding: 2rem;
-        margin-bottom: 2rem;
+        background: rgba(113,198,221,0.08);
         border: 1px solid rgba(113,198,221,0.2);
-        position: relative;
-        z-index: 2;
-        transition: all 0.3s ease;
+        border-radius: var(--radius);
+        padding: 1.2rem;
+        margin-top: 1rem;
     }
-    
-    .form-section:hover {
-        border-color: var(--color-main);
-        box-shadow: 0 10px 20px rgba(113,198,221,0.2);
+
+    .duration-display .dur-val {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--accent);
     }
-    
-    .section-title {
-        color: var(--color-main);
-        font-size: 1.8rem;
-        margin-bottom: 1.5rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-        border-bottom: 2px solid rgba(113,198,221,0.3);
-        padding-bottom: 1rem;
+
+    .duration-display .dur-label { color: var(--muted); font-size: 1.4rem; }
+    .duration-display.invalid { border-color: rgba(255,71,87,0.4); background: rgba(255,71,87,0.06); }
+    .duration-display.invalid .dur-val { color: var(--danger); }
+
+    /* IST timezone note */
+    .tz-note {
+        font-size: 1.2rem;
+        color: var(--muted);
+        background: rgba(255,255,255,0.04);
+        padding: 0.5rem 1.2rem;
+        border-radius: 20px;
+        display: inline-block;
+        margin-top: 0.6rem;
     }
-    
-    /* Form Groups */
-    .form-group {
-        margin-bottom: 1.8rem;
-    }
-    
-    .form-group label {
-        display: block;
-        color: var(--color-light);
-        margin-bottom: 0.8rem;
-        font-weight: 500;
-        font-size: 1.4rem;
-    }
-    
-    .form-control {
-        width: 100%;
-        padding: 1.2rem 1.5rem;
-        background: var(--color-dark-medium);
-        border: 2px solid var(--color-dark-light);
-        border-radius: 1.5rem;
-        color: var(--color-light);
-        font-size: 1.5rem;
-        transition: all 0.3s ease;
-    }
-    
-    .form-control:focus {
-        border-color: var(--color-main);
-        outline: none;
-        box-shadow: 0 0 0 4px rgba(113,198,221,0.2);
-    }
-    
-    /* Input with Icon */
-    .input-icon-wrapper {
-        position: relative;
-    }
-    
-    .input-icon {
-        position: absolute;
-        left: 1.5rem;
-        top: 50%;
-        transform: translateY(-50%);
-        color: var(--color-main);
-        font-size: 1.8rem;
-    }
-    
-    .input-icon-wrapper .form-control {
-        padding-left: 4.5rem;
-    }
-    
-    /* Date-Time Group */
-    .datetime-group {
+
+    /* ── Priority ── */
+    .priority-grid {
         display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1.5rem;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
     }
-    
-    /* Priority Options */
-    .priority-options {
-        display: flex;
-        gap: 1.5rem;
-        margin-top: 0.5rem;
-    }
-    
-    .priority-option {
-        flex: 1;
-        padding: 1.5rem;
+
+    .priority-opt {
+        background: rgba(255,255,255,0.04);
+        border: 2px solid rgba(255,255,255,0.08);
+        border-radius: var(--radius);
+        padding: 1.6rem;
         text-align: center;
-        background: linear-gradient(145deg, var(--color-dark-medium) 0%, #323240 100%);
-        border: 2px solid var(--color-dark-light);
-        border-radius: 1.5rem;
         cursor: pointer;
-        transition: all 0.3s ease;
+        transition: var(--transition);
     }
-    
-    .priority-option:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+
+    .priority-opt:hover { transform: translateY(-3px); }
+    .priority-opt .p-icon { font-size: 2.4rem; margin-bottom: 0.5rem; }
+    .priority-opt .p-name { font-size: 1.4rem; font-weight: 700; }
+    .priority-opt .p-desc { font-size: 1.2rem; color: var(--muted); margin-top: 0.3rem; }
+
+    .priority-opt[data-val="1"] { --p-color: var(--danger); }
+    .priority-opt[data-val="2"] { --p-color: var(--warning); }
+    .priority-opt[data-val="3"] { --p-color: var(--success); }
+
+    .priority-opt.selected {
+        border-color: var(--p-color);
+        background: rgba(var(--p-color), 0.08);
+        box-shadow: 0 0 20px rgba(0,0,0,0.2);
     }
-    
-    .priority-option.selected {
-        border-color: var(--color-main);
-        background: linear-gradient(145deg, rgba(113,198,221,0.2) 0%, #2a2a45 100%);
-        box-shadow: 0 0 20px rgba(113,198,221,0.3);
-    }
-    
-    /* Reminder Options */
-    .reminder-options {
+
+    .priority-opt[data-val="1"].selected { background: rgba(255,71,87,0.08); }
+    .priority-opt[data-val="2"].selected { background: rgba(255,165,2,0.08); }
+    .priority-opt[data-val="3"].selected { background: rgba(38,222,129,0.08); }
+
+    /* ── Reminder ── */
+    .reminder-grid {
         display: grid;
         grid-template-columns: repeat(4, 1fr);
-        gap: 1rem;
-        margin-top: 0.5rem;
+        gap: 0.8rem;
     }
-    
-    .reminder-option {
+
+    .reminder-opt {
+        background: rgba(255,255,255,0.04);
+        border: 2px solid rgba(255,255,255,0.08);
+        border-radius: var(--radius);
         padding: 1.2rem;
         text-align: center;
-        background: var(--color-dark-medium);
-        border: 2px solid var(--color-dark-light);
-        border-radius: 1rem;
         cursor: pointer;
-        transition: all 0.3s ease;
-        font-size: 1.3rem;
+        transition: var(--transition);
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: var(--text);
     }
-    
-    .reminder-option:hover {
-        border-color: var(--color-main);
-        transform: translateY(-2px);
+
+    .reminder-opt:hover { border-color: var(--accent); transform: translateY(-2px); }
+
+    .reminder-opt.selected {
+        background: var(--accent);
+        color: #1a1a2e;
+        border-color: var(--accent);
     }
-    
-    .reminder-option.selected {
-        background: var(--color-main);
-        color: var(--color-dark);
-        border-color: var(--color-main);
-        font-weight: bold;
+
+    .reminder-note {
+        background: rgba(38,222,129,0.06);
+        border: 1px solid rgba(38,222,129,0.2);
+        border-radius: var(--radius);
+        padding: 1.4rem;
+        margin-top: 1.4rem;
     }
-    
-    /* Study Techniques */
+
+    .reminder-note p { font-size: 1.3rem; color: var(--muted); line-height: 1.8; }
+    .reminder-note strong { color: var(--success); }
+
+    /* ── Techniques ── */
     .techniques-grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
         gap: 1rem;
-        margin-top: 0.5rem;
     }
-    
-    .technique-card {
-        padding: 1.5rem;
-        background: linear-gradient(145deg, var(--color-dark-medium) 0%, #323240 100%);
-        border-radius: 1rem;
+
+    .technique-opt {
+        background: rgba(255,255,255,0.04);
+        border: 2px solid rgba(255,255,255,0.08);
+        border-radius: var(--radius);
+        padding: 1.6rem;
         text-align: center;
         cursor: pointer;
-        transition: all 0.3s ease;
-        border: 2px solid transparent;
+        transition: var(--transition);
     }
-    
-    .technique-card:hover {
-        transform: translateY(-3px);
-        border-color: var(--color-main);
+
+    .technique-opt:hover { border-color: var(--accent); transform: translateY(-2px); }
+
+    .technique-opt.selected {
+        border-color: var(--accent);
+        background: rgba(113,198,221,0.1);
     }
-    
-    .technique-card.selected {
-        border-color: var(--color-main);
-        background: linear-gradient(145deg, rgba(113,198,221,0.2) 0%, #2a2a45 100%);
-    }
-    
-    .technique-icon {
-        font-size: 2.4rem;
-        margin-bottom: 0.5rem;
-    }
-    
-    .technique-name {
-        color: var(--color-light);
-        font-size: 1.4rem;
-        font-weight: 600;
-    }
-    
-    .technique-desc {
-        color: var(--color-light-gray);
-        font-size: 1.2rem;
+
+    .tech-icon { font-size: 2.8rem; margin-bottom: 0.6rem; }
+    .tech-name { font-size: 1.5rem; font-weight: 700; color: var(--text); margin-bottom: 0.3rem; }
+    .tech-desc { font-size: 1.2rem; color: var(--muted); line-height: 1.5; }
+    .tech-timing {
+        font-size: 1.1rem;
+        font-family: 'JetBrains Mono', monospace;
+        color: var(--accent);
         margin-top: 0.5rem;
+        background: rgba(113,198,221,0.1);
+        padding: 0.3rem 0.8rem;
+        border-radius: 10px;
+        display: inline-block;
     }
-    
-    /* AI Study Assistant - UPGRADED */
-    .ai-assistant {
-        background: linear-gradient(145deg, rgba(113,198,221,0.2) 0%, #2a2a45 100%);
-        border-radius: 1.5rem;
-        padding: 1.5rem;
-        margin-bottom: 2rem;
-        border: 2px solid var(--color-main);
-        position: relative;
-        overflow: hidden;
+
+    /* ── Focus Settings ── */
+    .focus-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr 1fr;
+        gap: 1rem;
     }
-    
-    .ai-assistant::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        right: -50%;
-        width: 200%;
-        height: 200%;
-        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-        animation: aiPulse 3s ease-in-out infinite;
+
+    /* ── Goals / Resources ── */
+    textarea.fc { resize: vertical; min-height: 90px; line-height: 1.7; }
+
+    /* ── Gamification Preview ── */
+    .rewards-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        text-align: center;
     }
-    
-    @keyframes aiPulse {
-        0%, 100% { opacity: 0.3; }
-        50% { opacity: 0.8; }
+
+    .reward-card {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: var(--radius);
+        padding: 1.4rem;
+        transition: var(--transition);
     }
-    
-    .ai-assistant h4 {
-        color: var(--color-main);
-        font-size: 1.8rem;
-        margin-bottom: 1.5rem;
-        display: flex;
-        align-items: center;
+
+    .reward-card:hover { border-color: rgba(255,215,0,0.3); transform: translateY(-2px); }
+    .reward-icon { font-size: 2.6rem; margin-bottom: 0.5rem; }
+    .reward-val { font-size: 1.6rem; font-weight: 700; color: var(--text); }
+    .reward-label { font-size: 1.2rem; color: var(--muted); margin-top: 0.3rem; }
+
+    /* ── Recurring Section ── */
+    .recur-opts {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
         gap: 0.8rem;
     }
-    
-    .ai-thinking {
-        display: inline-block;
-        width: 20px;
-        height: 20px;
-        border: 3px solid var(--color-main);
-        border-top-color: transparent;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-        margin-left: 0.5rem;
-    }
-    
-    @keyframes spin {
-        to { transform: rotate(360deg); }
-    }
-    
-    .ai-suggestion-container {
-        background: var(--color-dark);
-        padding: 1.5rem;
-        border-radius: 1rem;
-        border-left: 4px solid var(--color-main);
-        margin-bottom: 1rem;
-    }
-    
-    .ai-suggestion-title {
-        color: var(--color-main);
-        font-size: 1.6rem;
-        font-weight: bold;
-        margin-bottom: 0.5rem;
-    }
-    
-    .ai-suggestion-desc {
-        color: var(--color-light);
-        font-size: 1.4rem;
-        margin-bottom: 1rem;
-        line-height: 1.6;
-    }
-    
-    .ai-suggestion-meta {
-        display: flex;
-        gap: 1rem;
-        flex-wrap: wrap;
-        margin-bottom: 1rem;
-    }
-    
-    .ai-meta-item {
-        background: rgba(113,198,221,0.1);
-        padding: 0.5rem 1rem;
-        border-radius: 2rem;
-        font-size: 1.2rem;
-        color: var(--color-main);
-    }
-    
-    .ai-confidence {
-        display: inline-block;
-        padding: 0.3rem 0.8rem;
-        border-radius: 1rem;
-        font-size: 1.2rem;
-        font-weight: bold;
-    }
-    
-    .confidence-high {
-        background: rgba(38,222,129,0.2);
-        color: #26de81;
-    }
-    
-    .confidence-medium {
-        background: rgba(255,165,2,0.2);
-        color: #ffa502;
-    }
-    
-    .confidence-low {
-        background: rgba(255,71,87,0.2);
-        color: #ff4757;
-    }
-    
-    .ai-actions {
-        display: flex;
-        gap: 1rem;
-        margin-top: 1rem;
-        flex-wrap: wrap;
-    }
-    
-    .ai-btn {
-        padding: 0.8rem 1.5rem;
-        border: none;
-        border-radius: 2rem;
+
+    .recur-opt {
+        background: rgba(255,255,255,0.04);
+        border: 2px solid rgba(255,255,255,0.08);
+        border-radius: var(--radius);
+        padding: 1rem;
+        text-align: center;
+        cursor: pointer;
         font-size: 1.3rem;
         font-weight: 600;
-        cursor: pointer;
-        transition: all 0.3s ease;
+        color: var(--text);
+        transition: var(--transition);
     }
-    
-    .ai-apply-btn {
-        background: var(--color-main);
-        color: var(--color-dark);
+
+    .recur-opt:hover { border-color: var(--accent); }
+    .recur-opt.selected { background: rgba(113,198,221,0.12); border-color: var(--accent); color: var(--accent); }
+
+    /* ── Tags ── */
+    .tags-wrap {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.6rem;
+        margin-bottom: 0.8rem;
     }
-    
-    .ai-apply-btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(113,198,221,0.4);
-    }
-    
-    .ai-refresh-btn {
-        background: var(--color-dark-medium);
-        color: var(--color-light);
-    }
-    
-    .ai-refresh-btn:hover {
-        background: var(--color-main);
-        color: var(--color-dark);
-    }
-    
-    .ai-more-options {
-        margin-top: 1rem;
-    }
-    
-    .ai-option {
-        background: rgba(255,255,255,0.05);
-        padding: 1rem;
-        border-radius: 1rem;
-        margin-bottom: 0.5rem;
-        cursor: pointer;
-        transition: all 0.3s ease;
-        border: 1px solid transparent;
-    }
-    
-    .ai-option:hover {
-        background: rgba(113,198,221,0.1);
-        border-color: var(--color-main);
-        transform: translateX(5px);
-    }
-    
-    .ai-option-title {
-        color: var(--color-light);
-        font-weight: 600;
-        font-size: 1.4rem;
-        margin-bottom: 0.3rem;
-    }
-    
-    .ai-option-desc {
-        color: var(--color-light-gray);
-        font-size: 1.2rem;
-    }
-    
-    /* Break Reminder */
-    .break-settings {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 1rem;
-        margin-top: 1rem;
-    }
-    
-    /* Gamification */
-    .gamification-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 0.5rem;
-        background: linear-gradient(135deg, #ffd700, #ffa500);
-        color: var(--color-dark);
-        padding: 0.5rem 1rem;
-        border-radius: 2rem;
+
+    .tag-chip {
+        background: rgba(113,198,221,0.12);
+        border: 1px solid rgba(113,198,221,0.25);
+        color: var(--accent);
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
         font-size: 1.2rem;
         font-weight: 600;
-        margin-left: 1rem;
-    }
-    
-    /* Notification Status */
-    .notification-status {
-        display: inline-flex;
+        display: flex;
         align-items: center;
         gap: 0.5rem;
-        padding: 0.5rem 1rem;
-        border-radius: 2rem;
-        font-size: 1.2rem;
-        margin-top: 1rem;
-        background: rgba(255,255,255,0.1);
     }
-    
-    .notification-status.allowed {
-        background: rgba(38,222,129,0.2);
-        color: #26de81;
-    }
-    
-    .notification-status.denied {
-        background: rgba(255,71,87,0.2);
-        color: #ff4757;
-    }
-    
-    /* Submit Button */
-    .submit-btn {
-        width: 100%;
-        padding: 1.8rem;
-        background: linear-gradient(135deg, var(--color-main) 0%, #4fa3b8 100%);
-        color: var(--color-dark);
+
+    .tag-remove {
+        cursor: pointer;
+        opacity: 0.6;
+        transition: opacity 0.2s;
+        background: none;
         border: none;
-        border-radius: 3rem;
-        font-size: 1.8rem;
-        font-weight: 700;
-        cursor: pointer;
+        color: inherit;
+        font-size: 1.2rem;
+        padding: 0;
+        line-height: 1;
+    }
+
+    .tag-remove:hover { opacity: 1; }
+
+    /* ── Submit ── */
+    .form-footer {
         margin-top: 3rem;
-        transition: all 0.3s ease;
+        display: flex;
+        gap: 1.2rem;
+        flex-wrap: wrap;
+    }
+
+    .submit-btn {
+        flex: 1;
+        padding: 1.6rem;
+        background: linear-gradient(135deg, var(--accent), var(--accent-2));
+        color: #1a1a2e;
+        border: none;
+        border-radius: 50px;
+        font-size: 1.7rem;
+        font-weight: 800;
+        cursor: pointer;
+        font-family: 'Space Grotesk', sans-serif;
+        transition: var(--transition);
         display: flex;
         align-items: center;
         justify-content: center;
         gap: 1rem;
-        border: 2px solid #ffffff;
-        box-shadow: 0 10px 20px rgba(113,198,221,0.4);
+        box-shadow: 0 8px 24px rgba(113,198,221,0.35);
     }
-    
+
     .submit-btn:hover {
         transform: translateY(-3px);
-        box-shadow: 0 15px 30px rgba(113,198,221,0.6);
+        box-shadow: 0 14px 32px rgba(113,198,221,0.5);
     }
-    
-    /* Mobile Responsive */
-    @media (max-width: 768px) {
-        .form-container {
-            margin: 1.5rem;
-            padding: 2rem;
-        }
-        
-        .datetime-group {
-            grid-template-columns: 1fr;
-        }
-        
-        .priority-options {
-            flex-direction: column;
-        }
-        
-        .reminder-options {
-            grid-template-columns: repeat(2, 1fr);
-        }
-        
-        .techniques-grid {
-            grid-template-columns: 1fr;
-        }
-        
-        .break-settings {
-            grid-template-columns: 1fr;
-        }
-        
-        .form-header h1 {
-            font-size: 2.4rem;
-            flex-direction: column;
-        }
-        
-        .ai-actions {
-            flex-direction: column;
-        }
-        
-        .ai-btn {
-            width: 100%;
-        }
+
+    .submit-btn:active { transform: translateY(-1px); }
+
+    .save-draft-btn {
+        padding: 1.6rem 2.4rem;
+        background: rgba(255,255,255,0.06);
+        color: var(--text);
+        border: 1px solid rgba(255,255,255,0.12);
+        border-radius: 50px;
+        font-size: 1.5rem;
+        font-weight: 600;
+        cursor: pointer;
+        font-family: 'Space Grotesk', sans-serif;
+        transition: var(--transition);
+    }
+
+    .save-draft-btn:hover { background: rgba(255,255,255,0.1); border-color: rgba(255,255,255,0.2); }
+
+    /* ── Validation error ── */
+    .field-error {
+        color: var(--danger);
+        font-size: 1.2rem;
+        margin-top: 0.5rem;
+        display: none;
+    }
+
+    .fc.has-error { border-color: var(--danger); }
+
+    /* ── Toast ── */
+    #csp-toast-container {
+        position: fixed;
+        top: 2rem;
+        right: 2rem;
+        z-index: 9999;
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+    }
+
+    .csp-toast {
+        background: #1e1e2e;
+        border-radius: 14px;
+        padding: 1.2rem 1.8rem;
+        color: var(--text);
+        font-size: 1.4rem;
+        font-weight: 500;
+        border-left: 4px solid var(--accent);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        transform: translateX(120%);
+        transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        max-width: 360px;
+    }
+
+    .csp-toast.show { transform: translateX(0); }
+    .csp-toast.success { border-left-color: var(--success); }
+    .csp-toast.error { border-left-color: var(--danger); }
+    .csp-toast.warning { border-left-color: var(--warning); }
+
+    /* ── Responsive ── */
+    @media (max-width: 640px) {
+        .csp-wrap { padding: 1.5rem 1.2rem 4rem; }
+        .form-row { grid-template-columns: 1fr; }
+        .priority-grid { grid-template-columns: 1fr; }
+        .reminder-grid { grid-template-columns: repeat(2, 1fr); }
+        .techniques-grid { grid-template-columns: 1fr; }
+        .focus-grid { grid-template-columns: 1fr; }
+        .recur-opts { grid-template-columns: repeat(2, 1fr); }
+        .rewards-grid { grid-template-columns: repeat(3, 1fr); }
+        .ai-quick-opts { grid-template-columns: 1fr; }
     }
 </style>
 
-<div class="form-container">
-    <!-- Back Button -->
-    <a href="javascript:history.back()" class="back-button">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
-        </svg>
-        Back
-    </a>
-    
-    <div class="form-header">
-        <h1>
-            <span>📚</span> Create <span>Study Plan</span>
-            <span class="gamification-badge">
-                <span>⭐</span> +50 XP
-            </span>
-        </h1>
-        <p>✨ Advanced AI-powered study planner with real push notifications ✨</p>
-        
-        <!-- Notification Status -->
-        <div id="notificationStatus" class="notification-status">
-            <span>🔔</span>
-            <span id="notificationText">Checking notification permission...</span>
-        </div>
+<div id="csp-toast-container"></div>
+
+<div class="csp-wrap">
+
+    <!-- Back -->
+    <a href="javascript:history.back()" class="back-btn">← Back</a>
+
+    <!-- Header -->
+    <div class="csp-header">
+        <h1>{% if edit_mode %}✏️ Edit Study Plan{% else %}📚 Create Study Plan{% endif %}</h1>
+        <p>AI-powered scheduling with smart reminders & focus tools</p>
+        {% if not edit_mode %}<div class="xp-badge">⭐ +50 XP on completion</div>{% endif %}
     </div>
-    
-    <!-- UPGRADED AI Study Assistant -->
-    <div class="ai-assistant">
-        <h4>
-            <span>🤖</span> AI Study Assistant
-            <span class="ai-thinking" id="aiThinking" style="display: none;"></span>
-        </h4>
-        
-        <div id="aiSuggestionContainer" class="ai-suggestion-container">
-            <div class="ai-suggestion-title" id="aiTitle">🎯 Personalized Study Plan</div>
-            <div class="ai-suggestion-desc" id="aiDescription">
-                Based on your learning patterns, I'm analyzing the best approach...
+
+    <!-- Notification Status -->
+    <div class="notif-status" id="notifStatus" onclick="handleNotifClick()">
+        <div class="notif-status-dot" id="notifDot"></div>
+        <span class="notif-status-text" id="notifText">Checking notification permission...</span>
+        <span class="notif-status-action" id="notifAction"></span>
+    </div>
+
+    <!-- AI Assistant -->
+    <div class="ai-panel">
+        <div class="ai-header">
+            <span style="font-size:2.4rem;">🤖</span>
+            <h3>AI Study Assistant</h3>
+            <div class="ai-spin" id="aiSpin"></div>
+        </div>
+
+        <div class="ai-result" id="aiResult">
+            <div class="ai-result-title" id="aiResultTitle">🎯 Start filling in your plan details...</div>
+            <div class="ai-result-desc" id="aiResultDesc">
+                Enter a subject and title above, and I'll recommend the best study technique, duration, and session structure for you.
             </div>
-            
-            <div class="ai-suggestion-meta" id="aiMeta">
-                <span class="ai-meta-item">⏱️ Optimal duration: 45 min</span>
-                <span class="ai-meta-item">📊 Focus level: High</span>
-            </div>
-            
-            <div class="ai-confidence confidence-high" id="aiConfidence">
-                🔥 95% match with your learning style
-            </div>
-            
+            <div class="ai-tags" id="aiTags"></div>
+            <div class="confidence-bar"><div class="confidence-fill" id="aiConfidenceFill" style="width:0%"></div></div>
+            <div class="confidence-label" id="aiConfidenceLabel">Waiting for input...</div>
             <div class="ai-actions">
-                <button type="button" class="ai-btn ai-apply-btn" onclick="applyAISuggestion()">
-                    ✓ Apply AI Suggestion
-                </button>
-                <button type="button" class="ai-btn ai-refresh-btn" onclick="refreshAISuggestion()">
-                    ↻ Get New Suggestion
-                </button>
+                <button type="button" class="ai-btn ai-btn-primary" onclick="applyAI()">✓ Apply Suggestion</button>
+                <button type="button" class="ai-btn ai-btn-ghost" onclick="refreshAI()">↻ Refresh</button>
             </div>
         </div>
-        
-        <!-- More AI Options -->
-        <div class="ai-more-options" id="aiMoreOptions">
-            <div class="ai-option" onclick="selectAIOption(1)">
-                <div class="ai-option-title">📚 Deep Focus Session</div>
-                <div class="ai-option-desc">90 min with 15 min breaks - Best for complex topics</div>
+
+        <!-- Quick session presets -->
+        <div class="ai-quick-opts" id="aiQuickOpts">
+            <div class="ai-quick-opt" onclick="applyPreset('deep')">
+                <div class="aq-icon">🔬</div>
+                <div class="aq-name">Deep Focus</div>
+                <div class="aq-desc">90 min — Complex topics</div>
             </div>
-            <div class="ai-option" onclick="selectAIOption(2)">
-                <div class="ai-option-title">⚡ Quick Revision</div>
-                <div class="ai-option-desc">25 min sprints - Ideal for reviewing material</div>
+            <div class="ai-quick-opt" onclick="applyPreset('sprint')">
+                <div class="aq-icon">⚡</div>
+                <div class="aq-name">Quick Sprint</div>
+                <div class="aq-desc">25 min — Revision</div>
             </div>
-            <div class="ai-option" onclick="selectAIOption(3)">
-                <div class="ai-option-title">🧠 Active Learning</div>
-                <div class="ai-option-desc">Incorporate quizzes and self-testing</div>
+            <div class="ai-quick-opt" onclick="applyPreset('active')">
+                <div class="aq-icon">🧠</div>
+                <div class="aq-name">Active Recall</div>
+                <div class="aq-desc">45 min — Self-testing</div>
             </div>
         </div>
     </div>
-    
-    <form method="POST" id="studyPlanForm">
+
+    <!-- FORM -->
+    <form method="POST" id="studyPlanForm" novalidate>
         {% csrf_token %}
         {% if edit_mode %}
         <input type="hidden" name="plan_id" value="{{ plan.id }}">
         {% endif %}
-        
-        <!-- Basic Information Section -->
+        <input type="hidden" name="priority" id="priorityInput" value="{{ plan.priority|default:2 }}">
+        <input type="hidden" name="reminder" id="reminderInput" value="{{ plan.reminder|default:60 }}">
+        <input type="hidden" name="technique" id="techniqueInput" value="{{ plan.technique|default:'' }}">
+        <input type="hidden" name="recurrence" id="recurrenceInput" value="none">
+
+        <!-- ── Basic Info ── -->
         <div class="form-section">
-            <div class="section-title">
-                <svg viewBox="0 0 24 24" width="24" height="24" fill="var(--color-main)">
-                    <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
-                </svg>
-                Basic Information
+            <div class="section-heading">
+                <span>📝</span>
+                <h2>Basic Information</h2>
             </div>
-            
+
             <div class="form-group">
-                <label>📌 Title <span style="color: var(--color-main);">*</span></label>
-                <div class="input-icon-wrapper">
-                    <span class="input-icon">📝</span>
-                    <input type="text" name="title" id="title" class="form-control" placeholder="e.g., Chapter 5 Review" value="{{ plan.title|default:'' }}" required onkeyup="updateAIAnalysis()">
+                <label>Title <span class="req">*</span></label>
+                <div class="fc-icon-wrap">
+                    <span class="fc-icon">📌</span>
+                    <input type="text" name="title" id="title" class="fc"
+                           placeholder="e.g., Chapter 5 — Newton's Laws"
+                           value="{{ plan.title|default:'' }}" required
+                           oninput="debouncedAI()">
+                </div>
+                <div class="field-error" id="titleError">Please enter a title.</div>
+            </div>
+
+            <div class="form-group">
+                <label>Subject <span class="req">*</span></label>
+                <div class="fc-icon-wrap">
+                    <span class="fc-icon">📚</span>
+                    <input type="text" name="subject" id="subject" class="fc"
+                           placeholder="e.g., Physics, Mathematics, Python"
+                           value="{{ plan.subject|default:'' }}" required
+                           oninput="debouncedAI()" list="subjectSuggestions">
+                </div>
+                <datalist id="subjectSuggestions">
+                    <option value="Mathematics">
+                    <option value="Physics">
+                    <option value="Chemistry">
+                    <option value="Biology">
+                    <option value="History">
+                    <option value="Geography">
+                    <option value="Computer Science">
+                    <option value="Programming">
+                    <option value="English">
+                    <option value="Economics">
+                </datalist>
+                <div class="field-error" id="subjectError">Please enter a subject.</div>
+            </div>
+
+            <div class="form-group">
+                <label>Description</label>
+                <textarea name="description" id="description" class="fc"
+                          placeholder="What do you plan to study? What are your goals for this session?"
+                          oninput="debouncedAI()">{{ plan.description|default:'' }}</textarea>
+            </div>
+
+            <!-- Tags -->
+            <div class="form-group">
+                <label>Tags</label>
+                <div class="tags-wrap" id="tagsContainer"></div>
+                <input type="text" id="tagInput" class="fc" placeholder="Add tag and press Enter (e.g. exam, revision, project)"
+                       onkeydown="handleTagInput(event)">
+                <input type="hidden" name="tags" id="tagsHidden" value="{{ plan.tags|default:'' }}">
+            </div>
+        </div>
+
+        <!-- ── Date & Time ── -->
+        <div class="form-section">
+            <div class="section-heading">
+                <span>📅</span>
+                <h2>Date & Time</h2>
+            </div>
+
+            <div class="tz-note">🇮🇳 All times are in Indian Standard Time (IST, UTC+5:30)</div>
+            <br>
+
+            <div class="form-row" style="margin-top:1.2rem;">
+                <div class="form-group">
+                    <label>Start Date <span class="req">*</span></label>
+                    <input type="date" name="start_date" id="startDate" class="fc fc-time"
+                           value="{{ plan.start_date|date:'Y-m-d'|default:'' }}" required
+                           onchange="recalcDuration(); debouncedAI()">
+                    <div class="field-error" id="startDateError">Please select a start date.</div>
+                </div>
+                <div class="form-group">
+                    <label>Start Time (IST) <span class="req">*</span></label>
+                    <input type="time" name="start_time" id="startTime" class="fc fc-time"
+                           value="{{ plan.start_date|time:'H:i'|default:'09:00' }}" required
+                           onchange="recalcDuration(); debouncedAI()">
+                    <div class="field-error" id="startTimeError">Please select a start time.</div>
                 </div>
             </div>
-            
-            <div class="form-group">
-                <label>📖 Description</label>
-                <textarea name="description" id="description" class="form-control" rows="4" placeholder="What do you want to study? What are your goals?" onkeyup="updateAIAnalysis()">{{ plan.description|default:'' }}</textarea>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>End Date <span class="req">*</span></label>
+                    <input type="date" name="end_date" id="endDate" class="fc fc-time"
+                           value="{{ plan.end_date|date:'Y-m-d'|default:'' }}" required
+                           onchange="recalcDuration()">
+                    <div class="field-error" id="endDateError">Please select an end date.</div>
+                </div>
+                <div class="form-group">
+                    <label>End Time (IST) <span class="req">*</span></label>
+                    <input type="time" name="end_time" id="endTime" class="fc fc-time"
+                           value="{{ plan.end_date|time:'H:i'|default:'10:00' }}" required
+                           onchange="recalcDuration()">
+                    <div class="field-error" id="endTimeError">Please select an end time.</div>
+                </div>
             </div>
-            
-            <div class="form-group">
-                <label>🔬 Subject <span style="color: var(--color-main);">*</span></label>
-                <div class="input-icon-wrapper">
-                    <span class="input-icon">📚</span>
-                    <input type="text" name="subject" id="subject" class="form-control" placeholder="e.g., Mathematics, Physics, Programming" value="{{ plan.subject|default:'' }}" required onkeyup="updateAIAnalysis()">
+
+            <div class="duration-display" id="durationDisplay">
+                <span style="font-size:2rem;">⏱️</span>
+                <span class="dur-val" id="durVal">—</span>
+                <span class="dur-label" id="durLabel">duration</span>
+            </div>
+
+            <!-- Recurrence -->
+            <div class="form-group" style="margin-top:1.6rem;">
+                <label>🔁 Repeat (Recurring Plan)</label>
+                <div class="recur-opts">
+                    <div class="recur-opt selected" onclick="setRecur(this,'none')">Once</div>
+                    <div class="recur-opt" onclick="setRecur(this,'daily')">Daily</div>
+                    <div class="recur-opt" onclick="setRecur(this,'weekly')">Weekly</div>
+                    <div class="recur-opt" onclick="setRecur(this,'weekdays')">Weekdays</div>
                 </div>
             </div>
         </div>
-        
-        <!-- Date & Time Section -->
+
+        <!-- ── Priority & Notifications ── -->
         <div class="form-section">
-            <div class="section-title">
-                <svg viewBox="0 0 24 24" width="24" height="24" fill="var(--color-main)">
-                    <path d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V9h14v10zM7 11h5v5H7v-5z"/>
-                </svg>
-                Date & Time (24-Hour Format - Indian Timezone)
+            <div class="section-heading">
+                <span>🔔</span>
+                <h2>Priority & Notifications</h2>
             </div>
-            
-            <div class="datetime-group">
-                <div class="form-group">
-                    <label>📅 Start Date</label>
-                    <input type="date" name="start_date" id="start_date" class="form-control" value="{{ plan.start_date|date:'Y-m-d'|default:'' }}" required onchange="calculateDuration(); updateAIAnalysis()">
-                </div>
-                
-                <div class="form-group">
-                    <label>⏰ Start Time (24h IST)</label>
-                    <input type="time" name="start_time" id="start_time" class="form-control" value="{{ plan.start_date|time:'H:i'|default:'09:00' }}" required onchange="calculateDuration(); updateAIAnalysis()">
-                </div>
-            </div>
-            
-            <div class="datetime-group">
-                <div class="form-group">
-                    <label>📅 End Date</label>
-                    <input type="date" name="end_date" id="end_date" class="form-control" value="{{ plan.end_date|date:'Y-m-d'|default:'' }}" required onchange="calculateDuration(); updateAIAnalysis()">
-                </div>
-                
-                <div class="form-group">
-                    <label>⏰ End Time (24h IST)</label>
-                    <input type="time" name="end_time" id="end_time" class="form-control" value="{{ plan.end_date|time:'H:i'|default:'10:00' }}" required onchange="calculateDuration(); updateAIAnalysis()">
-                </div>
-            </div>
-            
-            <!-- Duration Display -->
-            <div style="background: rgba(113,198,221,0.1); padding: 1rem; border-radius: 1rem; margin-top: 1rem;">
-                <p style="color: var(--color-light); text-align: center;">
-                    <span style="color: var(--color-main);">⏱️ Total Duration:</span> 
-                    <span id="durationDisplay">1 hour</span>
-                </p>
-            </div>
-        </div>
-        
-        <!-- Priority & Reminder Section -->
-        <div class="form-section">
-            <div class="section-title">
-                <svg viewBox="0 0 24 24" width="24" height="24" fill="var(--color-main)">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                </svg>
-                Priority & Real Push Notifications
-            </div>
-            
+
             <div class="form-group">
-                <label>🔥 Priority Level</label>
-                <div class="priority-options">
-                    <div class="priority-option {% if plan.priority == 1 %}selected{% endif %}" onclick="selectPriority(this, 1)" data-priority="high">
-                        <span style="color: #ff4757;">🔥 High</span>
+                <label>Priority Level</label>
+                <div class="priority-grid">
+                    <div class="priority-opt {% if plan.priority == 1 %}selected{% endif %}"
+                         data-val="1" onclick="setPriority(this)">
+                        <div class="p-icon">🔥</div>
+                        <div class="p-name" style="color:var(--danger);">High</div>
+                        <div class="p-desc">Urgent & important</div>
                     </div>
-                    <div class="priority-option {% if plan.priority == 2 or not plan.priority %}selected{% endif %}" onclick="selectPriority(this, 2)" data-priority="medium">
-                        <span style="color: #ffa502;">📌 Medium</span>
+                    <div class="priority-opt {% if not plan.priority or plan.priority == 2 %}selected{% endif %}"
+                         data-val="2" onclick="setPriority(this)">
+                        <div class="p-icon">📌</div>
+                        <div class="p-name" style="color:var(--warning);">Medium</div>
+                        <div class="p-desc">Standard priority</div>
                     </div>
-                    <div class="priority-option {% if plan.priority == 3 %}selected{% endif %}" onclick="selectPriority(this, 3)" data-priority="low">
-                        <span style="color: #26de81;">📝 Low</span>
+                    <div class="priority-opt {% if plan.priority == 3 %}selected{% endif %}"
+                         data-val="3" onclick="setPriority(this)">
+                        <div class="p-icon">📝</div>
+                        <div class="p-name" style="color:var(--success);">Low</div>
+                        <div class="p-desc">When time allows</div>
                     </div>
                 </div>
-                <input type="hidden" name="priority" id="priority-input" value="{{ plan.priority|default:2 }}">
             </div>
-            
+
             <div class="form-group">
-                <label>🔔 Real Push Notifications (Choose when to be notified)</label>
-                <div class="reminder-options">
-                    <div class="reminder-option {% if plan.reminder == 15 %}selected{% endif %}" onclick="selectReminder(this, 15)">15 min</div>
-                    <div class="reminder-option {% if plan.reminder == 30 %}selected{% endif %}" onclick="selectReminder(this, 30)">30 min</div>
-                    <div class="reminder-option {% if plan.reminder == 60 or not plan.reminder %}selected{% endif %}" onclick="selectReminder(this, 60)">1 hour</div>
-                    <div class="reminder-option {% if plan.reminder == 120 %}selected{% endif %}" onclick="selectReminder(this, 120)">2 hours</div>
+                <label>Remind me before session starts</label>
+                <div class="reminder-grid">
+                    <div class="reminder-opt" onclick="setReminder(this,10)">10 min</div>
+                    <div class="reminder-opt" onclick="setReminder(this,15)">15 min</div>
+                    <div class="reminder-opt" onclick="setReminder(this,30)">30 min</div>
+                    <div class="reminder-opt {% if not plan.reminder %}selected{% endif %}"
+                         onclick="setReminder(this,60)">1 hour</div>
+                    <div class="reminder-opt" onclick="setReminder(this,120)">2 hours</div>
+                    <div class="reminder-opt" onclick="setReminder(this,1440)">1 day</div>
+                    <div class="reminder-opt" onclick="setReminder(this,0)">No reminder</div>
+                    <div class="reminder-opt" onclick="setReminder(this,-1)">Custom</div>
                 </div>
-                <input type="hidden" name="reminder" id="reminder-input" value="{{ plan.reminder|default:60 }}">
-                
-                <div style="margin-top: 1rem; padding: 1rem; background: rgba(38,222,129,0.1); border-radius: 1rem;">
-                    <p style="color: var(--color-light); font-size: 1.3rem;">
-                        <span style="color: #26de81;">✨ NEW: Real Push Notifications</span><br>
-                        • Works even when browser is closed<br>
-                        • Works on mobile when phone is locked<br>
-                        • Like WhatsApp/Instagram notifications<br>
-                        • Requires OneSignal setup (instructions below)
+                <div id="customReminderWrap" style="display:none;margin-top:1rem;">
+                    <input type="number" id="customReminderVal" class="fc" placeholder="Enter minutes before start" min="1" max="10080"
+                           onchange="document.getElementById('reminderInput').value=this.value">
+                </div>
+                <div class="reminder-note">
+                    <p>
+                        <strong>✅ Browser Notifications</strong> — enabled for as long as this page is open.<br>
+                        <strong>📱 How to get phone notifications</strong> — Add StudyBud to your home screen (PWA) for native-like push alerts.<br>
+                        A test notification will fire when you save this plan.
                     </p>
                 </div>
             </div>
         </div>
-        
-        <!-- Study Techniques Section -->
+
+        <!-- ── Study Technique ── -->
         <div class="form-section">
-            <div class="section-title">
-                <svg viewBox="0 0 24 24" width="24" height="24" fill="var(--color-main)">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                </svg>
-                Advanced Study Techniques
+            <div class="section-heading">
+                <span>🧠</span>
+                <h2>Study Technique</h2>
             </div>
-            
             <div class="techniques-grid">
-                <div class="technique-card {% if plan.technique == 'pomodoro' %}selected{% endif %}" onclick="selectTechnique(this, 'pomodoro')">
-                    <div class="technique-icon">🍅</div>
-                    <div class="technique-name">Pomodoro Timer</div>
-                    <div class="technique-desc">25 min study + 5 min break</div>
+                <div class="technique-opt {% if plan.technique == 'pomodoro' %}selected{% endif %}"
+                     onclick="setTechnique(this,'pomodoro')">
+                    <div class="tech-icon">🍅</div>
+                    <div class="tech-name">Pomodoro</div>
+                    <div class="tech-desc">Alternating focus & break sprints. Best for sustained sessions.</div>
+                    <div class="tech-timing">25 min study · 5 min break</div>
                 </div>
-                
-                <div class="technique-card {% if plan.technique == 'active_recall' %}selected{% endif %}" onclick="selectTechnique(this, 'active_recall')">
-                    <div class="technique-icon">🧠</div>
-                    <div class="technique-name">Active Recall</div>
-                    <div class="technique-desc">Test yourself every 15 min</div>
+                <div class="technique-opt {% if plan.technique == 'active_recall' %}selected{% endif %}"
+                     onclick="setTechnique(this,'active_recall')">
+                    <div class="tech-icon">🧠</div>
+                    <div class="tech-name">Active Recall</div>
+                    <div class="tech-desc">Test yourself regularly without looking at notes.</div>
+                    <div class="tech-timing">Study 15 min · Quiz 5 min</div>
                 </div>
-                
-                <div class="technique-card {% if plan.technique == 'spaced_repetition' %}selected{% endif %}" onclick="selectTechnique(this, 'spaced_repetition')">
-                    <div class="technique-icon">🔄</div>
-                    <div class="technique-name">Spaced Repetition</div>
-                    <div class="technique-desc">Review at optimal intervals</div>
+                <div class="technique-opt {% if plan.technique == 'spaced_repetition' %}selected{% endif %}"
+                     onclick="setTechnique(this,'spaced_repetition')">
+                    <div class="tech-icon">🔄</div>
+                    <div class="tech-name">Spaced Repetition</div>
+                    <div class="tech-desc">Review material at optimal increasing intervals.</div>
+                    <div class="tech-timing">1 day → 3 days → 1 week</div>
                 </div>
-                
-                <div class="technique-card {% if plan.technique == 'feynman' %}selected{% endif %}" onclick="selectTechnique(this, 'feynman')">
-                    <div class="technique-icon">📝</div>
-                    <div class="technique-name">Feynman Technique</div>
-                    <div class="technique-desc">Teach concepts simply</div>
+                <div class="technique-opt {% if plan.technique == 'feynman' %}selected{% endif %}"
+                     onclick="setTechnique(this,'feynman')">
+                    <div class="tech-icon">📝</div>
+                    <div class="tech-name">Feynman Technique</div>
+                    <div class="tech-desc">Explain concepts in simple language to master them.</div>
+                    <div class="tech-timing">Study → Explain → Review gaps</div>
                 </div>
             </div>
-            <input type="hidden" name="technique" id="technique-input" value="{{ plan.technique|default:'' }}">
         </div>
-        
-        <!-- Break & Focus Section -->
+
+        <!-- ── Focus & Break ── -->
         <div class="form-section">
-            <div class="section-title">
-                <svg viewBox="0 0 24 24" width="24" height="24" fill="var(--color-main)">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
-                </svg>
-                Focus & Break Settings
+            <div class="section-heading">
+                <span>⏸️</span>
+                <h2>Focus & Break Settings</h2>
             </div>
-            
-            <div class="break-settings">
+            <div class="focus-grid">
                 <div class="form-group">
-                    <label>⏸️ Break Frequency</label>
-                    <select name="break_reminder" class="form-control">
+                    <label>Break Every</label>
+                    <select name="break_reminder" class="fc" id="breakReminder">
                         <option value="0" {% if plan.break_reminder == 0 %}selected{% endif %}>No breaks</option>
-                        <option value="25" {% if plan.break_reminder == 25 %}selected{% endif %}>Every 25 min (Pomodoro)</option>
-                        <option value="30" {% if plan.break_reminder == 30 %}selected{% endif %}>Every 30 min</option>
-                        <option value="45" {% if plan.break_reminder == 45 %}selected{% endif %}>Every 45 min</option>
-                        <option value="60" {% if plan.break_reminder == 60 %}selected{% endif %}>Every 60 min</option>
+                        <option value="25" {% if plan.break_reminder == 25 %}selected{% endif %}>25 min (Pomodoro)</option>
+                        <option value="30" {% if plan.break_reminder == 30 %}selected{% endif %}>30 min</option>
+                        <option value="45" {% if plan.break_reminder == 45 %}selected{% endif %}>45 min</option>
+                        <option value="60" {% if plan.break_reminder == 60 %}selected{% endif %}>60 min</option>
+                        <option value="90" {% if plan.break_reminder == 90 %}selected{% endif %}>90 min</option>
                     </select>
                 </div>
-                
                 <div class="form-group">
-                    <label>☕ Break Duration</label>
-                    <select name="break_duration" class="form-control">
-                        <option value="5" {% if plan.break_duration == 5 %}selected{% endif %}>5 minutes</option>
-                        <option value="10" {% if plan.break_duration == 10 %}selected{% endif %}>10 minutes</option>
-                        <option value="15" {% if plan.break_duration == 15 %}selected{% endif %}>15 minutes</option>
-                        <option value="30" {% if plan.break_duration == 30 %}selected{% endif %}>30 minutes</option>
+                    <label>Break Duration</label>
+                    <select name="break_duration" class="fc">
+                        <option value="5" {% if plan.break_duration == 5 %}selected{% endif %}>5 min</option>
+                        <option value="10" {% if plan.break_duration == 10 %}selected{% endif %}>10 min</option>
+                        <option value="15" {% if plan.break_duration == 15 %}selected{% endif %}>15 min</option>
+                        <option value="20" {% if plan.break_duration == 20 %}selected{% endif %}>20 min</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>🎵 Ambient Sound</label>
+                    <select name="focus_music" class="fc">
+                        <option value="none">None</option>
+                        <option value="lofi">Lo-fi Beats</option>
+                        <option value="classical">Classical Piano</option>
+                        <option value="nature">Nature Sounds</option>
+                        <option value="white">White Noise</option>
+                        <option value="rain">Rain</option>
+                        <option value="cafe">Coffee Shop</option>
                     </select>
                 </div>
             </div>
-            
-            <div class="form-group" style="margin-top: 1rem;">
-                <label>🎵 Focus Music</label>
-                <select name="focus_music" class="form-control">
-                    <option value="none">No music</option>
-                    <option value="lofi">Lo-fi beats</option>
-                    <option value="classical">Classical piano</option>
-                    <option value="nature">Nature sounds</option>
-                    <option value="white">White noise</option>
-                </select>
-            </div>
         </div>
-        
-        <!-- Goals & Resources Section -->
+
+        <!-- ── Goals & Resources ── -->
         <div class="form-section">
-            <div class="section-title">
-                <svg viewBox="0 0 24 24" width="24" height="24" fill="var(--color-main)">
-                    <path d="M12 2L15 8.5L22 9.5L17 14L18.5 21L12 17.5L5.5 21L7 14L2 9.5L9 8.5L12 2z"/>
-                </svg>
-                Learning Goals & Resources
+            <div class="section-heading">
+                <span>🎯</span>
+                <h2>Goals & Resources</h2>
             </div>
-            
             <div class="form-group">
-                <label>🎯 Specific Goals</label>
-                <textarea name="goals" class="form-control" rows="3" placeholder="What do you want to achieve by the end of this session?">{{ plan.goals|default:'' }}</textarea>
+                <label>Specific Goals</label>
+                <textarea name="goals" class="fc"
+                          placeholder="What will you have mastered by the end of this session? Be specific.">{{ plan.goals|default:'' }}</textarea>
             </div>
-            
             <div class="form-group">
-                <label>📎 Resources</label>
-                <input type="text" name="resources" class="form-control" placeholder="e.g., Textbook page numbers, video links" value="{{ plan.resources|default:'' }}">
+                <label>Resources</label>
+                <input type="text" name="resources" class="fc"
+                       placeholder="Textbook pages, YouTube links, notes file..."
+                       value="{{ plan.resources|default:'' }}">
             </div>
-            
             <div class="form-group">
-                <label>📝 Notes</label>
-                <textarea name="notes" class="form-control" rows="3" placeholder="Any additional notes or thoughts">{{ plan.notes|default:'' }}</textarea>
+                <label>Pre-Session Notes</label>
+                <textarea name="notes" class="fc"
+                          placeholder="Anything you want to remember before starting...">{{ plan.notes|default:'' }}</textarea>
             </div>
         </div>
-        
-        <!-- Gamification Section -->
+
+        <!-- ── Gamification ── -->
         <div class="form-section">
-            <div class="section-title">
-                <svg viewBox="0 0 24 24" width="24" height="24" fill="var(--color-main)">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                </svg>
-                Gamification Rewards
+            <div class="section-heading">
+                <span>🏆</span>
+                <h2>Rewards on Completion</h2>
             </div>
-            
-            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; text-align: center;">
-                <div style="background: var(--color-dark-medium); padding: 1rem; border-radius: 1rem;">
-                    <span style="font-size: 2rem;">⭐</span>
-                    <p style="color: var(--color-light);">50 XP</p>
-                    <small style="color: var(--color-light-gray);">For completing</small>
+            <div class="rewards-grid">
+                <div class="reward-card">
+                    <div class="reward-icon">⭐</div>
+                    <div class="reward-val" id="xpReward">50 XP</div>
+                    <div class="reward-label">Experience Points</div>
                 </div>
-                <div style="background: var(--color-dark-medium); padding: 1rem; border-radius: 1rem;">
-                    <span style="font-size: 2rem;">🔥</span>
-                    <p style="color: var(--color-light);">Streak +1</p>
-                    <small style="color: var(--color-light-gray);">Daily consistency</small>
+                <div class="reward-card">
+                    <div class="reward-icon">🔥</div>
+                    <div class="reward-val">Streak +1</div>
+                    <div class="reward-label">Daily Consistency</div>
                 </div>
-                <div style="background: var(--color-dark-medium); padding: 1rem; border-radius: 1rem;">
-                    <span style="font-size: 2rem;">🏆</span>
-                    <p style="color: var(--color-light);">Badge</p>
-                    <small style="color: var(--color-light-gray);">On completion</small>
+                <div class="reward-card">
+                    <div class="reward-icon">🏅</div>
+                    <div class="reward-val">Badge</div>
+                    <div class="reward-label">Achievement Unlocked</div>
                 </div>
             </div>
         </div>
-        
-        <!-- OneSignal Setup Instructions -->
-        <div class="form-section" style="background: rgba(255,215,0,0.1); border-color: gold;">
-            <div class="section-title">
-                <span>📱</span>
-                Setup Real Push Notifications (OneSignal)
-            </div>
-            <ol style="color: var(--color-light); font-size: 1.4rem; line-height: 2;">
-                <li>Go to <a href="https://onesignal.com" target="_blank" style="color: var(--color-main);">OneSignal.com</a> and create free account</li>
-                <li>Create new app and get your App ID</li>
-                <li>Add this code to your base template:</li>
-            </ol>
-            <pre style="background: var(--color-dark); padding: 1rem; border-radius: 1rem; overflow-x: auto;">
-&lt;script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer&gt;&lt;/script&gt;
-&lt;script&gt;
-  window.OneSignalDeferred = window.OneSignalDeferred || [];
-  OneSignalDeferred.push(function(OneSignal) {
-    OneSignal.init({
-      appId: "YOUR_APP_ID_HERE",
-    });
-  });
-&lt;/script&gt;</pre>
+
+        <!-- Submit -->
+        <div class="form-footer">
+            <button type="submit" class="submit-btn">
+                {% if edit_mode %}✓ Update Study Plan{% else %}🚀 Create Study Plan{% endif %}
+            </button>
+            <button type="button" class="save-draft-btn" onclick="saveDraft()">💾 Save Draft</button>
         </div>
-        
-        <button type="submit" class="submit-btn">
-            <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
-                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-            </svg>
-            {% if edit_mode %}Update{% else %}Create{% endif %} Study Plan
-        </button>
     </form>
 </div>
 
 <script>
-// Set today's date as default if no date is provided
-document.addEventListener('DOMContentLoaded', function() {
-    // Get today's date in YYYY-MM-DD format
-    const today = new Date();
-    const year = today.getFullYear();
-    const month = String(today.getMonth() + 1).padStart(2, '0');
-    const day = String(today.getDate()).padStart(2, '0');
-    const todayStr = `${year}-${month}-${day}`;
-    
-    // Set default dates if empty
-    const startDateInput = document.getElementById('start_date');
-    const endDateInput = document.getElementById('end_date');
-    
-    if (!startDateInput.value) {
-        startDateInput.value = todayStr;
-    }
-    
-    if (!endDateInput.value) {
-        endDateInput.value = todayStr;
-    }
-    
-    // Check notification permission
-    checkNotificationPermission();
-    
-    // Calculate initial duration
-    calculateDuration();
-    
-    // Initial AI analysis
-    setTimeout(updateAIAnalysis, 500);
-});
+// ─── Toast ─────────────────────────────────────────────────────────────────────
+function showToast(msg, type='info', dur=4000) {
+    const c = document.getElementById('csp-toast-container');
+    const t = document.createElement('div');
+    t.className = `csp-toast ${type}`;
+    t.textContent = msg;
+    c.appendChild(t);
+    requestAnimationFrame(() => { requestAnimationFrame(() => t.classList.add('show')); });
+    setTimeout(() => { t.classList.remove('show'); setTimeout(() => t.remove(), 400); }, dur);
+}
 
-function checkNotificationPermission() {
-    const statusDiv = document.getElementById('notificationStatus');
-    const statusText = document.getElementById('notificationText');
-    
+// ─── Notification System ──────────────────────────────────────────────────────
+function updateNotifUI() {
+    const status = document.getElementById('notifStatus');
+    const text = document.getElementById('notifText');
+    const action = document.getElementById('notifAction');
     if (!('Notification' in window)) {
-        statusDiv.className = 'notification-status denied';
-        statusText.innerHTML = '❌ Notifications not supported';
+        text.textContent = '❌ Notifications not supported by this browser';
+        action.textContent = '';
         return;
     }
-    
     if (Notification.permission === 'granted') {
-        statusDiv.className = 'notification-status allowed';
-        statusText.innerHTML = '✅ Browser notifications enabled (basic)';
+        status.className = 'notif-status granted';
+        text.textContent = '✅ Notifications enabled — you will receive reminders for this plan';
+        action.textContent = '';
     } else if (Notification.permission === 'denied') {
-        statusDiv.className = 'notification-status denied';
-        statusText.innerHTML = '❌ Notifications blocked - Enable in browser settings';
+        status.className = 'notif-status denied';
+        text.textContent = '❌ Notifications blocked — enable in your browser settings';
+        action.textContent = 'How to fix →';
     } else {
-        statusDiv.className = 'notification-status';
-        statusText.innerHTML = '🔔 Click to enable basic notifications';
-        statusDiv.style.cursor = 'pointer';
-        statusDiv.onclick = requestNotificationPermission;
+        status.className = 'notif-status';
+        text.textContent = '🔔 Click to enable study reminders for this plan';
+        action.textContent = 'Enable →';
     }
 }
 
-function requestNotificationPermission() {
-    Notification.requestPermission().then(permission => {
-        checkNotificationPermission();
-        if (permission === 'granted') {
-            new Notification('StudyBud', {
-                body: 'Basic notifications enabled! For real push notifications, set up OneSignal.',
-                icon: '/static/images/logo.svg'
-            });
-        }
-    });
-}
-
-function selectPriority(element, value) {
-    document.querySelectorAll('.priority-option').forEach(opt => {
-        opt.classList.remove('selected');
-    });
-    element.classList.add('selected');
-    document.getElementById('priority-input').value = value;
-    updateAIAnalysis();
-}
-
-function selectReminder(element, value) {
-    document.querySelectorAll('.reminder-option').forEach(opt => {
-        opt.classList.remove('selected');
-    });
-    element.classList.add('selected');
-    document.getElementById('reminder-input').value = value;
-}
-
-function selectTechnique(element, value) {
-    document.querySelectorAll('.technique-card').forEach(card => {
-        card.classList.remove('selected');
-    });
-    element.classList.add('selected');
-    document.getElementById('technique-input').value = value;
-}
-
-// UPGRADED AI Functions
-function updateAIAnalysis() {
-    const title = document.getElementById('title').value;
-    const subject = document.getElementById('subject').value;
-    const description = document.getElementById('description').value;
-    const startDate = document.getElementById('start_date').value;
-    const endDate = document.getElementById('end_date').value;
-    const priority = document.getElementById('priority-input').value;
-    
-    // Show thinking animation
-    document.getElementById('aiThinking').style.display = 'inline-block';
-    
-    // Simulate AI processing (in production, this would call a real AI API)
-    setTimeout(() => {
-        generateAISuggestion(title, subject, description, startDate, endDate, priority);
-        document.getElementById('aiThinking').style.display = 'none';
-    }, 800);
-}
-
-function generateAISuggestion(title, subject, description, startDate, endDate, priority) {
-    const aiTitle = document.getElementById('aiTitle');
-    const aiDesc = document.getElementById('aiDescription');
-    const aiMeta = document.getElementById('aiMeta');
-    const aiConfidence = document.getElementById('aiConfidence');
-    
-    // Calculate duration
-    let duration = 60; // default 60 min
-    if (startDate && endDate) {
-        const start = new Date(startDate + 'T' + document.getElementById('start_time').value);
-        const end = new Date(endDate + 'T' + document.getElementById('end_time').value);
-        duration = Math.round((end - start) / (1000 * 60));
-    }
-    
-    // AI Logic based on inputs
-    let technique = 'pomodoro';
-    let focusLevel = 'High';
-    let confidence = 95;
-    let suggestion = '';
-    
-    if (subject.toLowerCase().includes('math') || subject.toLowerCase().includes('physics')) {
-        technique = 'active_recall';
-        suggestion = 'For technical subjects like ' + subject + ', Active Recall works best. Practice problems every 15 minutes.';
-        focusLevel = 'Very High';
-    } else if (subject.toLowerCase().includes('programming') || subject.toLowerCase().includes('coding')) {
-        technique = 'pomodoro';
-        suggestion = subject + ' requires focused coding sessions. Use Pomodoro with 25min sprints.';
-        focusLevel = 'High';
-    } else if (subject.toLowerCase().includes('history') || subject.toLowerCase().includes('biology')) {
-        technique = 'spaced_repetition';
-        suggestion = 'For ' + subject + ', spaced repetition helps with memorization. Review key concepts at intervals.';
-        focusLevel = 'Medium';
-    } else if (description.toLowerCase().includes('teach') || description.toLowerCase().includes('explain')) {
-        technique = 'feynman';
-        suggestion = 'Perfect for Feynman Technique! Try explaining concepts in simple terms.';
-        focusLevel = 'High';
-    }
-    
-    // Adjust based on duration
-    if (duration > 120) {
-        suggestion += ' This is a long session. Take 15min breaks every hour to maintain focus.';
-        confidence -= 5;
-    } else if (duration < 30) {
-        suggestion += ' Short but effective! Maximize focus with no distractions.';
-        confidence += 3;
-    }
-    
-    // Adjust based on priority
-    if (priority == 1) {
-        suggestion += ' High priority! Start with the most challenging topics first.';
-        confidence += 2;
-    }
-    
-    // Update UI
-    aiTitle.innerHTML = `🎯 AI Analysis for ${subject || 'your study'}`;
-    aiDesc.innerHTML = suggestion || 'Based on your inputs, I recommend the Pomodoro technique with 25min focused sessions.';
-    
-    aiMeta.innerHTML = `
-        <span class="ai-meta-item">⏱️ Duration: ${duration} min</span>
-        <span class="ai-meta-item">📊 Focus: ${focusLevel}</span>
-        <span class="ai-meta-item">🎯 Technique: ${technique.replace('_', ' ')}</span>
-    `;
-    
-    let confidenceClass = 'confidence-high';
-    if (confidence < 70) confidenceClass = 'confidence-low';
-    else if (confidence < 85) confidenceClass = 'confidence-medium';
-    
-    aiConfidence.className = `ai-confidence ${confidenceClass}`;
-    aiConfidence.innerHTML = confidence > 90 ? '🔥 ' : '📊 ';
-    aiConfidence.innerHTML += `${confidence}% match with your learning style`;
-    
-    // Auto-select the recommended technique
-    const techniqueCards = document.querySelectorAll('.technique-card');
-    techniqueCards.forEach(card => {
-        if (card.querySelector('.technique-name').textContent.toLowerCase().includes(technique.replace('_', ' '))) {
-            card.click();
-        }
-    });
-}
-
-function refreshAISuggestion() {
-    updateAIAnalysis();
-}
-
-function applyAISuggestion() {
-    // Get current AI recommendation and apply all settings
-    const aiMeta = document.getElementById('aiMeta').innerText;
-    
-    // Extract technique from AI meta
-    if (aiMeta.includes('Pomodoro')) {
-        selectTechnique(document.querySelector('[data-technique="pomodoro"]'), 'pomodoro');
-        document.querySelector('select[name="break_reminder"]').value = '25';
-        document.querySelector('select[name="break_duration"]').value = '5';
-    } else if (aiMeta.includes('Active Recall')) {
-        selectTechnique(document.querySelector('[data-technique="active_recall"]'), 'active_recall');
-    } else if (aiMeta.includes('Spaced Repetition')) {
-        selectTechnique(document.querySelector('[data-technique="spaced_repetition"]'), 'spaced_repetition');
-    } else if (aiMeta.includes('Feynman')) {
-        selectTechnique(document.querySelector('[data-technique="feynman"]'), 'feynman');
-    }
-    
-    // Set priority based on confidence
-    const confidenceText = document.getElementById('aiConfidence').innerText;
-    if (confidenceText.includes('95') || confidenceText.includes('High')) {
-        selectPriority(document.querySelector('[data-priority="high"]'), 1);
-    } else if (confidenceText.includes('Medium')) {
-        selectPriority(document.querySelector('[data-priority="medium"]'), 2);
-    }
-    
-    // Show success message
-    const notification = new Notification('AI Assistant', {
-        body: '✅ AI suggestions applied to your study plan!',
-        icon: '/static/images/logo.svg'
-    });
-}
-
-function selectAIOption(option) {
-    const aiDesc = document.getElementById('aiDescription');
-    const aiMeta = document.getElementById('aiMeta');
-    
-    if (option === 1) {
-        aiDesc.innerHTML = 'Deep Focus Session: 90 minutes of uninterrupted study with strategic 15-minute breaks. Best for complex topics like mathematics or programming.';
-        aiMeta.innerHTML = `
-            <span class="ai-meta-item">⏱️ Duration: 90 min</span>
-            <span class="ai-meta-item">📊 Focus: Maximum</span>
-            <span class="ai-meta-item">🎯 Breaks: 15 min</span>
-        `;
-        document.querySelector('select[name="break_reminder"]').value = '90';
-        document.querySelector('select[name="break_duration"]').value = '15';
-    } else if (option === 2) {
-        aiDesc.innerHTML = 'Quick Revision: 25-minute sprints perfect for reviewing material before exams. High intensity, short duration.';
-        aiMeta.innerHTML = `
-            <span class="ai-meta-item">⏱️ Duration: 25 min</span>
-            <span class="ai-meta-item">📊 Focus: High</span>
-            <span class="ai-meta-item">🎯 Technique: Sprint</span>
-        `;
-        selectTechnique(document.querySelector('[data-technique="pomodoro"]'), 'pomodoro');
-    } else if (option === 3) {
-        aiDesc.innerHTML = 'Active Learning: Incorporate quizzes and self-testing every 15 minutes. Best for memorization-based subjects.';
-        aiMeta.innerHTML = `
-            <span class="ai-meta-item">⏱️ Duration: 45 min</span>
-            <span class="ai-meta-item">📊 Focus: Active</span>
-            <span class="ai-meta-item">🎯 Tests: Every 15 min</span>
-        `;
-        selectTechnique(document.querySelector('[data-technique="active_recall"]'), 'active_recall');
-    }
-}
-
-// Calculate duration in 24-hour format
-function calculateDuration() {
-    const startDate = document.getElementById('start_date').value;
-    const startTime = document.getElementById('start_time').value;
-    const endDate = document.getElementById('end_date').value;
-    const endTime = document.getElementById('end_time').value;
-    
-    if (startDate && startTime && endDate && endTime) {
-        const start = new Date(`${startDate}T${startTime}`);
-        const end = new Date(`${endDate}T${endTime}`);
-        const diffMs = end - start;
-        const diffHours = diffMs / (1000 * 60 * 60);
-        
-        if (diffHours > 0) {
-            const display = document.getElementById('durationDisplay');
-            if (diffHours < 1) {
-                display.textContent = Math.round(diffHours * 60) + ' minutes';
-            } else if (diffHours === 1) {
-                display.textContent = '1 hour';
-            } else {
-                display.textContent = diffHours.toFixed(1) + ' hours';
-            }
-        } else {
-            document.getElementById('durationDisplay').textContent = 'Invalid duration';
-        }
-    }
-}
-
-// Add event listeners for duration calculation
-document.getElementById('start_date').addEventListener('change', calculateDuration);
-document.getElementById('start_time').addEventListener('change', calculateDuration);
-document.getElementById('end_date').addEventListener('change', calculateDuration);
-document.getElementById('end_time').addEventListener('change', calculateDuration);
-
-// Form validation
-document.getElementById('studyPlanForm').addEventListener('submit', function(e) {
-    const startDate = document.getElementById('start_date').value;
-    const endDate = document.getElementById('end_date').value;
-    const startTime = document.getElementById('start_time').value;
-    const endTime = document.getElementById('end_time').value;
-    
-    const start = new Date(`${startDate}T${startTime}`);
-    const end = new Date(`${endDate}T${endTime}`);
-    
-    if (end <= start) {
-        e.preventDefault();
-        alert('❌ End time must be after start time!');
+function handleNotifClick() {
+    if (Notification.permission === 'granted') return;
+    if (Notification.permission === 'denied') {
+        showToast('Go to browser Settings → Privacy → Notifications to allow StudyBud', 'warning', 6000);
         return;
     }
-    
-    // Show notification permission reminder if not granted
-    if ('Notification' in window && Notification.permission !== 'granted') {
-        const confirmSubmit = confirm('Notifications are not enabled. You won\'t receive reminders. Continue anyway?');
-        if (!confirmSubmit) {
-            e.preventDefault();
-            requestNotificationPermission();
+    Notification.requestPermission().then(p => {
+        updateNotifUI();
+        if (p === 'granted') {
+            showToast('✅ Notifications enabled! You will get study reminders.', 'success');
+            sendNotif('StudyBud Ready 🎓', 'You will now receive smart study reminders!');
+        }
+    });
+}
+
+function sendNotif(title, body) {
+    if (Notification.permission !== 'granted') return;
+    new Notification(title, { body, icon: '/static/images/logo.svg' });
+}
+
+// ─── Duration Calculator ──────────────────────────────────────────────────────
+function recalcDuration() {
+    const sd = document.getElementById('startDate').value;
+    const st = document.getElementById('startTime').value;
+    const ed = document.getElementById('endDate').value;
+    const et = document.getElementById('endTime').value;
+
+    const display = document.getElementById('durationDisplay');
+    const valEl = document.getElementById('durVal');
+    const labelEl = document.getElementById('durLabel');
+
+    if (!sd || !st || !ed || !et) {
+        valEl.textContent = '—';
+        labelEl.textContent = 'select dates above';
+        display.classList.remove('invalid');
+        updateXP(0);
+        return;
+    }
+
+    const start = new Date(`${sd}T${st}`);
+    const end = new Date(`${ed}T${et}`);
+    const diffMs = end - start;
+
+    if (diffMs <= 0) {
+        valEl.textContent = '⚠ Invalid';
+        labelEl.textContent = 'end must be after start';
+        display.classList.add('invalid');
+        updateXP(0);
+        return;
+    }
+
+    display.classList.remove('invalid');
+    const totalMin = Math.round(diffMs / 60000);
+    const h = Math.floor(totalMin / 60);
+    const m = totalMin % 60;
+
+    if (h === 0) {
+        valEl.textContent = `${m} min`;
+        labelEl.textContent = 'duration';
+    } else if (m === 0) {
+        valEl.textContent = `${h} hr`;
+        labelEl.textContent = 'duration';
+    } else {
+        valEl.textContent = `${h}h ${m}m`;
+        labelEl.textContent = 'duration';
+    }
+
+    updateXP(totalMin);
+}
+
+function updateXP(totalMin) {
+    const base = 50;
+    const bonus = Math.min(200, Math.floor(totalMin / 10) * 5);
+    const xp = base + bonus;
+    const el = document.getElementById('xpReward');
+    if (el) el.textContent = xp + ' XP';
+}
+
+// ─── Priority ─────────────────────────────────────────────────────────────────
+function setPriority(el) {
+    document.querySelectorAll('.priority-opt').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('priorityInput').value = el.dataset.val;
+}
+
+// ─── Reminder ─────────────────────────────────────────────────────────────────
+function setReminder(el, val) {
+    document.querySelectorAll('.reminder-opt').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+
+    const customWrap = document.getElementById('customReminderWrap');
+    if (val === -1) {
+        customWrap.style.display = 'block';
+    } else {
+        customWrap.style.display = 'none';
+        document.getElementById('reminderInput').value = val;
+    }
+}
+
+// ─── Technique ────────────────────────────────────────────────────────────────
+function setTechnique(el, val) {
+    document.querySelectorAll('.technique-opt').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('techniqueInput').value = val;
+
+    // Auto-set break frequency
+    const breakSel = document.getElementById('breakReminder');
+    const presets = { pomodoro: '25', active_recall: '15', spaced_repetition: '45', feynman: '30' };
+    if (breakSel && presets[val]) breakSel.value = presets[val];
+}
+
+// ─── Recurrence ───────────────────────────────────────────────────────────────
+function setRecur(el, val) {
+    document.querySelectorAll('.recur-opt').forEach(o => o.classList.remove('selected'));
+    el.classList.add('selected');
+    document.getElementById('recurrenceInput').value = val;
+}
+
+// ─── Tags ─────────────────────────────────────────────────────────────────────
+let tags = [];
+
+{% if plan.tags %}
+tags = '{{ plan.tags }}'.split(',').filter(Boolean);
+{% endif %}
+
+function renderTags() {
+    const wrap = document.getElementById('tagsContainer');
+    wrap.innerHTML = '';
+    tags.forEach((tag, i) => {
+        const chip = document.createElement('div');
+        chip.className = 'tag-chip';
+        chip.innerHTML = `${tag} <button type="button" class="tag-remove" onclick="removeTag(${i})">✕</button>`;
+        wrap.appendChild(chip);
+    });
+    document.getElementById('tagsHidden').value = tags.join(',');
+}
+
+function handleTagInput(e) {
+    if (e.key === 'Enter' || e.key === ',') {
+        e.preventDefault();
+        const val = document.getElementById('tagInput').value.trim().replace(/,$/, '');
+        if (val && !tags.includes(val) && tags.length < 8) {
+            tags.push(val);
+            renderTags();
+            document.getElementById('tagInput').value = '';
         }
     }
+}
+
+function removeTag(i) {
+    tags.splice(i, 1);
+    renderTags();
+}
+
+// ─── Presets ──────────────────────────────────────────────────────────────────
+function applyPreset(type) {
+    document.querySelectorAll('.ai-quick-opt').forEach(o => o.classList.remove('selected'));
+    event.currentTarget.classList.add('selected');
+
+    const now = new Date();
+    const today = now.toISOString().split('T')[0];
+    const startHour = String(now.getHours() + 1).padStart(2,'0') + ':00';
+
+    document.getElementById('startDate').value = today;
+    document.getElementById('endDate').value = today;
+    document.getElementById('startTime').value = startHour;
+
+    if (type === 'deep') {
+        const endH = String(now.getHours() + 2).padStart(2,'0') + ':30';
+        document.getElementById('endTime').value = endH;
+        setTechnique(document.querySelector('[onclick*="pomodoro"]'), 'pomodoro');
+        document.getElementById('breakReminder').value = '45';
+        showToast('Deep Focus preset applied — 90 min session', 'success');
+    } else if (type === 'sprint') {
+        const endH = String(now.getHours() + 1).padStart(2,'0') + ':25';
+        document.getElementById('endTime').value = endH;
+        setTechnique(document.querySelector('[onclick*="pomodoro"]'), 'pomodoro');
+        document.getElementById('breakReminder').value = '25';
+        showToast('Quick Sprint preset applied — 25 min session', 'success');
+    } else if (type === 'active') {
+        const endH = String(now.getHours() + 1).padStart(2,'0') + ':45';
+        document.getElementById('endTime').value = endH;
+        setTechnique(document.querySelector('[onclick*="active_recall"]'), 'active_recall');
+        showToast('Active Recall preset applied — 45 min session', 'success');
+    }
+    recalcDuration();
+}
+
+// ─── AI Analysis ──────────────────────────────────────────────────────────────
+let aiDebounceTimer = null;
+
+function debouncedAI() {
+    clearTimeout(aiDebounceTimer);
+    aiDebounceTimer = setTimeout(runAIAnalysis, 700);
+}
+
+function refreshAI() {
+    clearTimeout(aiDebounceTimer);
+    runAIAnalysis();
+}
+
+function runAIAnalysis() {
+    const title = document.getElementById('title').value.trim();
+    const subject = document.getElementById('subject').value.trim();
+    const desc = document.getElementById('description').value.trim();
+
+    if (!title && !subject) return;
+
+    document.getElementById('aiSpin').classList.add('active');
+
+    setTimeout(() => {
+        document.getElementById('aiSpin').classList.remove('active');
+        generateAIOutput(title, subject, desc);
+    }, 600);
+}
+
+function generateAIOutput(title, subject, desc) {
+    const s = subject.toLowerCase();
+    let technique = 'pomodoro', confidence = 78, tip = '', tags = [];
+
+    if (s.includes('math') || s.includes('physics') || s.includes('calculus') || s.includes('statistics')) {
+        technique = 'active_recall';
+        confidence = 93;
+        tip = `${subject} requires strong problem-solving practice. Use Active Recall — attempt problems from memory before checking solutions. Take 5-min breaks every 25 min to let concepts consolidate.`;
+        tags = ['⏱ 45 min sessions', '🔢 Problem-first approach', '📊 High focus required'];
+    } else if (s.includes('program') || s.includes('code') || s.includes('python') || s.includes('javascript') || s.includes('computer')) {
+        technique = 'pomodoro';
+        confidence = 89;
+        tip = `For ${subject}, deep coding sessions work best. Use Pomodoro to avoid mental fatigue. Build something small each session — practice > theory. Write code by hand for memory retention.`;
+        tags = ['💻 Build projects', '🍅 Pomodoro timing', '⚡ Hands-on practice'];
+    } else if (s.includes('history') || s.includes('geography') || s.includes('civics')) {
+        technique = 'spaced_repetition';
+        confidence = 87;
+        tip = `${subject} benefits enormously from spaced repetition. Review timelines and events at increasing intervals: 1 day, 3 days, 1 week. Use mind maps to connect events visually.`;
+        tags = ['🗺 Mind mapping', '🔄 Spaced reviews', '📖 Narrative learning'];
+    } else if (s.includes('bio') || s.includes('chem') || s.includes('anatomy')) {
+        technique = 'feynman';
+        confidence = 85;
+        tip = `For ${subject}, the Feynman Technique is powerful — explain each concept as if teaching a 10-year-old. Diagrams are critical. Use flashcards for terminology.`;
+        tags = ['📝 Feynman method', '🖼 Diagrams essential', '🃏 Flashcards for terms'];
+    } else if (s.includes('lang') || s.includes('english') || s.includes('hindi') || s.includes('essay')) {
+        technique = 'active_recall';
+        confidence = 82;
+        tip = `Language learning requires active production. Read + summarize without looking at the text. Write short essays from memory, then compare. Vocabulary spaced repetition is highly effective.`;
+        tags = ['✍ Active writing', '🗣 Speak aloud', '🔁 Vocabulary recall'];
+    } else if (desc.toLowerCase().includes('exam') || desc.toLowerCase().includes('test') || title.toLowerCase().includes('revision')) {
+        technique = 'active_recall';
+        confidence = 91;
+        tip = `Exam prep sessions call for Active Recall — close notes and attempt past questions cold. Simulate exam conditions with a timer. Identify weak spots and revisit them last.`;
+        tags = ['⏰ Timed practice', '📋 Past papers', '🎯 Weak spot focus'];
+    } else {
+        technique = 'pomodoro';
+        confidence = 75;
+        tip = `Based on your session details, Pomodoro timing will maintain your focus throughout. Break your content into clear sub-goals for each 25-min sprint.`;
+        tags = ['🍅 Pomodoro', '📝 Sub-goals', '⏱ 25 min focus'];
+    }
+
+    // Apply to UI
+    document.getElementById('aiResultTitle').textContent = `🎯 Recommendation for ${subject || title}`;
+    document.getElementById('aiResultDesc').textContent = tip;
+
+    const tagsEl = document.getElementById('aiTags');
+    tagsEl.innerHTML = tags.map(t => `<span class="ai-tag">${t}</span>`).join('');
+
+    document.getElementById('aiConfidenceFill').style.width = confidence + '%';
+    document.getElementById('aiConfidenceLabel').textContent = `${confidence}% confidence match with your study profile`;
+
+    // Auto-select technique
+    const techEls = document.querySelectorAll('.technique-opt');
+    techEls.forEach(el => {
+        if (el.getAttribute('onclick') && el.getAttribute('onclick').includes(technique)) {
+            el.classList.add('selected');
+            document.getElementById('techniqueInput').value = technique;
+        } else {
+            el.classList.remove('selected');
+        }
+    });
+}
+
+function applyAI() {
+    const technique = document.getElementById('techniqueInput').value;
+    const presets = { pomodoro: '25', active_recall: '25', spaced_repetition: '45', feynman: '30' };
+    if (presets[technique]) document.getElementById('breakReminder').value = presets[technique];
+    showToast('✅ AI suggestions applied to your plan!', 'success');
+}
+
+// ─── Draft Save ───────────────────────────────────────────────────────────────
+function saveDraft() {
+    const draft = {
+        title: document.getElementById('title').value,
+        subject: document.getElementById('subject').value,
+        description: document.getElementById('description').value,
+        priority: document.getElementById('priorityInput').value,
+        technique: document.getElementById('techniqueInput').value,
+        startDate: document.getElementById('startDate').value,
+        startTime: document.getElementById('startTime').value,
+        endDate: document.getElementById('endDate').value,
+        endTime: document.getElementById('endTime').value,
+    };
+    sessionStorage.setItem('studyPlanDraft', JSON.stringify(draft));
+    showToast('💾 Draft saved locally!', 'success');
+}
+
+function loadDraft() {
+    const draft = sessionStorage.getItem('studyPlanDraft');
+    if (!draft) return;
+    try {
+        const d = JSON.parse(draft);
+        if (d.title && !document.getElementById('title').value) {
+            Object.keys(d).forEach(k => {
+                const el = document.getElementById(k) || document.getElementById(k + 'Input');
+                if (el) el.value = d[k];
+            });
+            showToast('Draft restored from last session', 'info');
+        }
+    } catch(e) {}
+}
+
+// ─── Form Validation ──────────────────────────────────────────────────────────
+function validateForm(e) {
+    let valid = true;
+
+    // Clear errors
+    document.querySelectorAll('.field-error').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.fc').forEach(el => el.classList.remove('has-error'));
+
+    const required = [
+        { id: 'title', errId: 'titleError', msg: 'Please enter a title.' },
+        { id: 'subject', errId: 'subjectError', msg: 'Please enter a subject.' },
+        { id: 'startDate', errId: 'startDateError', msg: 'Please select a start date.' },
+        { id: 'startTime', errId: 'startTimeError', msg: 'Please select a start time.' },
+        { id: 'endDate', errId: 'endDateError', msg: 'Please select an end date.' },
+        { id: 'endTime', errId: 'endTimeError', msg: 'Please select an end time.' },
+    ];
+
+    required.forEach(({ id, errId, msg }) => {
+        const el = document.getElementById(id);
+        const err = document.getElementById(errId);
+        if (!el.value.trim()) {
+            el.classList.add('has-error');
+            if (err) { err.textContent = msg; err.style.display = 'block'; }
+            valid = false;
+        }
+    });
+
+    // Date/time logic check
+    const sd = document.getElementById('startDate').value;
+    const st = document.getElementById('startTime').value;
+    const ed = document.getElementById('endDate').value;
+    const et = document.getElementById('endTime').value;
+
+    if (sd && st && ed && et) {
+        const start = new Date(`${sd}T${st}`);
+        const end = new Date(`${ed}T${et}`);
+
+        if (end <= start) {
+            document.getElementById('endTime').classList.add('has-error');
+            const err = document.getElementById('endTimeError');
+            if (err) { err.textContent = 'End time must be after start time.'; err.style.display = 'block'; }
+            valid = false;
+        }
+    }
+
+    if (!valid && e) {
+        e.preventDefault();
+        showToast('⚠ Please fix the errors above before saving.', 'error');
+        // Scroll to first error
+        const firstErr = document.querySelector('.has-error');
+        if (firstErr) firstErr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    return valid;
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+    updateNotifUI();
+    recalcDuration();
+
+    // Set default dates if empty
+    const today = new Date().toISOString().split('T')[0];
+    const startD = document.getElementById('startDate');
+    const endD = document.getElementById('endDate');
+    if (!startD.value) startD.value = today;
+    if (!endD.value) endD.value = today;
+
+    // Default time: next round hour
+    const now = new Date();
+    const nextHour = new Date(now);
+    nextHour.setHours(now.getHours() + 1, 0, 0, 0);
+    const endHour = new Date(now);
+    endHour.setHours(now.getHours() + 2, 0, 0, 0);
+
+    const pad = n => String(n).padStart(2,'0');
+    const startT = document.getElementById('startTime');
+    const endT = document.getElementById('endTime');
+    if (!startT.value || startT.value === '00:00') {
+        startT.value = `${pad(nextHour.getHours())}:${pad(nextHour.getMinutes())}`;
+    }
+    if (!endT.value || endT.value === '00:00') {
+        endT.value = `${pad(endHour.getHours())}:${pad(endHour.getMinutes())}`;
+    }
+
+    recalcDuration();
+    renderTags();
+
+    // Pre-select reminder based on plan value
+    const reminderVal = '{{ plan.reminder|default:60 }}';
+    document.querySelectorAll('.reminder-opt').forEach(opt => {
+        const onclick = opt.getAttribute('onclick');
+        if (onclick && onclick.includes(`,${reminderVal})`)) {
+            opt.classList.add('selected');
+        }
+    });
+
+    // Load draft if no edit mode
+    {% if not edit_mode %}
+    loadDraft();
+    {% endif %}
+
+    // Run initial AI if editing
+    {% if edit_mode %}
+    debouncedAI();
+    {% endif %}
 });
 
-// Initial calculation
-calculateDuration();
+document.getElementById('studyPlanForm').addEventListener('submit', function(e) {
+    if (!validateForm(e)) return;
+
+    // Schedule a test notification on save
+    const reminderMin = parseInt(document.getElementById('reminderInput').value);
+    const title = document.getElementById('title').value;
+    const startD = document.getElementById('startDate').value;
+    const startT = document.getElementById('startTime').value;
+
+    if (Notification.permission === 'granted' && reminderMin > 0 && startD && startT) {
+        const startTime = new Date(`${startD}T${startT}`);
+        const reminderTime = new Date(startTime.getTime() - reminderMin * 60000);
+        const now = new Date();
+        const delay = reminderTime - now;
+
+        if (delay > 0) {
+            setTimeout(() => {
+                sendNotif(`⏰ Study Reminder: ${title}`, `Starting in ${reminderMin} minutes!`);
+            }, delay);
+        }
+    }
+
+    // Clear draft on successful save
+    sessionStorage.removeItem('studyPlanDraft');
+});
 </script>
 
 {% endblock %}
