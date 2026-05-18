@@ -45,6 +45,7 @@
         overflow: hidden;
     }
 
+    /* Main Layout */
     .chat-shell {
         display: flex;
         height: 100vh;
@@ -89,6 +90,7 @@
         color: var(--text-muted);
     }
 
+    /* Participant Card */
     .participant-card {
         margin: 20px;
         padding: 20px;
@@ -153,6 +155,7 @@
         margin-top: 4px;
     }
 
+    /* Pinned Section */
     .pinned-section {
         margin: 0 20px 20px;
         background: var(--bg-elevated);
@@ -214,6 +217,7 @@
         text-overflow: ellipsis;
     }
 
+    /* Sidebar Actions */
     .sidebar-actions {
         margin: 0 20px;
         display: flex;
@@ -248,6 +252,7 @@
         transform: translateX(4px);
     }
 
+    /* Main Chat Area */
     .chat-main {
         flex: 1;
         display: flex;
@@ -257,6 +262,7 @@
         position: relative;
     }
 
+    /* Chat Header */
     .chat-header {
         padding: 16px 24px;
         background: var(--bg-surface);
@@ -353,6 +359,7 @@
         transform: scale(1.05);
     }
 
+    /* Messages Area */
     .messages-area {
         flex: 1;
         overflow-y: auto;
@@ -367,6 +374,7 @@
     .messages-area::-webkit-scrollbar-track { background: transparent; }
     .messages-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
+    /* Date Separator */
     .date-separator {
         display: flex;
         align-items: center;
@@ -389,6 +397,7 @@
         letter-spacing: 1px;
     }
 
+    /* Message Wrapper */
     .msg-wrap {
         display: flex;
         flex-direction: column;
@@ -412,6 +421,7 @@
         padding: 0 8px;
     }
 
+    /* Reply Strip */
     .msg-reply-strip {
         background: rgba(91, 141, 238, 0.08);
         border-left: 3px solid var(--accent);
@@ -429,6 +439,7 @@
         padding-left: 16px;
     }
 
+    /* Message Bubble */
     .msg-bubble {
         padding: 10px 16px;
         border-radius: var(--radius-bubble);
@@ -453,6 +464,7 @@
         border-bottom-left-radius: 4px;
     }
 
+    /* Message Actions - Desktop Hover */
     .msg-actions {
         position: absolute;
         top: 50%;
@@ -478,6 +490,7 @@
         pointer-events: all;
     }
 
+    /* Mobile selection mode */
     .msg-wrap.selected {
         background: var(--accent-soft);
         border-radius: var(--radius-md);
@@ -525,6 +538,7 @@
         fill: var(--red);
     }
 
+    /* Message Time */
     .msg-time {
         font-size: 10px;
         opacity: 0.6;
@@ -543,6 +557,7 @@
 
     .read-tick.read { color: var(--accent); opacity: 1; }
 
+    /* Reactions */
     .msg-reactions {
         display: flex;
         flex-wrap: wrap;
@@ -580,12 +595,14 @@
         font-weight: 600;
     }
 
+    /* Deleted Message */
     .msg-deleted {
         font-style: italic;
         color: var(--text-muted);
         font-size: 12px;
     }
 
+    /* Media Messages */
     .msg-image {
         border-radius: 12px;
         overflow: hidden;
@@ -626,6 +643,7 @@
         fill: var(--accent);
     }
 
+    /* Typing Indicator */
     .typing-bar {
         padding: 12px 24px;
         display: none;
@@ -671,6 +689,7 @@
         30% { transform: translateY(-6px); opacity: 1; }
     }
 
+    /* Input Area */
     .input-zone {
         padding: 20px 24px;
         background: var(--bg-surface);
@@ -678,6 +697,7 @@
         flex-shrink: 0;
     }
 
+    /* Reply Banner */
     .reply-banner {
         display: none;
         align-items: center;
@@ -722,6 +742,7 @@
 
     .reply-close:hover { color: var(--red); }
 
+    /* Input Row */
     .input-row {
         display: flex;
         align-items: flex-end;
@@ -832,6 +853,7 @@
         box-shadow: 0 6px 20px rgba(91, 141, 238, 0.6);
     }
 
+    /* Modals */
     .modal-overlay {
         display: none;
         position: fixed;
@@ -902,6 +924,7 @@
         color: var(--accent);
     }
 
+    /* Reaction Picker */
     .reaction-grid {
         display: grid;
         grid-template-columns: repeat(6, 1fr);
@@ -923,6 +946,7 @@
         transform: scale(1.2);
     }
 
+    /* Theme Grid */
     .theme-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -956,6 +980,7 @@
         background: var(--bg-elevated);
     }
 
+    /* Context Menu */
     .context-menu {
         position: fixed;
         background: var(--bg-surface);
@@ -1007,6 +1032,7 @@
         margin: 4px 0;
     }
 
+    /* File Preview */
     .file-modal-img {
         max-width: 100%;
         max-height: 65vh;
@@ -1014,6 +1040,7 @@
         border-radius: var(--radius-md);
     }
 
+    /* Toast Container (Fixed) */
     .toast-container {
         position: fixed;
         bottom: 24px;
@@ -1046,6 +1073,7 @@
         to { opacity: 1; transform: translateX(0); }
     }
 
+    /* Mobile Responsive */
     @media (max-width: 768px) {
         .chat-sidebar { display: none; }
         .msg-wrap { max-width: 85%; }
@@ -1144,7 +1172,7 @@
             </div>
         </div>
 
-        <!-- Messages Area -->
+        <!-- Messages -->
         <div class="messages-area" id="messagesArea">
             {% for message in messages %}
             <div class="msg-wrap {% if message.sender == request.user %}own{% else %}other{% endif %}"
@@ -1187,7 +1215,7 @@
                         <button class="msg-action-btn" onclick="showReactionPicker('{{ message.id }}')" title="React">
                             <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/></svg>
                         </button>
-                        <button class="msg-action-btn" onclick="forwardMessage('{{ message.id }}', `{{ message.content|escapejs }}`)" title="Forward">
+                        <button class="msg-action-btn" onclick="forwardMessage('{{ message.id }}', '{{ message.content|escapejs }}')" title="Forward">
                             <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
                         </button>
                         {% if not message.is_pinned %}
@@ -1260,7 +1288,7 @@
     </div>
 </div>
 
-<!-- Toast Container -->
+<!-- Toast Container (Fixed - No more annoying notifications) -->
 <div class="toast-container" id="toastContainer"></div>
 
 <!-- Modals -->
@@ -1341,7 +1369,7 @@ let activeReactionMsgId = null;
 let forwardMessageData = null;
 let selectedMessageId = null;
 
-// Toast function - Only shows important notifications (no more annoying "info" toasts for every message)
+// Toast function (Fixed - Only shows important notifications)
 function showToast(message, type = 'info') {
     const container = document.getElementById('toastContainer');
     const toast = document.createElement('div');
@@ -1360,50 +1388,88 @@ const chatId = "{{ chat.id }}";
 const protocol = location.protocol === 'https:' ? 'wss://' : 'ws://';
 const socket = new WebSocket(protocol + location.host + '/ws/chat/' + chatId + '/');
 
-socket.onopen = () => {
-    console.log('WebSocket connected');
-    socket.send(JSON.stringify({ type: 'get_online_users' }));
-};
+socket.onopen = () => console.log('WebSocket connected');
 socket.onerror = (error) => console.error('WebSocket error:', error);
 
 socket.onmessage = (e) => {
     const data = JSON.parse(e.data);
     switch (data.type) {
-        case 'new_message': 
-            addNewMessage(data);
-            break;
-        case 'user_online': 
-            updateOnlineStatus(data.user_id, true);
-            break;
-        case 'user_offline': 
-            updateOnlineStatus(data.user_id, false);
-            break;
-        case 'typing': 
-            handleTyping(data);
-            break;
-        case 'message_reaction': 
-            updateReaction(data);
-            break;
-        case 'message_pinned': 
-            showToast('📌 Message pinned', 'success');
-            break;
-        case 'message_unpinned': 
-            showToast('📌 Message unpinned', 'success');
-            break;
-        case 'message_deleted': 
-            handleDeleteMessage(data);
-            break;
-        case 'message_read': 
-            updateReadStatus(data);
-            break;
-        case 'message_forwarded':
-            showToast('Message forwarded successfully!', 'success');
-            break;
-        default: 
-            break;
+        case 'new_message': addNewMessage(data); break;
+        case 'user_online': updateOnlineStatus(data.user_id, true); break;
+        case 'user_offline': updateOnlineStatus(data.user_id, false); break;
+        case 'typing': handleTyping(data); break;
+        case 'message_reaction': updateReaction(data); break;
+        case 'message_pinned': showToast('📌 Message pinned', 'success'); break;
+        case 'message_deleted': handleDeleteMessage(data); break;
+        case 'message_read': updateReadStatus(data); break;
+        default: break;
     }
 };
 
+// Send message
+function sendMessage() {
+    const content = document.getElementById('messageInput').value.trim();
+    if (!content) return;
+    
+    socket.send(JSON.stringify({
+        type: 'message',
+        content: content,
+        parent_id: replyingTo ? replyingTo.id : null
+    }));
+    
+    document.getElementById('messageInput').value = '';
+    document.getElementById('messageInput').style.height = 'auto';
+    cancelReply();
+}
+
+// Add new message
+function addNewMessage(data) {
+    const area = document.getElementById('messagesArea');
+    const isOwn = data.sender_id === parseInt("{{ request.user.id }}");
+    
+    let contentHtml = '';
+    if (data.message_type === 'image') {
+        contentHtml = `<div class="msg-image" onclick="openFileModal('${data.file_url}')">
+            <img src="${data.file_url}" alt="${data.file_name}">
+        </div>`;
+    } else if (data.message_type === 'file') {
+        contentHtml = `<div class="msg-file" onclick="window.open('${data.file_url}','_blank')">
+            <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6z"/></svg>
+            <span>${data.file_name}</span>
+        </div>`;
+    } else {
+        contentHtml = escapeHtml(data.content);
+    }
+    
+    const messageHtml = `
+        <div class="msg-wrap ${isOwn ? 'own' : 'other'}" id="message-${data.message_id}" data-message-id="${data.message_id}" data-sender="${data.sender_username}" data-content="${escapeHtml(data.content || '').replace(/'/g, "\\'")}">
+            ${!isOwn ? `<div class="msg-sender-label">${escapeHtml(data.sender_username)}</div>` : ''}
+            ${data.parent_id ? `<div class="msg-reply-strip" onclick="scrollToMessage('${data.parent_id}')"><strong>↪ Reply</strong></div>` : ''}
+            <div class="msg-bubble">
+                ${contentHtml}
+                <div class="msg-actions">
+                    <button class="msg-action-btn" onclick="replyToMessage('${data.message_id}', '${data.sender_username}', \`${escapeHtml(data.content || '').replace(/`/g, '\\`')}\`)"><svg viewBox="0 0 24 24"><path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/></svg></button>
+                    <button class="msg-action-btn" onclick="showReactionPicker('${data.message_id}')"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/></svg></button>
+                    <button class="msg-action-btn" onclick="forwardMessage('${data.message_id}', \`${escapeHtml(data.content || '').replace(/`/g, '\\`')}\`)"><svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg></button>
+                    ${!data.is_pinned ? `<button class="msg-action-btn" onclick="pinMessage('${data.message_id}')"><svg viewBox="0 0 24 24"><path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5v6h2v-6h5v-2l-2-2z"/></svg></button>` : ''}
+                    ${isOwn ? `<button class="msg-action-btn danger" onclick="deleteMessage('${data.message_id}', 'everyone')"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg></button>` : ''}
+                </div>
+            </div>
+            <div class="msg-time">${new Date(data.created).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}${isOwn ? '<span class="read-tick">✓✓</span>' : ''}</div>
+            <div class="msg-reactions" id="reactions-${data.message_id}"></div>
+        </div>
+    `;
+    
+    area.insertAdjacentHTML('beforeend', messageHtml);
+    area.scrollTop = area.scrollHeight;
+    
+    // Mark as read
+    if (!isOwn) {
+        socket.send(JSON.stringify({ type: 'read', message_id: data.message_id }));
+    }
+}
+
+// Helper Functions
 function escapeHtml(text) {
     if (!text) return '';
     const div = document.createElement('div');
@@ -1460,8 +1526,6 @@ function handleDeleteMessage(data) {
         if (data.deleted_for === 'everyone') {
             const bubble = messageEl.querySelector('.msg-bubble');
             if (bubble) bubble.innerHTML = '<span class="msg-deleted">🚫 Message deleted</span>';
-            const actions = messageEl.querySelector('.msg-actions');
-            if (actions) actions.remove();
         } else if (data.user_id === parseInt("{{ request.user.id }}")) {
             messageEl.remove();
         }
@@ -1473,66 +1537,6 @@ function updateReadStatus(data) {
     if (messageEl) {
         const readTick = messageEl.querySelector('.read-tick');
         if (readTick) readTick.classList.add('read');
-    }
-}
-
-// Send message
-function sendMessage() {
-    const content = document.getElementById('messageInput').value.trim();
-    if (!content) return;
-    
-    socket.send(JSON.stringify({
-        type: 'message',
-        content: content,
-        parent_id: replyingTo ? replyingTo.id : null
-    }));
-    
-    document.getElementById('messageInput').value = '';
-    document.getElementById('messageInput').style.height = 'auto';
-    cancelReply();
-}
-
-function addNewMessage(data) {
-    const area = document.getElementById('messagesArea');
-    const isOwn = data.sender_id === parseInt("{{ request.user.id }}");
-    
-    let contentHtml = '';
-    if (data.message_type === 'image') {
-        contentHtml = `<div class="msg-image" onclick="openFileModal('${data.file_url}')">
-            <img src="${data.file_url}" alt="${data.file_name}">
-        </div>`;
-    } else if (data.message_type === 'file') {
-        contentHtml = `<div class="msg-file" onclick="window.open('${data.file_url}','_blank')">
-            <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6z"/></svg>
-            <span>${escapeHtml(data.file_name)}</span>
-        </div>`;
-    } else {
-        contentHtml = escapeHtml(data.content);
-    }
-    
-    const messageHtml = `
-        <div class="msg-wrap ${isOwn ? 'own' : 'other'}" id="message-${data.message_id}" data-message-id="${data.message_id}" data-sender="${escapeHtml(data.sender_username)}" data-content="${escapeHtml(data.content || '').replace(/'/g, "\\'")}">
-            ${!isOwn ? `<div class="msg-sender-label">${escapeHtml(data.sender_username)}</div>` : ''}
-            ${data.parent_id ? `<div class="msg-reply-strip" onclick="scrollToMessage('${data.parent_id}')"><strong>↪ Reply</strong></div>` : ''}
-            <div class="msg-bubble">
-                ${contentHtml}
-                <div class="msg-actions">
-                    <button class="msg-action-btn" onclick="replyToMessage('${data.message_id}', '${escapeHtml(data.sender_username)}', \`${escapeHtml(data.content || '').replace(/`/g, '\\`')}\`)"><svg viewBox="0 0 24 24"><path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/></svg></button>
-                    <button class="msg-action-btn" onclick="showReactionPicker('${data.message_id}')"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/></svg></button>
-                    <button class="msg-action-btn" onclick="forwardMessage('${data.message_id}', \`${escapeHtml(data.content || '').replace(/`/g, '\\`')}\`)"><svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg></button>
-                    ${isOwn ? `<button class="msg-action-btn danger" onclick="deleteMessage('${data.message_id}', 'everyone')"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg></button>` : ''}
-                </div>
-            </div>
-            <div class="msg-time">${new Date(data.created).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}${isOwn ? '<span class="read-tick">✓✓</span>' : ''}</div>
-            <div class="msg-reactions" id="reactions-${data.message_id}"></div>
-        </div>
-    `;
-    
-    area.insertAdjacentHTML('beforeend', messageHtml);
-    area.scrollTop = area.scrollHeight;
-    
-    if (!isOwn) {
-        socket.send(JSON.stringify({ type: 'read', message_id: data.message_id }));
     }
 }
 
@@ -1561,6 +1565,7 @@ msgInput.addEventListener('input', () => {
     msgInput.style.height = Math.min(msgInput.scrollHeight, 100) + 'px';
 });
 
+// Send on Enter (Shift+Enter for newline)
 msgInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
@@ -1589,7 +1594,7 @@ function uploadFile(input) {
     .then(res => res.json())
     .then(data => {
         input.value = '';
-        if (data.success) showToast('File uploaded!', 'success');
+        if (data.success) showToast('File uploaded successfully!', 'success');
         else showToast('Upload failed: ' + (data.error || 'unknown'), 'error');
     })
     .catch(() => {
@@ -1601,7 +1606,10 @@ function uploadFile(input) {
 // Pin/Unpin
 function pinMessage(msgId) {
     socket.send(JSON.stringify({ type: 'pin', message_id: parseInt(msgId) }));
-    showToast('Pinning message...', 'info');
+}
+
+function unpinMessage(msgId) {
+    socket.send(JSON.stringify({ type: 'unpin', message_id: parseInt(msgId) }));
 }
 
 // Delete
@@ -1750,43 +1758,22 @@ function toggleEmojiPicker() {
     showToast('Emoji picker coming soon!', 'info');
 }
 
-// Mobile message selection (long press)
-let touchStartTime;
-let touchTimer;
-const messages = document.querySelectorAll('.msg-wrap');
-
-messages.forEach(msg => {
+// Mobile message selection
+let touchTimeout;
+document.querySelectorAll('.msg-wrap').forEach(msg => {
     msg.addEventListener('touchstart', (e) => {
-        touchStartTime = Date.now();
-        touchTimer = setTimeout(() => {
-            // Long press detected
+        touchTimeout = setTimeout(() => {
             document.querySelectorAll('.msg-wrap.selected').forEach(m => m.classList.remove('selected'));
             msg.classList.add('selected');
             selectedMessageId = msg.dataset.messageId;
-            e.preventDefault();
         }, 500);
     });
-    
     msg.addEventListener('touchend', () => {
-        clearTimeout(touchTimer);
-        // If short tap and message is selected, deselect after a delay
-        if (msg.classList.contains('selected')) {
-            setTimeout(() => {
-                msg.classList.remove('selected');
-            }, 2000);
-        }
-    });
-    
-    // Desktop click selection (optional)
-    msg.addEventListener('click', (e) => {
-        if (window.innerWidth > 768) {
-            // On desktop, clicking doesn't select by default, only hover
-            // But we keep this for compatibility
-        }
+        clearTimeout(touchTimeout);
     });
 });
 
-// Close modals on backdrop click
+// Close modal on backdrop click
 document.querySelectorAll('.modal-overlay').forEach(overlay => {
     overlay.addEventListener('click', (e) => {
         if (e.target === overlay) overlay.classList.remove('active');
@@ -1798,5 +1785,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const area = document.getElementById('messagesArea');
     area.scrollTop = area.scrollHeight;
 });
+
+// Request initial online status
+socket.onopen = () => {
+    socket.send(JSON.stringify({ type: 'get_online_users' }));
+};
 </script>
 {% endblock %}
