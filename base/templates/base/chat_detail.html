@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block content %}
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
     :root {
@@ -17,7 +17,6 @@
         --accent-glow: rgba(91, 141, 238, 0.3);
         --green: #10b981;
         --red: #f56565;
-        --yellow: #fbbf24;
         --text-primary: #eff3f6;
         --text-secondary: #9ca3af;
         --text-muted: #4b5563;
@@ -26,7 +25,6 @@
         --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
         --shadow-md: 0 8px 32px rgba(0,0,0,0.4);
         --shadow-lg: 0 16px 48px rgba(0,0,0,0.5);
-        --shadow-accent: 0 0 40px rgba(91, 141, 238, 0.2);
         --font-display: 'Syne', sans-serif;
         --font-body: 'Inter', sans-serif;
         --radius-sm: 8px;
@@ -45,7 +43,6 @@
         overflow: hidden;
     }
 
-    /* Main Layout */
     .chat-shell {
         display: flex;
         height: 100vh;
@@ -62,7 +59,6 @@
         flex-direction: column;
         overflow-y: auto;
         flex-shrink: 0;
-        backdrop-filter: blur(10px);
     }
 
     .chat-sidebar::-webkit-scrollbar { width: 4px; }
@@ -72,7 +68,6 @@
     .sidebar-top {
         padding: 28px 24px 20px;
         border-bottom: 1px solid var(--border);
-        background: linear-gradient(135deg, var(--bg-surface), var(--bg-base));
     }
 
     .sidebar-top h3 {
@@ -90,7 +85,6 @@
         color: var(--text-muted);
     }
 
-    /* Participant Card */
     .participant-card {
         margin: 20px;
         padding: 20px;
@@ -102,7 +96,7 @@
         gap: 16px;
         text-decoration: none;
         color: inherit;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.3s;
     }
 
     .participant-card:hover {
@@ -155,7 +149,6 @@
         margin-top: 4px;
     }
 
-    /* Pinned Section */
     .pinned-section {
         margin: 0 20px 20px;
         background: var(--bg-elevated);
@@ -217,7 +210,6 @@
         text-overflow: ellipsis;
     }
 
-    /* Sidebar Actions */
     .sidebar-actions {
         margin: 0 20px;
         display: flex;
@@ -262,7 +254,6 @@
         position: relative;
     }
 
-    /* Chat Header */
     .chat-header {
         padding: 16px 24px;
         background: var(--bg-surface);
@@ -270,7 +261,6 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
-        backdrop-filter: blur(10px);
         flex-shrink: 0;
     }
 
@@ -374,7 +364,6 @@
     .messages-area::-webkit-scrollbar-track { background: transparent; }
     .messages-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
-    /* Date Separator */
     .date-separator {
         display: flex;
         align-items: center;
@@ -397,7 +386,6 @@
         letter-spacing: 1px;
     }
 
-    /* Message Wrapper */
     .msg-wrap {
         display: flex;
         flex-direction: column;
@@ -421,7 +409,6 @@
         padding: 0 8px;
     }
 
-    /* Reply Strip */
     .msg-reply-strip {
         background: rgba(91, 141, 238, 0.08);
         border-left: 3px solid var(--accent);
@@ -439,7 +426,6 @@
         padding-left: 16px;
     }
 
-    /* Message Bubble */
     .msg-bubble {
         padding: 10px 16px;
         border-radius: var(--radius-bubble);
@@ -464,7 +450,6 @@
         border-bottom-left-radius: 4px;
     }
 
-    /* Message Actions - Desktop Hover */
     .msg-actions {
         position: absolute;
         top: 50%;
@@ -490,7 +475,6 @@
         pointer-events: all;
     }
 
-    /* Mobile selection mode */
     .msg-wrap.selected {
         background: var(--accent-soft);
         border-radius: var(--radius-md);
@@ -538,7 +522,6 @@
         fill: var(--red);
     }
 
-    /* Message Time */
     .msg-time {
         font-size: 10px;
         opacity: 0.6;
@@ -557,7 +540,6 @@
 
     .read-tick.read { color: var(--accent); opacity: 1; }
 
-    /* Reactions */
     .msg-reactions {
         display: flex;
         flex-wrap: wrap;
@@ -595,14 +577,12 @@
         font-weight: 600;
     }
 
-    /* Deleted Message */
     .msg-deleted {
         font-style: italic;
         color: var(--text-muted);
         font-size: 12px;
     }
 
-    /* Media Messages */
     .msg-image {
         border-radius: 12px;
         overflow: hidden;
@@ -689,7 +669,7 @@
         30% { transform: translateY(-6px); opacity: 1; }
     }
 
-    /* Input Area */
+    /* Input Area - FIXED */
     .input-zone {
         padding: 20px 24px;
         background: var(--bg-surface);
@@ -697,7 +677,6 @@
         flex-shrink: 0;
     }
 
-    /* Reply Banner */
     .reply-banner {
         display: none;
         align-items: center;
@@ -742,7 +721,6 @@
 
     .reply-close:hover { color: var(--red); }
 
-    /* Input Row */
     .input-row {
         display: flex;
         align-items: flex-end;
@@ -811,21 +789,6 @@
 
     .message-input::placeholder {
         color: var(--text-muted);
-    }
-
-    .emoji-btn {
-        background: none;
-        border: none;
-        font-size: 22px;
-        cursor: pointer;
-        padding: 8px;
-        opacity: 0.6;
-        transition: all 0.2s;
-    }
-
-    .emoji-btn:hover {
-        opacity: 1;
-        transform: scale(1.2);
     }
 
     .send-btn {
@@ -924,7 +887,6 @@
         color: var(--accent);
     }
 
-    /* Reaction Picker */
     .reaction-grid {
         display: grid;
         grid-template-columns: repeat(6, 1fr);
@@ -946,7 +908,6 @@
         transform: scale(1.2);
     }
 
-    /* Theme Grid */
     .theme-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
@@ -980,59 +941,6 @@
         background: var(--bg-elevated);
     }
 
-    /* Context Menu */
-    .context-menu {
-        position: fixed;
-        background: var(--bg-surface);
-        border: 1px solid var(--border);
-        border-radius: var(--radius-md);
-        box-shadow: var(--shadow-lg);
-        z-index: 3000;
-        min-width: 180px;
-        overflow: hidden;
-        animation: menuIn 0.15s ease;
-    }
-
-    @keyframes menuIn {
-        from { opacity: 0; transform: scale(0.95); }
-        to { opacity: 1; transform: scale(1); }
-    }
-
-    .context-menu-item {
-        padding: 12px 16px;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        cursor: pointer;
-        transition: all 0.2s;
-        font-size: 13px;
-        color: var(--text-secondary);
-    }
-
-    .context-menu-item:hover {
-        background: var(--bg-hover);
-        color: var(--text-primary);
-        padding-left: 20px;
-    }
-
-    .context-menu-item.danger:hover {
-        background: rgba(245, 101, 101, 0.15);
-        color: var(--red);
-    }
-
-    .context-menu-item svg {
-        width: 18px;
-        height: 18px;
-        fill: currentColor;
-    }
-
-    .context-divider {
-        height: 1px;
-        background: var(--border);
-        margin: 4px 0;
-    }
-
-    /* File Preview */
     .file-modal-img {
         max-width: 100%;
         max-height: 65vh;
@@ -1040,7 +948,7 @@
         border-radius: var(--radius-md);
     }
 
-    /* Toast Container (Fixed) */
+    /* Toast - Only for important messages */
     .toast-container {
         position: fixed;
         bottom: 24px;
@@ -1073,7 +981,6 @@
         to { opacity: 1; transform: translateX(0); }
     }
 
-    /* Mobile Responsive */
     @media (max-width: 768px) {
         .chat-sidebar { display: none; }
         .msg-wrap { max-width: 85%; }
@@ -1087,18 +994,6 @@
         .msg-wrap.selected .msg-actions {
             opacity: 1;
             pointer-events: all;
-        }
-        .msg-wrap:active {
-            background: var(--accent-soft);
-            border-radius: var(--radius-md);
-        }
-        .context-menu {
-            position: fixed;
-            bottom: auto;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 280px;
         }
     }
 </style>
@@ -1201,7 +1096,7 @@
                     {% elif message.message_type == 'file' and message.file %}
                     <div class="msg-file" onclick="window.open('{{ message.file.url }}', '_blank')">
                         <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6z"/></svg>
-                        <span class="msg-file-name">{{ message.file_name }}</span>
+                        <span>{{ message.file_name }}</span>
                     </div>
                     {% else %}
                     {{ message.content }}
@@ -1209,22 +1104,22 @@
 
                     {% if not message.deleted_for_everyone %}
                     <div class="msg-actions">
-                        <button class="msg-action-btn" onclick="replyToMessage('{{ message.id }}', '{{ message.sender.username }}', `{{ message.content|escapejs }}`)" title="Reply">
+                        <button class="msg-action-btn" data-action="reply" data-msg-id="{{ message.id }}" data-sender="{{ message.sender.username }}" data-content="{{ message.content|escapejs }}" title="Reply">
                             <svg viewBox="0 0 24 24"><path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/></svg>
                         </button>
-                        <button class="msg-action-btn" onclick="showReactionPicker('{{ message.id }}')" title="React">
+                        <button class="msg-action-btn" data-action="react" data-msg-id="{{ message.id }}" title="React">
                             <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/></svg>
                         </button>
-                        <button class="msg-action-btn" onclick="forwardMessage('{{ message.id }}', '{{ message.content|escapejs }}')" title="Forward">
+                        <button class="msg-action-btn" data-action="forward" data-msg-id="{{ message.id }}" data-content="{{ message.content|escapejs }}" title="Forward">
                             <svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg>
                         </button>
                         {% if not message.is_pinned %}
-                        <button class="msg-action-btn" onclick="pinMessage('{{ message.id }}')" title="Pin">
+                        <button class="msg-action-btn" data-action="pin" data-msg-id="{{ message.id }}" title="Pin">
                             <svg viewBox="0 0 24 24"><path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5v6h2v-6h5v-2l-2-2z"/></svg>
                         </button>
                         {% endif %}
                         {% if message.sender == request.user %}
-                        <button class="msg-action-btn danger" onclick="deleteMessage('{{ message.id }}', 'everyone')" title="Delete">
+                        <button class="msg-action-btn danger" data-action="delete" data-msg-id="{{ message.id }}" title="Delete">
                             <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg>
                         </button>
                         {% endif %}
@@ -1240,8 +1135,7 @@
                 {% if not message.deleted_for_everyone %}
                 <div class="msg-reactions" id="reactions-{{ message.id }}">
                     {% for reaction, users in message.reactions.items %}
-                    <span class="reaction-chip {% if request.user.username in users %}active{% endif %}"
-                          onclick="toggleReaction('{{ message.id }}', '{{ reaction }}')">
+                    <span class="reaction-chip {% if request.user.username in users %}active{% endif %}" data-msg-id="{{ message.id }}" data-reaction="{{ reaction }}">
                         {{ reaction }} <span class="r-count">{{ users|length }}</span>
                     </span>
                     {% endfor %}
@@ -1264,23 +1158,22 @@
                     <div class="sender" id="replyBannerSender"></div>
                     <div class="text" id="replyBannerText"></div>
                 </div>
-                <button class="reply-close" onclick="cancelReply()">×</button>
+                <button class="reply-close" id="cancelReplyBtn">×</button>
             </div>
 
             <div class="input-row">
                 <div class="input-left-actions">
-                    <input type="file" id="fileInput" style="display:none;" accept="image/*,video/*,application/pdf,.doc,.docx,.txt" onchange="uploadFile(this)">
-                    <button class="input-icon-btn" onclick="document.getElementById('fileInput').click()" title="Attach file">
+                    <input type="file" id="fileInput" style="display:none;" accept="image/*,video/*,application/pdf,.doc,.docx,.txt">
+                    <button class="input-icon-btn" id="attachFileBtn" title="Attach file">
                         <svg viewBox="0 0 24 24"><path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5v10.5c0 .55-.45 1-1 1s-1-.45-1-1V6H10v9.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V5c0-2.21-1.79-4-4-4S7 2.79 7 5v12.5c0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5V6h-1.5z"/></svg>
                     </button>
                 </div>
 
                 <div class="input-field-wrap">
                     <textarea class="message-input" id="messageInput" placeholder="Type a message…" rows="1" autocomplete="off"></textarea>
-                    <button class="emoji-btn" onclick="toggleEmojiPicker()" title="Emoji">😊</button>
                 </div>
 
-                <button class="send-btn" onclick="sendMessage()" title="Send">
+                <button class="send-btn" id="sendMsgBtn" title="Send">
                     <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
                 </button>
             </div>
@@ -1288,7 +1181,7 @@
     </div>
 </div>
 
-<!-- Toast Container (Fixed - No more annoying notifications) -->
+<!-- Toast Container -->
 <div class="toast-container" id="toastContainer"></div>
 
 <!-- Modals -->
@@ -1300,7 +1193,7 @@
         </div>
         <div class="theme-grid">
             {% for theme in themes %}
-            <div class="theme-card {% if chat.theme.id == theme.id %}active{% endif %}" onclick="selectTheme('{{ theme.id }}')">
+            <div class="theme-card {% if chat.theme.id == theme.id %}active{% endif %}" data-theme-id="{{ theme.id }}">
                 <div class="theme-preview-box" style="background: {{ theme.background_color|default:'#1a1e2a' }};"></div>
                 <div class="theme-label">{{ theme.name }}</div>
             </div>
@@ -1315,19 +1208,19 @@
             <h2>React to message</h2>
             <button class="modal-close-btn" onclick="closeReactionPicker()">×</button>
         </div>
-        <div class="reaction-grid">
-            <span class="reaction-opt" onclick="addReaction('👍')">👍</span>
-            <span class="reaction-opt" onclick="addReaction('❤️')">❤️</span>
-            <span class="reaction-opt" onclick="addReaction('😂')">😂</span>
-            <span class="reaction-opt" onclick="addReaction('😮')">😮</span>
-            <span class="reaction-opt" onclick="addReaction('😢')">😢</span>
-            <span class="reaction-opt" onclick="addReaction('👎')">👎</span>
-            <span class="reaction-opt" onclick="addReaction('🔥')">🔥</span>
-            <span class="reaction-opt" onclick="addReaction('🎉')">🎉</span>
-            <span class="reaction-opt" onclick="addReaction('💯')">💯</span>
-            <span class="reaction-opt" onclick="addReaction('⭐')">⭐</span>
-            <span class="reaction-opt" onclick="addReaction('🏆')">🏆</span>
-            <span class="reaction-opt" onclick="addReaction('💔')">💔</span>
+        <div class="reaction-grid" id="reactionGrid">
+            <span class="reaction-opt" data-reaction="👍">👍</span>
+            <span class="reaction-opt" data-reaction="❤️">❤️</span>
+            <span class="reaction-opt" data-reaction="😂">😂</span>
+            <span class="reaction-opt" data-reaction="😮">😮</span>
+            <span class="reaction-opt" data-reaction="😢">😢</span>
+            <span class="reaction-opt" data-reaction="👎">👎</span>
+            <span class="reaction-opt" data-reaction="🔥">🔥</span>
+            <span class="reaction-opt" data-reaction="🎉">🎉</span>
+            <span class="reaction-opt" data-reaction="💯">💯</span>
+            <span class="reaction-opt" data-reaction="⭐">⭐</span>
+            <span class="reaction-opt" data-reaction="🏆">🏆</span>
+            <span class="reaction-opt" data-reaction="💔">💔</span>
         </div>
     </div>
 </div>
@@ -1361,15 +1254,35 @@
     </div>
 </div>
 
+<!-- Confirmation Modal -->
+<div class="modal-overlay" id="confirmModal">
+    <div class="modal-box" style="max-width: 400px;">
+        <div class="modal-header">
+            <h2 id="confirmTitle">Confirm</h2>
+            <button class="modal-close-btn" onclick="closeConfirmModal()">×</button>
+        </div>
+        <div style="padding: 24px;">
+            <p id="confirmMessage" style="margin-bottom: 24px; color: var(--text-secondary);">Are you sure?</p>
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <button class="modal-close-btn" onclick="closeConfirmModal()" style="padding: 0 16px; border-radius: 40px;">Cancel</button>
+                <button class="modal-close-btn" id="confirmOkBtn" style="background: var(--accent); color: white; padding: 0 16px; border-radius: 40px;">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-// Variables
+// ========== VARIABLES ==========
 let replyingTo = null;
 let typingTimer;
 let activeReactionMsgId = null;
 let forwardMessageData = null;
-let selectedMessageId = null;
+let confirmCallback = null;
+let socket = null;
+let reconnectAttempts = 0;
+const maxReconnectAttempts = 5;
 
-// Toast function (Fixed - Only shows important notifications)
+// ========== TOAST FUNCTION (NO SPAM) ==========
 function showToast(message, type = 'info') {
     const container = document.getElementById('toastContainer');
     const toast = document.createElement('div');
@@ -1379,37 +1292,90 @@ function showToast(message, type = 'info') {
     setTimeout(() => {
         toast.style.opacity = '0';
         toast.style.transform = 'translateX(30px)';
+        toast.style.transition = 'all 0.3s';
         setTimeout(() => toast.remove(), 300);
     }, 3000);
 }
 
-// WebSocket Connection
-const chatId = "{{ chat.id }}";
-const protocol = location.protocol === 'https:' ? 'wss://' : 'ws://';
-const socket = new WebSocket(protocol + location.host + '/ws/chat/' + chatId + '/');
+// ========== CONFIRMATION MODAL ==========
+function confirmAction(title, message, callback) {
+    document.getElementById('confirmTitle').textContent = title;
+    document.getElementById('confirmMessage').textContent = message;
+    confirmCallback = callback;
+    document.getElementById('confirmModal').classList.add('active');
+}
 
-socket.onopen = () => console.log('WebSocket connected');
-socket.onerror = (error) => console.error('WebSocket error:', error);
+function closeConfirmModal() {
+    document.getElementById('confirmModal').classList.remove('active');
+    confirmCallback = null;
+}
 
-socket.onmessage = (e) => {
-    const data = JSON.parse(e.data);
-    switch (data.type) {
-        case 'new_message': addNewMessage(data); break;
-        case 'user_online': updateOnlineStatus(data.user_id, true); break;
-        case 'user_offline': updateOnlineStatus(data.user_id, false); break;
-        case 'typing': handleTyping(data); break;
-        case 'message_reaction': updateReaction(data); break;
-        case 'message_pinned': showToast('📌 Message pinned', 'success'); break;
-        case 'message_deleted': handleDeleteMessage(data); break;
-        case 'message_read': updateReadStatus(data); break;
-        default: break;
-    }
+document.getElementById('confirmOkBtn').onclick = () => {
+    if (confirmCallback) confirmCallback();
+    closeConfirmModal();
 };
 
-// Send message
+// ========== WEBSOCKET CONNECTION WITH RECONNECT ==========
+function connectWebSocket() {
+    const chatId = "{{ chat.id }}";
+    const protocol = location.protocol === 'https:' ? 'wss://' : 'ws://';
+    
+    if (socket && socket.readyState === WebSocket.OPEN) {
+        return;
+    }
+    
+    socket = new WebSocket(protocol + location.host + '/ws/chat/' + chatId + '/');
+    
+    socket.onopen = () => {
+        console.log('WebSocket connected');
+        reconnectAttempts = 0;
+        socket.send(JSON.stringify({ type: 'get_online_users' }));
+    };
+    
+    socket.onerror = (error) => {
+        console.error('WebSocket error:', error);
+    };
+    
+    socket.onclose = () => {
+        console.log('WebSocket closed, reconnecting...');
+        if (reconnectAttempts < maxReconnectAttempts) {
+            setTimeout(connectWebSocket, 2000 * (reconnectAttempts + 1));
+            reconnectAttempts++;
+        }
+    };
+    
+    socket.onmessage = (e) => {
+        try {
+            const data = JSON.parse(e.data);
+            switch (data.type) {
+                case 'new_message': addNewMessage(data); break;
+                case 'user_online': updateOnlineStatus(data.user_id, true); break;
+                case 'user_offline': updateOnlineStatus(data.user_id, false); break;
+                case 'typing': handleTyping(data); break;
+                case 'message_reaction': updateReaction(data); break;
+                case 'message_pinned': showToast('📌 Message pinned', 'success'); break;
+                case 'message_unpinned': showToast('📍 Message unpinned', 'info'); break;
+                case 'message_deleted': handleDeleteMessage(data); break;
+                case 'message_read': updateReadStatus(data); break;
+                default: break;
+            }
+        } catch (err) {
+            console.error('Error parsing message:', err);
+        }
+    };
+}
+
+// ========== SEND MESSAGE ==========
 function sendMessage() {
-    const content = document.getElementById('messageInput').value.trim();
+    const input = document.getElementById('messageInput');
+    const content = input.value.trim();
     if (!content) return;
+    
+    if (!socket || socket.readyState !== WebSocket.OPEN) {
+        showToast('Connection lost. Reconnecting...', 'error');
+        connectWebSocket();
+        return;
+    }
     
     socket.send(JSON.stringify({
         type: 'message',
@@ -1417,12 +1383,12 @@ function sendMessage() {
         parent_id: replyingTo ? replyingTo.id : null
     }));
     
-    document.getElementById('messageInput').value = '';
-    document.getElementById('messageInput').style.height = 'auto';
+    input.value = '';
+    input.style.height = 'auto';
     cancelReply();
 }
 
-// Add new message
+// ========== ADD NEW MESSAGE ==========
 function addNewMessage(data) {
     const area = document.getElementById('messagesArea');
     const isOwn = data.sender_id === parseInt("{{ request.user.id }}");
@@ -1435,24 +1401,24 @@ function addNewMessage(data) {
     } else if (data.message_type === 'file') {
         contentHtml = `<div class="msg-file" onclick="window.open('${data.file_url}','_blank')">
             <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6z"/></svg>
-            <span>${data.file_name}</span>
+            <span>${escapeHtml(data.file_name)}</span>
         </div>`;
     } else {
         contentHtml = escapeHtml(data.content);
     }
     
     const messageHtml = `
-        <div class="msg-wrap ${isOwn ? 'own' : 'other'}" id="message-${data.message_id}" data-message-id="${data.message_id}" data-sender="${data.sender_username}" data-content="${escapeHtml(data.content || '').replace(/'/g, "\\'")}">
+        <div class="msg-wrap ${isOwn ? 'own' : 'other'}" id="message-${data.message_id}" data-message-id="${data.message_id}" data-sender="${escapeHtml(data.sender_username)}" data-content="${escapeHtml(data.content || '').replace(/'/g, "\\'")}">
             ${!isOwn ? `<div class="msg-sender-label">${escapeHtml(data.sender_username)}</div>` : ''}
             ${data.parent_id ? `<div class="msg-reply-strip" onclick="scrollToMessage('${data.parent_id}')"><strong>↪ Reply</strong></div>` : ''}
             <div class="msg-bubble">
                 ${contentHtml}
                 <div class="msg-actions">
-                    <button class="msg-action-btn" onclick="replyToMessage('${data.message_id}', '${data.sender_username}', \`${escapeHtml(data.content || '').replace(/`/g, '\\`')}\`)"><svg viewBox="0 0 24 24"><path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/></svg></button>
-                    <button class="msg-action-btn" onclick="showReactionPicker('${data.message_id}')"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/></svg></button>
-                    <button class="msg-action-btn" onclick="forwardMessage('${data.message_id}', \`${escapeHtml(data.content || '').replace(/`/g, '\\`')}\`)"><svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg></button>
-                    ${!data.is_pinned ? `<button class="msg-action-btn" onclick="pinMessage('${data.message_id}')"><svg viewBox="0 0 24 24"><path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5v6h2v-6h5v-2l-2-2z"/></svg></button>` : ''}
-                    ${isOwn ? `<button class="msg-action-btn danger" onclick="deleteMessage('${data.message_id}', 'everyone')"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg></button>` : ''}
+                    <button class="msg-action-btn" data-action="reply" data-msg-id="${data.message_id}" data-sender="${escapeHtml(data.sender_username)}" data-content="${escapeHtml(data.content || '').replace(/'/g, "\\'")}"><svg viewBox="0 0 24 24"><path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/></svg></button>
+                    <button class="msg-action-btn" data-action="react" data-msg-id="${data.message_id}"><svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8z"/></svg></button>
+                    <button class="msg-action-btn" data-action="forward" data-msg-id="${data.message_id}" data-content="${escapeHtml(data.content || '').replace(/'/g, "\\'")}"><svg viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></svg></button>
+                    ${!data.is_pinned ? `<button class="msg-action-btn" data-action="pin" data-msg-id="${data.message_id}"><svg viewBox="0 0 24 24"><path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5v6h2v-6h5v-2l-2-2z"/></svg></button>` : ''}
+                    ${isOwn ? `<button class="msg-action-btn danger" data-action="delete" data-msg-id="${data.message_id}"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12z"/></svg></button>` : ''}
                 </div>
             </div>
             <div class="msg-time">${new Date(data.created).toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})}${isOwn ? '<span class="read-tick">✓✓</span>' : ''}</div>
@@ -1463,13 +1429,13 @@ function addNewMessage(data) {
     area.insertAdjacentHTML('beforeend', messageHtml);
     area.scrollTop = area.scrollHeight;
     
-    // Mark as read
-    if (!isOwn) {
+    attachMessageActionListeners();
+    
+    if (!isOwn && socket && socket.readyState === WebSocket.OPEN) {
         socket.send(JSON.stringify({ type: 'read', message_id: data.message_id }));
     }
 }
 
-// Helper Functions
 function escapeHtml(text) {
     if (!text) return '';
     const div = document.createElement('div');
@@ -1513,11 +1479,12 @@ function updateReaction(data) {
     let html = '';
     for (const [emoji, users] of Object.entries(data.reactions)) {
         const isActive = users.includes("{{ request.user.username }}");
-        html += `<span class="reaction-chip ${isActive ? 'active' : ''}" onclick="toggleReaction('${data.message_id}', '${emoji}')">
+        html += `<span class="reaction-chip ${isActive ? 'active' : ''}" data-msg-id="${data.message_id}" data-reaction="${emoji}">
             ${emoji} <span class="r-count">${users.length}</span>
         </span>`;
     }
     reactionsDiv.innerHTML = html;
+    attachReactionListeners();
 }
 
 function handleDeleteMessage(data) {
@@ -1526,6 +1493,8 @@ function handleDeleteMessage(data) {
         if (data.deleted_for === 'everyone') {
             const bubble = messageEl.querySelector('.msg-bubble');
             if (bubble) bubble.innerHTML = '<span class="msg-deleted">🚫 Message deleted</span>';
+            const actions = messageEl.querySelector('.msg-actions');
+            if (actions) actions.remove();
         } else if (data.user_id === parseInt("{{ request.user.id }}")) {
             messageEl.remove();
         }
@@ -1540,7 +1509,7 @@ function updateReadStatus(data) {
     }
 }
 
-// Reply Functions
+// ========== REPLY FUNCTIONS ==========
 function replyToMessage(id, username, content) {
     replyingTo = { id, username, content };
     const banner = document.getElementById('replyBanner');
@@ -1555,28 +1524,95 @@ function cancelReply() {
     document.getElementById('replyBanner').classList.remove('visible');
 }
 
-// Typing indicator
-const msgInput = document.getElementById('messageInput');
-msgInput.addEventListener('input', () => {
-    socket.send(JSON.stringify({ type: 'typing', is_typing: msgInput.value.length > 0 }));
-    clearTimeout(typingTimer);
-    typingTimer = setTimeout(() => socket.send(JSON.stringify({ type: 'typing', is_typing: false })), 1500);
-    msgInput.style.height = 'auto';
-    msgInput.style.height = Math.min(msgInput.scrollHeight, 100) + 'px';
-});
+// ========== MESSAGE ACTION HANDLERS ==========
+function attachMessageActionListeners() {
+    document.querySelectorAll('.msg-action-btn').forEach(btn => {
+        btn.removeEventListener('click', handleActionClick);
+        btn.addEventListener('click', handleActionClick);
+    });
+}
 
-// Send on Enter (Shift+Enter for newline)
-msgInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage();
+function handleActionClick(e) {
+    e.stopPropagation();
+    const btn = e.currentTarget;
+    const action = btn.dataset.action;
+    const msgId = btn.dataset.msgId;
+    
+    if (action === 'reply') {
+        replyToMessage(msgId, btn.dataset.sender, btn.dataset.content);
+    } else if (action === 'react') {
+        showReactionPicker(msgId);
+    } else if (action === 'forward') {
+        forwardMessage(msgId, btn.dataset.content);
+    } else if (action === 'pin') {
+        pinMessage(msgId);
+    } else if (action === 'delete') {
+        confirmAction('Delete Message', 'Are you sure you want to delete this message?', () => {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({ type: 'delete', message_id: parseInt(msgId), delete_for: 'everyone' }));
+            }
+        });
     }
+}
+
+function attachReactionListeners() {
+    document.querySelectorAll('.reaction-chip').forEach(chip => {
+        chip.removeEventListener('click', handleReactionClick);
+        chip.addEventListener('click', handleReactionClick);
+    });
+}
+
+function handleReactionClick(e) {
+    e.stopPropagation();
+    const chip = e.currentTarget;
+    const msgId = chip.dataset.msgId;
+    const reaction = chip.dataset.reaction;
+    if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({ type: 'reaction', message_id: parseInt(msgId), reaction: reaction, action: 'toggle' }));
+    }
+}
+
+// ========== TYPING INDICATOR ==========
+const msgInput = document.getElementById('messageInput');
+if (msgInput) {
+    msgInput.addEventListener('input', () => {
+        if (socket && socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({ type: 'typing', is_typing: msgInput.value.length > 0 }));
+        }
+        clearTimeout(typingTimer);
+        typingTimer = setTimeout(() => {
+            if (socket && socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({ type: 'typing', is_typing: false }));
+            }
+        }, 1500);
+        msgInput.style.height = 'auto';
+        msgInput.style.height = Math.min(msgInput.scrollHeight, 100) + 'px';
+    });
+    
+    msgInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            sendMessage();
+        }
+    });
+}
+
+// ========== FILE UPLOAD ==========
+document.getElementById('attachFileBtn')?.addEventListener('click', () => {
+    document.getElementById('fileInput').click();
 });
 
-// File upload
 function uploadFile(input) {
     const file = input.files[0];
     if (!file) return;
+    
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'application/pdf', 'text/plain'];
+    if (!allowedTypes.includes(file.type) && !file.type.startsWith('video/')) {
+        showToast('File type not supported', 'error');
+        input.value = '';
+        return;
+    }
+    
     if (file.size > 10 * 1024 * 1024) {
         showToast('File too large (max 10 MB)', 'error');
         input.value = '';
@@ -1586,6 +1622,8 @@ function uploadFile(input) {
     const formData = new FormData();
     formData.append('file', file);
     
+    showToast('Uploading...', 'info');
+    
     fetch(`/chat/{{ chat.id }}/upload/`, {
         method: 'POST',
         headers: { 'X-CSRFToken': '{{ csrf_token }}' },
@@ -1594,8 +1632,11 @@ function uploadFile(input) {
     .then(res => res.json())
     .then(data => {
         input.value = '';
-        if (data.success) showToast('File uploaded successfully!', 'success');
-        else showToast('Upload failed: ' + (data.error || 'unknown'), 'error');
+        if (data.success) {
+            showToast('File uploaded!', 'success');
+        } else {
+            showToast('Upload failed: ' + (data.error || 'unknown'), 'error');
+        }
     })
     .catch(() => {
         showToast('Upload failed', 'error');
@@ -1603,23 +1644,16 @@ function uploadFile(input) {
     });
 }
 
-// Pin/Unpin
+document.getElementById('fileInput')?.addEventListener('change', function() { uploadFile(this); });
+
+// ========== PIN/UNPIN ==========
 function pinMessage(msgId) {
-    socket.send(JSON.stringify({ type: 'pin', message_id: parseInt(msgId) }));
-}
-
-function unpinMessage(msgId) {
-    socket.send(JSON.stringify({ type: 'unpin', message_id: parseInt(msgId) }));
-}
-
-// Delete
-function deleteMessage(msgId, deleteFor) {
-    if (confirm('Delete this message?')) {
-        socket.send(JSON.stringify({ type: 'delete', message_id: parseInt(msgId), delete_for: deleteFor }));
+    if (socket && socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({ type: 'pin', message_id: parseInt(msgId) }));
     }
 }
 
-// Reactions
+// ========== REACTIONS ==========
 function showReactionPicker(msgId) {
     activeReactionMsgId = msgId;
     document.getElementById('reactionModal').classList.add('active');
@@ -1630,18 +1664,16 @@ function closeReactionPicker() {
     activeReactionMsgId = null;
 }
 
-function addReaction(emoji) {
-    if (activeReactionMsgId) {
-        socket.send(JSON.stringify({ type: 'reaction', message_id: parseInt(activeReactionMsgId), reaction: emoji, action: 'add' }));
-        closeReactionPicker();
-    }
-}
+document.querySelectorAll('.reaction-opt').forEach(opt => {
+    opt.addEventListener('click', () => {
+        if (activeReactionMsgId && socket && socket.readyState === WebSocket.OPEN) {
+            socket.send(JSON.stringify({ type: 'reaction', message_id: parseInt(activeReactionMsgId), reaction: opt.dataset.reaction, action: 'toggle' }));
+            closeReactionPicker();
+        }
+    });
+});
 
-function toggleReaction(msgId, emoji) {
-    socket.send(JSON.stringify({ type: 'reaction', message_id: parseInt(msgId), reaction: emoji, action: 'add' }));
-}
-
-// Forward message
+// ========== FORWARD MESSAGE ==========
 function forwardMessage(msgId, content) {
     forwardMessageData = { id: msgId, content: content };
     openForwardModal();
@@ -1670,7 +1702,7 @@ function searchForwardUsers(query) {
                 return;
             }
             list.innerHTML = data.users.map(user => `
-                <div class="user-item" onclick="sendForwardMessage(${user.id})" style="cursor: pointer;">
+                <div class="user-item" data-user-id="${user.id}" style="cursor: pointer;">
                     <img src="${user.avatar}" alt="${user.username}" onerror="this.src='{% static 'images/avatar.svg' %}'">
                     <div class="user-item-info">
                         <h4>${escapeHtml(user.username)}</h4>
@@ -1678,6 +1710,10 @@ function searchForwardUsers(query) {
                     </div>
                 </div>
             `).join('');
+            
+            document.querySelectorAll('#forwardUsersList .user-item').forEach(item => {
+                item.addEventListener('click', () => sendForwardMessage(item.dataset.userId));
+            });
         })
         .catch(() => {});
 }
@@ -1707,11 +1743,11 @@ function sendForwardMessage(userId) {
     .catch(() => showToast('Failed to forward message', 'error'));
 }
 
-document.getElementById('forwardSearch').addEventListener('input', (e) => {
+document.getElementById('forwardSearch')?.addEventListener('input', (e) => {
     searchForwardUsers(e.target.value);
 });
 
-// Scroll to message
+// ========== SCROLL TO MESSAGE ==========
 function scrollToMessage(msgId) {
     const el = document.getElementById(`message-${msgId}`);
     if (el) {
@@ -1721,21 +1757,24 @@ function scrollToMessage(msgId) {
     }
 }
 
-// Theme functions
+// ========== THEME FUNCTIONS ==========
 function openThemeModal() { document.getElementById('themeModal').classList.add('active'); }
 function closeThemeModal() { document.getElementById('themeModal').classList.remove('active'); }
 
-function selectTheme(themeId) {
-    fetch(`/chat/{{ chat.id }}/update-theme/`, {
-        method: 'POST',
-        headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/x-www-form-urlencoded' },
-        body: `theme_id=${themeId}`
-    })
-    .then(res => res.json())
-    .then(data => { if (data.success) location.reload(); });
-}
+document.querySelectorAll('.theme-card').forEach(card => {
+    card.addEventListener('click', () => {
+        const themeId = card.dataset.themeId;
+        fetch(`/chat/{{ chat.id }}/update-theme/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: `theme_id=${themeId}`
+        })
+        .then(res => res.json())
+        .then(data => { if (data.success) location.reload(); });
+    });
+});
 
-// File preview
+// ========== FILE PREVIEW ==========
 function openFileModal(url) {
     const img = document.getElementById('filePreviewImg');
     const other = document.getElementById('filePreviewOther');
@@ -1753,19 +1792,13 @@ function openFileModal(url) {
 
 function closeFileModal() { document.getElementById('fileModal').classList.remove('active'); }
 
-// Emoji picker placeholder
-function toggleEmojiPicker() {
-    showToast('Emoji picker coming soon!', 'info');
-}
-
-// Mobile message selection
+// ========== MOBILE MESSAGE SELECTION ==========
 let touchTimeout;
 document.querySelectorAll('.msg-wrap').forEach(msg => {
-    msg.addEventListener('touchstart', (e) => {
+    msg.addEventListener('touchstart', () => {
         touchTimeout = setTimeout(() => {
             document.querySelectorAll('.msg-wrap.selected').forEach(m => m.classList.remove('selected'));
             msg.classList.add('selected');
-            selectedMessageId = msg.dataset.messageId;
         }, 500);
     });
     msg.addEventListener('touchend', () => {
@@ -1773,22 +1806,26 @@ document.querySelectorAll('.msg-wrap').forEach(msg => {
     });
 });
 
-// Close modal on backdrop click
+// ========== CLOSE MODALS ON BACKDROP ==========
 document.querySelectorAll('.modal-overlay').forEach(overlay => {
     overlay.addEventListener('click', (e) => {
         if (e.target === overlay) overlay.classList.remove('active');
     });
 });
 
-// Scroll to bottom on load
+// ========== SEND BUTTON ==========
+document.getElementById('sendMsgBtn')?.addEventListener('click', sendMessage);
+document.getElementById('cancelReplyBtn')?.addEventListener('click', cancelReply);
+
+// ========== INITIALIZE ==========
 document.addEventListener('DOMContentLoaded', () => {
+    connectWebSocket();
+    
     const area = document.getElementById('messagesArea');
     area.scrollTop = area.scrollHeight;
+    
+    attachMessageActionListeners();
+    attachReactionListeners();
 });
-
-// Request initial online status
-socket.onopen = () => {
-    socket.send(JSON.stringify({ type: 'get_online_users' }));
-};
 </script>
 {% endblock %}

@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block content %}
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,wght@0,400;0,500;0,600;1,400&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <style>
     :root {
@@ -14,9 +14,7 @@
         --accent-soft: rgba(91, 141, 238, 0.12);
         --accent-glow: rgba(91, 141, 238, 0.3);
         --green: #10b981;
-        --green-soft: rgba(16, 185, 129, 0.12);
         --red: #f56565;
-        --yellow: #fbbf24;
         --text-primary: #eff3f6;
         --text-secondary: #9ca3af;
         --text-muted: #4b5563;
@@ -25,7 +23,6 @@
         --shadow-sm: 0 2px 8px rgba(0,0,0,0.3);
         --shadow-md: 0 8px 32px rgba(0,0,0,0.4);
         --shadow-lg: 0 16px 48px rgba(0,0,0,0.5);
-        --shadow-accent: 0 0 40px rgba(91, 141, 238, 0.15);
         --font-display: 'Syne', sans-serif;
         --font-body: 'Inter', sans-serif;
         --radius-sm: 8px;
@@ -34,9 +31,9 @@
         --radius-xl: 28px;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
-    body, .chats-page-wrapper {
+    body {
         font-family: var(--font-body);
         background: var(--bg-base);
         color: var(--text-primary);
@@ -49,7 +46,6 @@
         padding: 32px 28px 48px;
     }
 
-    /* Header Section */
     .chats-header {
         display: flex;
         align-items: flex-end;
@@ -74,7 +70,6 @@
         font-size: 14px;
         color: var(--text-secondary);
         margin-top: 8px;
-        font-weight: 400;
     }
 
     .header-badge {
@@ -89,7 +84,6 @@
         font-weight: 700;
         padding: 8px 18px;
         border-radius: 40px;
-        backdrop-filter: blur(10px);
     }
 
     .header-badge .dot {
@@ -105,7 +99,6 @@
         50% { opacity: 0.5; transform: scale(0.8); }
     }
 
-    /* Controls Bar */
     .controls-bar {
         display: flex;
         gap: 16px;
@@ -129,7 +122,6 @@
         height: 20px;
         fill: var(--text-muted);
         pointer-events: none;
-        transition: fill 0.2s;
     }
 
     .search-input {
@@ -139,9 +131,7 @@
         border: 1.5px solid var(--border);
         border-radius: var(--radius-xl);
         color: var(--text-primary);
-        font-family: var(--font-body);
         font-size: 14px;
-        font-weight: 400;
         transition: all 0.2s;
         outline: none;
     }
@@ -152,13 +142,6 @@
         box-shadow: 0 0 0 3px var(--accent-glow);
     }
 
-    .search-input:focus ~ svg,
-    .search-container:focus-within svg {
-        fill: var(--accent);
-    }
-
-    .search-input::placeholder { color: var(--text-muted); }
-
     .new-chat-btn {
         display: inline-flex;
         align-items: center;
@@ -168,11 +151,10 @@
         color: #fff;
         border: none;
         border-radius: var(--radius-xl);
-        font-family: var(--font-display);
-        font-size: 14px;
         font-weight: 700;
+        font-size: 14px;
         cursor: pointer;
-        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        transition: all 0.25s;
         white-space: nowrap;
         box-shadow: 0 4px 20px rgba(91, 141, 238, 0.35);
     }
@@ -188,7 +170,6 @@
         fill: #fff;
     }
 
-    /* Filter Tabs */
     .filter-tabs {
         display: flex;
         gap: 8px;
@@ -202,7 +183,6 @@
         border: 1.5px solid var(--border);
         border-radius: 40px;
         color: var(--text-secondary);
-        font-family: var(--font-body);
         font-size: 13px;
         font-weight: 500;
         cursor: pointer;
@@ -217,14 +197,12 @@
         transform: translateY(-1px);
     }
 
-    /* Chats Grid */
     .chats-grid {
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
         gap: 20px;
     }
 
-    /* Chat Tile */
     .chat-tile {
         display: block;
         background: var(--bg-surface);
@@ -251,7 +229,7 @@
     .chat-tile:hover {
         border-color: var(--border-hover);
         transform: translateY(-4px);
-        box-shadow: var(--shadow-md), var(--shadow-accent);
+        box-shadow: var(--shadow-md);
     }
 
     .chat-tile:hover::before { opacity: 1; }
@@ -266,7 +244,6 @@
         font-weight: 700;
     }
 
-    /* Tile Header */
     .chat-tile__header {
         display: flex;
         align-items: center;
@@ -351,7 +328,6 @@
         background: var(--accent);
         color: #fff;
         border-radius: 40px;
-        font-family: var(--font-display);
         font-size: 11px;
         font-weight: 700;
         display: flex;
@@ -368,7 +344,6 @@
         100% { transform: scale(1); }
     }
 
-    /* Tile Body */
     .chat-tile__body {
         padding-top: 16px;
         border-top: 1px solid var(--border);
@@ -438,7 +413,6 @@
         30% { transform: translateY(-5px); }
     }
 
-    /* Empty State */
     .no-chats {
         grid-column: 1 / -1;
         text-align: center;
@@ -475,7 +449,6 @@
         font-family: var(--font-display);
         font-size: 24px;
         font-weight: 700;
-        color: var(--text-primary);
         margin-bottom: 12px;
     }
 
@@ -548,7 +521,6 @@
         font-family: var(--font-display);
         font-size: 22px;
         font-weight: 700;
-        color: var(--text-primary);
     }
 
     .modal-close {
@@ -561,10 +533,9 @@
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        transition: all 0.2s;
-        color: var(--text-secondary);
         font-size: 20px;
-        line-height: 1;
+        color: var(--text-secondary);
+        transition: all 0.2s;
     }
 
     .modal-close:hover {
@@ -586,7 +557,6 @@
         border: 1.5px solid var(--border);
         border-radius: var(--radius-md);
         color: var(--text-primary);
-        font-family: var(--font-body);
         font-size: 14px;
         outline: none;
         transition: all 0.2s;
@@ -596,8 +566,6 @@
         border-color: var(--accent);
         box-shadow: 0 0 0 3px var(--accent-glow);
     }
-
-    .modal-search input::placeholder { color: var(--text-muted); }
 
     .users-list {
         flex: 1;
@@ -614,8 +582,6 @@
         align-items: center;
         gap: 14px;
         padding: 14px 16px;
-        text-decoration: none;
-        color: inherit;
         border-radius: var(--radius-md);
         transition: all 0.2s;
         cursor: pointer;
@@ -638,7 +604,6 @@
         font-family: var(--font-display);
         font-size: 16px;
         font-weight: 600;
-        color: var(--text-primary);
     }
 
     .user-item-info p {
@@ -647,7 +612,6 @@
         margin-top: 4px;
     }
 
-    /* Loading Animation */
     .loading-spinner {
         display: inline-block;
         width: 20px;
@@ -662,7 +626,6 @@
         to { transform: rotate(360deg); }
     }
 
-    /* Toast Container */
     .toast-container {
         position: fixed;
         bottom: 24px;
@@ -683,7 +646,6 @@
         box-shadow: var(--shadow-lg);
         animation: toastIn 0.3s ease;
         max-width: 320px;
-        backdrop-filter: blur(10px);
     }
 
     .toast.success { border-left: 3px solid var(--green); }
@@ -695,13 +657,6 @@
         to { opacity: 1; transform: translateX(0); }
     }
 
-    /* Scrollbar */
-    ::-webkit-scrollbar { width: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--border-hover); }
-
-    /* Responsive */
     @media (max-width: 768px) {
         .chats-page-wrapper { padding: 20px 16px 32px; }
         .chats-header h1 { font-size: 32px; }
@@ -709,18 +664,10 @@
         .controls-bar { flex-direction: column; }
         .new-chat-btn { width: 100%; justify-content: center; }
         .filter-tabs { justify-content: center; }
-        .chat-tile__preview-text { font-size: 12px; }
-    }
-
-    @media (max-width: 480px) {
-        .chat-tile__header { gap: 12px; }
-        .chat-tile__avatar img { width: 48px; height: 48px; }
-        .chat-tile__name { font-size: 16px; }
     }
 </style>
 
 <div class="chats-page-wrapper">
-    <!-- Header -->
     <div class="chats-header">
         <div class="chats-header-left">
             <h1>Mess<span>ages</span></h1>
@@ -734,26 +681,23 @@
         {% endif %}
     </div>
 
-    <!-- Controls -->
     <div class="controls-bar">
         <div class="search-container">
             <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
             <input type="text" class="search-input" id="chatSearch" placeholder="Search conversations by name or message..." autocomplete="off">
         </div>
-        <button class="new-chat-btn" onclick="openNewChatModal()">
+        <button class="new-chat-btn" id="newChatBtn">
             <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
             New Chat
         </button>
     </div>
 
-    <!-- Filter Tabs -->
     <div class="filter-tabs">
         <button class="filter-tab active" data-filter="all">All Chats</button>
         <button class="filter-tab" data-filter="unread">Unread</button>
         <button class="filter-tab" data-filter="online">Online Now</button>
     </div>
 
-    <!-- Chats Grid -->
     <div class="chats-grid" id="chatsGrid">
         {% for chat_data in chats %}
         <a href="{% url 'chat-detail' chat_data.chat.id %}"
@@ -793,7 +737,6 @@
                         {% if chat_data.last_message.message_type == 'text' %}{{ chat_data.last_message.content|truncatechars:50 }}
                         {% elif chat_data.last_message.message_type == 'image' %}📷 Photo
                         {% elif chat_data.last_message.message_type == 'file' %}📎 File
-                        {% elif chat_data.last_message.message_type == 'video' %}🎥 Video
                         {% else %}💬 New message
                         {% endif %}
                     </span>
@@ -814,7 +757,7 @@
             </div>
             <h3>No conversations yet</h3>
             <p>Start chatting with other students by clicking "New Chat" above</p>
-            <button class="new-chat-empty" onclick="openNewChatModal()">Start a conversation →</button>
+            <button class="new-chat-empty" id="emptyNewChatBtn">Start a conversation →</button>
         </div>
         {% endfor %}
     </div>
@@ -825,25 +768,23 @@
     <div class="modal-box">
         <div class="modal-header">
             <h2>Start New Chat</h2>
-            <button class="modal-close" onclick="closeNewChatModal()">×</button>
+            <button class="modal-close" id="closeModalBtn">×</button>
         </div>
         <div class="modal-search">
             <input type="text" id="userSearch" placeholder="Search by username..." autocomplete="off">
         </div>
         <div class="users-list" id="usersList">
-            <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+            <div style="text-align: center; padding: 40px;">
                 <div class="loading-spinner"></div>
-                <p style="margin-top: 12px;">Loading users...</p>
+                <p style="margin-top: 12px; color: var(--text-muted);">Loading users...</p>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Toast Container -->
 <div class="toast-container" id="toastContainer"></div>
 
 <script>
-// Toast function
 function showToast(message, type = 'info') {
     const container = document.getElementById('toastContainer');
     const toast = document.createElement('div');
@@ -858,7 +799,7 @@ function showToast(message, type = 'info') {
     }, 3000);
 }
 
-// Search chats functionality
+// Search functionality
 const searchInput = document.getElementById('chatSearch');
 if (searchInput) {
     searchInput.addEventListener('input', function() {
@@ -874,7 +815,6 @@ if (searchInput) {
             if (matches) visibleCount++;
         });
         
-        // Show message if no results
         const grid = document.getElementById('chatsGrid');
         const existingMsg = grid.querySelector('.no-results-msg');
         if (visibleCount === 0 && tiles.length > 0) {
@@ -897,11 +837,10 @@ if (searchInput) {
     });
 }
 
-// Filter tabs functionality
+// Filter tabs
 const filterTabs = document.querySelectorAll('.filter-tab');
 filterTabs.forEach(tab => {
     tab.addEventListener('click', function() {
-        // Update active state
         filterTabs.forEach(t => t.classList.remove('active'));
         this.classList.add('active');
         
@@ -926,7 +865,7 @@ filterTabs.forEach(tab => {
 function openNewChatModal() {
     const modal = document.getElementById('newChatModal');
     modal.classList.add('active');
-    searchUsers(''); // Load initial users
+    searchUsers('');
     setTimeout(() => {
         const searchInput = document.getElementById('userSearch');
         if (searchInput) searchInput.focus();
@@ -951,14 +890,14 @@ function searchUsers(query) {
                 usersList.innerHTML = `
                     <div style="text-align: center; padding: 60px 20px;">
                         <svg width="48" height="48" viewBox="0 0 24 24" fill="var(--text-muted)"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
-                        <p style="margin-top: 16px; color: var(--text-muted); font-size: 14px;">No users found</p>
+                        <p style="margin-top: 16px; color: var(--text-muted);">No users found</p>
                     </div>
                 `;
                 return;
             }
             
             usersList.innerHTML = data.users.map(user => `
-                <div class="user-item" onclick="startChatWithUser(${user.id})">
+                <div class="user-item" data-user-id="${user.id}">
                     <img src="${user.avatar}" alt="${user.username}" onerror="this.src='{% static 'images/avatar.svg' %}'">
                     <div class="user-item-info">
                         <h4>${escapeHtml(user.username)}</h4>
@@ -966,9 +905,15 @@ function searchUsers(query) {
                     </div>
                 </div>
             `).join('');
+            
+            document.querySelectorAll('#usersList .user-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    window.location.href = `/start-chat/${item.dataset.userId}/`;
+                });
+            });
         })
         .catch(error => {
-            console.error('Error searching users:', error);
+            console.error('Error:', error);
             usersList.innerHTML = `
                 <div style="text-align: center; padding: 60px 20px; color: var(--red);">
                     <svg width="48" height="48" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
@@ -978,11 +923,14 @@ function searchUsers(query) {
         });
 }
 
-function startChatWithUser(userId) {
-    window.location.href = `/start-chat/${userId}/`;
+function escapeHtml(text) {
+    if (!text) return '';
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
-// User search input handler
+// Search input handler
 const userSearchInput = document.getElementById('userSearch');
 if (userSearchInput) {
     let debounceTimer;
@@ -994,21 +942,17 @@ if (userSearchInput) {
     });
 }
 
-// Close modal on backdrop click
+// Modal close handlers
+document.getElementById('newChatBtn')?.addEventListener('click', openNewChatModal);
+document.getElementById('emptyNewChatBtn')?.addEventListener('click', openNewChatModal);
+document.getElementById('closeModalBtn')?.addEventListener('click', closeNewChatModal);
+
 window.addEventListener('click', (e) => {
     const modal = document.getElementById('newChatModal');
     if (e.target === modal) closeNewChatModal();
 });
 
-// Escape HTML helper
-function escapeHtml(text) {
-    if (!text) return '';
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
-
-// WebSocket connections for online status and typing indicator
+// WebSocket connections for online status
 const chatTiles = document.querySelectorAll('.chat-tile[data-chat-id]');
 const wsConnections = new Map();
 
@@ -1022,7 +966,6 @@ chatTiles.forEach(tile => {
     
     ws.onopen = () => {
         console.log(`WebSocket connected for chat ${chatId}`);
-        // Request online status
         ws.send(JSON.stringify({ type: 'get_online_users' }));
     };
     
@@ -1033,18 +976,11 @@ chatTiles.forEach(tile => {
             const typingEl = document.getElementById(`typing-${chatId}`);
             const previewEl = document.getElementById(`preview-${chatId}`);
             
-            if (data.type === 'user_online') {
-                if (onlineDot && data.user_id === otherUserId) {
+            if (data.type === 'user_online' || data.type === 'online_users') {
+                const users = data.type === 'online_users' ? data.users : [data.user_id];
+                if (onlineDot && users.includes(otherUserId)) {
                     onlineDot.classList.add('visible');
-                }
-            } else if (data.type === 'user_offline') {
-                if (onlineDot && data.user_id === otherUserId) {
-                    onlineDot.classList.remove('visible');
-                }
-            } else if (data.type === 'online_users') {
-                if (onlineDot && data.users && data.users.includes(otherUserId)) {
-                    onlineDot.classList.add('visible');
-                } else if (onlineDot) {
+                } else if (onlineDot && data.type === 'user_offline' && data.user_id === otherUserId) {
                     onlineDot.classList.remove('visible');
                 }
             } else if (data.type === 'typing') {
@@ -1058,7 +994,6 @@ chatTiles.forEach(tile => {
                     }
                 }
             } else if (data.type === 'new_message') {
-                // Update last message preview
                 if (previewEl && data.sender_id !== parseInt("{{ request.user.id }}")) {
                     const previewSender = previewEl.querySelector('.chat-tile__preview-sender');
                     const previewText = previewEl.querySelector('.chat-tile__preview-text');
@@ -1069,11 +1004,10 @@ chatTiles.forEach(tile => {
                         else if (data.message_type === 'file') previewText.textContent = '📎 File';
                         else previewText.textContent = '💬 New message';
                     }
-                    // Update time
                     const timeEl = tile.querySelector('.chat-tile__time');
                     if (timeEl) timeEl.textContent = 'just now';
-                    // Add unread badge
-                    if (!tile.classList.contains('unread') && data.sender_id !== parseInt("{{ request.user.id }}")) {
+                    
+                    if (!tile.classList.contains('unread')) {
                         tile.classList.add('unread');
                         const existingBadge = tile.querySelector('.chat-unread-badge');
                         if (existingBadge) {
@@ -1085,13 +1019,12 @@ chatTiles.forEach(tile => {
                             badge.textContent = '1';
                             tile.querySelector('.chat-tile__header').appendChild(badge);
                         }
-                        // Update header badge
                         updateTotalUnread();
                     }
                 }
             }
         } catch (error) {
-            console.error('WebSocket message error:', error);
+            console.error('WebSocket error:', error);
         }
     };
     
@@ -1100,14 +1033,13 @@ chatTiles.forEach(tile => {
     };
     
     ws.onclose = () => {
-        console.log(`WebSocket closed for chat ${chatId}`);
         wsConnections.delete(chatId);
-        // Try to reconnect after 5 seconds
         setTimeout(() => {
             if (!wsConnections.has(chatId)) {
                 const tile = document.querySelector(`.chat-tile[data-chat-id="${chatId}"]`);
                 if (tile) {
-                    // Reconnection logic would go here
+                    const newWs = new WebSocket(protocol + window.location.host + '/ws/chat/' + chatId + '/');
+                    wsConnections.set(chatId, newWs);
                 }
             }
         }, 5000);
@@ -1116,7 +1048,6 @@ chatTiles.forEach(tile => {
     wsConnections.set(chatId, ws);
 });
 
-// Update total unread count
 function updateTotalUnread() {
     const unreadTiles = document.querySelectorAll('.chat-tile.unread');
     let totalUnread = 0;
@@ -1145,7 +1076,7 @@ setInterval(() => {
     });
 }, 30000);
 
-// Smooth entrance animation for chat tiles
+// Animation on load
 document.addEventListener('DOMContentLoaded', () => {
     const tiles = document.querySelectorAll('.chat-tile');
     tiles.forEach((tile, index) => {
