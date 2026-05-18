@@ -2,1529 +2,1556 @@
 {% load static %}
 
 {% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+
 <style>
-    /* Chat Detail Page Styles */
-    .chat-detail-container {
-        height: calc(100vh - 80px);
-        display: flex;
-        background: var(--color-bg);
-        overflow: hidden;
+    :root {
+        --bg-base: #0d0f14;
+        --bg-surface: #13161e;
+        --bg-elevated: #1a1e2a;
+        --bg-hover: #1f2436;
+        --bg-bubble-own: #5b8dee;
+        --bg-bubble-other: #1e2235;
+        --accent: #5b8dee;
+        --accent-soft: rgba(91, 141, 238, 0.12);
+        --accent-glow: rgba(91, 141, 238, 0.25);
+        --green: #3ecf8e;
+        --red: #f56565;
+        --text-primary: #e8eaf2;
+        --text-secondary: #8b90a7;
+        --text-muted: #4a4f66;
+        --border: rgba(255,255,255,0.06);
+        --border-hover: rgba(91, 141, 238, 0.35);
+        --shadow-sm: 0 2px 12px rgba(0,0,0,0.3);
+        --shadow-md: 0 8px 32px rgba(0,0,0,0.4);
+        --font-display: 'Syne', sans-serif;
+        --font-body: 'DM Sans', sans-serif;
+        --radius-sm: 8px;
+        --radius-md: 14px;
+        --radius-lg: 20px;
+        --radius-bubble: 18px;
+        --sidebar-w: 280px;
     }
 
-    /* Sidebar */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+        font-family: var(--font-body);
+        background: var(--bg-base);
+        color: var(--text-primary);
+    }
+
+    /* ── Layout Shell ── */
+    .chat-shell {
+        display: flex;
+        height: calc(100vh - 70px);
+        overflow: hidden;
+        background: var(--bg-base);
+    }
+
+    /* ─────────────────── SIDEBAR ─────────────────── */
     .chat-sidebar {
-        width: 300px;
-        background: var(--color-dark);
-        border-right: 1px solid var(--color-dark-light);
+        width: var(--sidebar-w);
+        background: var(--bg-surface);
+        border-right: 1px solid var(--border);
         display: flex;
         flex-direction: column;
         overflow: hidden;
+        flex-shrink: 0;
     }
 
-    .chat-sidebar-header {
-        padding: 2rem;
-        border-bottom: 1px solid var(--color-dark-light);
+    .sidebar-top {
+        padding: 2rem 1.8rem 1.4rem;
+        border-bottom: 1px solid var(--border);
     }
 
-    .chat-sidebar-header h3 {
-        color: var(--color-main);
-        font-size: 1.8rem;
-        margin-bottom: 0.5rem;
+    .sidebar-top h3 {
+        font-family: var(--font-display);
+        font-size: 1.6rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.4rem;
     }
 
-    .chat-sidebar-header p {
-        color: var(--color-light-gray);
-        font-size: 1.3rem;
+    .sidebar-top p {
+        font-size: 1.15rem;
+        color: var(--text-muted);
     }
 
-    .chat-participant {
+    /* Participant Card */
+    .participant-card {
+        margin: 1.4rem;
+        padding: 1.4rem;
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
         display: flex;
         align-items: center;
-        gap: 1.5rem;
-        padding: 1.5rem 2rem;
-        background: var(--color-dark-medium);
-        margin: 1rem;
-        border-radius: 1rem;
-        transition: all 0.3s ease;
+        gap: 1.2rem;
+        text-decoration: none;
+        color: inherit;
+        transition: all 0.2s;
     }
 
-    .chat-participant:hover {
-        transform: translateX(5px);
-        background: var(--color-dark-light);
+    .participant-card:hover {
+        border-color: var(--border-hover);
+        background: var(--bg-hover);
     }
 
-    .chat-participant-avatar {
+    .participant-avatar {
         position: relative;
+        flex-shrink: 0;
     }
 
-    .chat-participant-avatar img {
-        width: 5rem;
-        height: 5rem;
+    .participant-avatar img {
+        width: 4.4rem;
+        height: 4.4rem;
         border-radius: 50%;
-        border: 2px solid var(--color-main);
+        object-fit: cover;
+        border: 2px solid var(--accent);
     }
 
-    .online-status {
+    .p-online-dot {
         position: absolute;
-        bottom: 2px;
-        right: 2px;
-        width: 1.2rem;
-        height: 1.2rem;
+        bottom: 1px;
+        right: 1px;
+        width: 1.1rem;
+        height: 1.1rem;
+        background: var(--green);
         border-radius: 50%;
-        background: #4caf50;
-        border: 2px solid var(--color-dark);
+        border: 2px solid var(--bg-surface);
+        display: none;
     }
 
-    .chat-participant-info h4 {
-        color: var(--color-light);
-        font-size: 1.6rem;
-        margin-bottom: 0.3rem;
+    .participant-info h4 {
+        font-family: var(--font-display);
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
     }
 
-    .chat-participant-info p {
-        color: var(--color-light-gray);
-        font-size: 1.2rem;
+    .participant-info p {
+        font-size: 1.15rem;
+        color: var(--text-muted);
+        margin-top: 0.2rem;
     }
 
-    /* Pinned Messages Section */
-    .pinned-messages-section {
-        margin: 1rem;
-        padding: 1rem;
-        background: var(--color-dark-medium);
-        border-radius: 1rem;
-        max-height: 200px;
+    /* Pinned Messages */
+    .pinned-section {
+        margin: 0 1.4rem 1.4rem;
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+
+    .pinned-section-header {
+        padding: 1rem 1.4rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+    }
+
+    .pinned-section-header svg {
+        width: 1.5rem;
+        height: 1.5rem;
+        fill: var(--accent);
+    }
+
+    .pinned-section-header span {
+        font-family: var(--font-display);
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--accent);
+    }
+
+    .pinned-list {
+        max-height: 180px;
         overflow-y: auto;
     }
 
-    .pinned-messages-section h4 {
-        color: var(--color-main);
-        font-size: 1.4rem;
-        margin-bottom: 1rem;
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-
-    .pinned-messages-section h4 svg {
-        width: 1.6rem;
-        height: 1.6rem;
-        fill: var(--color-main);
-    }
-
-    .pinned-message-item {
-        padding: 1rem;
-        background: var(--color-dark);
-        border-radius: 0.8rem;
-        margin-bottom: 0.8rem;
+    .pinned-item {
+        padding: 0.9rem 1.4rem;
+        border-bottom: 1px solid var(--border);
         cursor: pointer;
-        transition: all 0.2s ease;
-        border-left: 3px solid var(--color-main);
+        transition: background 0.2s;
     }
 
-    .pinned-message-item:hover {
-        transform: translateX(5px);
-        background: var(--color-dark-light);
+    .pinned-item:last-child { border-bottom: none; }
+    .pinned-item:hover { background: var(--bg-hover); }
+
+    .pinned-item-sender {
+        font-size: 1.15rem;
+        font-weight: 600;
+        color: var(--accent);
+        margin-bottom: 0.2rem;
     }
 
-    .pinned-message-sender {
-        color: var(--color-main);
-        font-weight: bold;
+    .pinned-item-text {
         font-size: 1.2rem;
-        margin-bottom: 0.3rem;
-    }
-
-    .pinned-message-content {
-        color: var(--color-light-gray);
-        font-size: 1.2rem;
+        color: var(--text-secondary);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
     }
 
-    /* File message styles */
-    .message-image {
-        max-width: 200px;
-        border-radius: 8px;
-        overflow: hidden;
+    /* Sidebar Actions */
+    .sidebar-actions {
+        margin: 0 1.4rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.6rem;
     }
 
-    .message-image img {
-        width: 100%;
-        height: auto;
-        transition: transform 0.2s ease;
-        cursor: pointer;
-    }
-
-    .message-image img:hover {
-        transform: scale(1.05);
-    }
-
-    .message-file {
+    .sidebar-action-btn {
         display: flex;
         align-items: center;
         gap: 1rem;
-        padding: 0.8rem;
-        background: rgba(0, 0, 0, 0.2);
-        border-radius: 0.8rem;
-        transition: background 0.2s ease;
-        cursor: pointer;
-    }
-
-    .message-file:hover {
-        background: rgba(0, 0, 0, 0.3);
-    }
-
-    .message-file svg {
-        width: 2.4rem;
-        height: 2.4rem;
-        fill: var(--color-main);
-    }
-
-    .file-name {
-        flex: 1;
+        padding: 1rem 1.2rem;
+        background: transparent;
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        color: var(--text-secondary);
+        font-family: var(--font-body);
         font-size: 1.3rem;
-        color: var(--color-light);
-        word-break: break-word;
+        cursor: pointer;
+        transition: all 0.2s;
+        text-align: left;
     }
 
-    .file-size {
-        font-size: 1.1rem;
-        color: var(--color-light-gray);
-        white-space: nowrap;
+    .sidebar-action-btn svg {
+        width: 1.6rem;
+        height: 1.6rem;
+        fill: var(--text-muted);
+        flex-shrink: 0;
+        transition: fill 0.2s;
     }
 
-    /* Upload progress indicator */
-    .upload-progress {
-        position: fixed;
-        bottom: 2rem;
-        right: 2rem;
-        background: var(--color-dark);
-        padding: 1rem;
-        border-radius: 1rem;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        z-index: 1000;
-        animation: slideIn 0.3s ease;
+    .sidebar-action-btn:hover {
+        background: var(--accent-soft);
+        border-color: var(--accent);
+        color: var(--accent);
     }
 
-    .progress-bar {
-        width: 200px;
-        height: 4px;
-        background: var(--color-dark-light);
-        border-radius: 2px;
-        overflow: hidden;
-        margin-top: 0.5rem;
-    }
+    .sidebar-action-btn:hover svg { fill: var(--accent); }
 
-    .progress-fill {
-        height: 100%;
-        background: var(--color-main);
-        transition: width 0.3s ease;
-    }
-
-    /* Main Chat Area */
+    /* ─────────────────── MAIN CHAT ─────────────────── */
     .chat-main {
         flex: 1;
         display: flex;
         flex-direction: column;
-        background: var(--color-dark);
-        position: relative;
         overflow: hidden;
+        background: var(--bg-base);
     }
 
-    /* Chat Header */
+    /* Header */
     .chat-header {
-        padding: 1.5rem 2rem;
-        background: var(--color-dark-medium);
-        border-bottom: 1px solid var(--color-dark-light);
+        padding: 1.2rem 2rem;
+        background: var(--bg-surface);
+        border-bottom: 1px solid var(--border);
         display: flex;
+        align-items: center;
         justify-content: space-between;
-        align-items: center;
+        gap: 1rem;
+        flex-shrink: 0;
     }
 
-    .chat-header-info {
+    .chat-header-left {
         display: flex;
         align-items: center;
-        gap: 1.5rem;
+        gap: 1.4rem;
+        text-decoration: none;
+        color: inherit;
     }
 
-    .chat-header-avatar {
+    .header-avatar-wrap {
         position: relative;
     }
 
-    .chat-header-avatar img {
-        width: 4.5rem;
-        height: 4.5rem;
+    .header-avatar-wrap img {
+        width: 4.4rem;
+        height: 4.4rem;
         border-radius: 50%;
-        border: 2px solid var(--color-main);
+        object-fit: cover;
+        border: 2px solid var(--accent);
+    }
+
+    .header-online-dot {
+        position: absolute;
+        bottom: 1px;
+        right: 1px;
+        width: 1rem;
+        height: 1rem;
+        background: var(--green);
+        border-radius: 50%;
+        border: 2px solid var(--bg-surface);
+        display: none;
     }
 
     .chat-header-text h2 {
-        color: var(--color-light);
+        font-family: var(--font-display);
         font-size: 1.8rem;
-        margin-bottom: 0.3rem;
+        font-weight: 700;
+        color: var(--text-primary);
     }
 
-    .chat-header-text p {
-        color: var(--color-light-gray);
+    .chat-header-text .sub {
         font-size: 1.2rem;
+        color: var(--text-muted);
+        margin-top: 0.1rem;
     }
 
-    .chat-header-actions {
+    .chat-header-text .sub.typing { color: var(--accent); }
+
+    .chat-header-right {
         display: flex;
-        gap: 1rem;
+        align-items: center;
+        gap: 0.8rem;
     }
 
-    .chat-header-btn {
-        background: var(--color-dark-light);
-        border: none;
-        border-radius: 50%;
-        width: 4rem;
-        height: 4rem;
+    .hdr-btn {
+        width: 3.8rem;
+        height: 3.8rem;
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        transition: all 0.2s ease;
+        transition: all 0.2s;
+        color: var(--text-secondary);
     }
 
-    .chat-header-btn:hover {
-        background: var(--color-main);
+    .hdr-btn svg {
+        width: 1.8rem;
+        height: 1.8rem;
+        fill: var(--text-secondary);
+        transition: fill 0.2s;
     }
 
-    .chat-header-btn:hover svg {
-        fill: var(--color-dark);
+    .hdr-btn:hover {
+        background: var(--accent-soft);
+        border-color: var(--accent);
     }
 
-    .chat-header-btn svg {
-        width: 2rem;
-        height: 2rem;
-        fill: var(--color-light);
-    }
+    .hdr-btn:hover svg { fill: var(--accent); }
 
-    /* Messages Container - THIS IS THE ONLY PLACE MESSAGES SHOULD APPEAR */
-    .messages-container {
+    /* ── Messages Area ── */
+    .messages-area {
         flex: 1;
         overflow-y: auto;
         padding: 2rem;
         display: flex;
         flex-direction: column;
-        gap: 1rem;
-        background-size: cover;
-        background-position: center;
-        background-repeat: no-repeat;
-        transition: background 0.3s ease;
+        gap: 0.4rem;
+        scroll-behavior: smooth;
     }
 
-    /* Message Bubbles */
-    .message-wrapper {
+    .messages-area::-webkit-scrollbar { width: 4px; }
+    .messages-area::-webkit-scrollbar-track { background: transparent; }
+    .messages-area::-webkit-scrollbar-thumb { background: var(--bg-elevated); border-radius: 2px; }
+
+    /* Date separator */
+    .date-separator {
         display: flex;
-        margin-bottom: 0.5rem;
-        animation: fadeIn 0.3s ease;
+        align-items: center;
+        gap: 1rem;
+        margin: 1.5rem 0 0.5rem;
     }
 
-    @keyframes fadeIn {
-        from {
-            opacity: 0;
-            transform: translateY(10px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
+    .date-separator::before,
+    .date-separator::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: var(--border);
     }
 
-    .message-wrapper.own-message {
-        justify-content: flex-end;
+    .date-separator span {
+        font-size: 1.15rem;
+        color: var(--text-muted);
+        white-space: nowrap;
     }
 
-    .message-bubble {
-        max-width: 60%;
-        padding: 1rem 1.5rem;
-        border-radius: 1.5rem;
+    /* Message wrapper */
+    .msg-wrap {
+        display: flex;
+        flex-direction: column;
+        max-width: 65%;
+        animation: msg-in 0.2s ease;
         position: relative;
-        transition: all 0.2s ease;
     }
 
-    .message-wrapper.own-message .message-bubble {
-        background: var(--color-main);
-        color: var(--color-dark);
-        border-bottom-right-radius: 0.5rem;
+    @keyframes msg-in {
+        from { opacity: 0; transform: translateY(8px); }
+        to { opacity: 1; transform: none; }
     }
 
-    .message-wrapper:not(.own-message) .message-bubble {
-        background: var(--color-dark-medium);
-        color: var(--color-light);
-        border-bottom-left-radius: 0.5rem;
+    .msg-wrap.own { align-self: flex-end; align-items: flex-end; }
+    .msg-wrap.other { align-self: flex-start; align-items: flex-start; }
+
+    .msg-sender-label {
+        font-size: 1.15rem;
+        color: var(--text-muted);
+        margin-bottom: 0.4rem;
+        padding: 0 0.6rem;
     }
 
-    .message-sender {
+    /* Reply preview strip */
+    .msg-reply-strip {
+        background: rgba(91, 141, 238, 0.08);
+        border-left: 3px solid var(--accent);
+        border-radius: 6px 6px 0 0;
+        padding: 0.6rem 1rem;
         font-size: 1.2rem;
-        font-weight: bold;
-        margin-bottom: 0.3rem;
-        color: inherit;
-        opacity: 0.8;
+        color: var(--text-secondary);
+        cursor: pointer;
+        margin-bottom: -4px;
+        max-width: 100%;
     }
 
-    .message-content {
-        font-size: 1.4rem;
-        line-height: 1.5;
-        word-wrap: break-word;
+    .msg-reply-strip:hover { background: var(--accent-soft); }
+    .msg-reply-strip strong { color: var(--accent); }
+
+    /* Bubble */
+    .msg-bubble {
+        padding: 1rem 1.4rem;
+        border-radius: var(--radius-bubble);
+        position: relative;
+        word-break: break-word;
+        line-height: 1.55;
+        font-size: 1.45rem;
+        max-width: 100%;
     }
 
-    .message-time {
+    .msg-wrap.own .msg-bubble {
+        background: var(--bg-bubble-own);
+        color: #fff;
+        border-bottom-right-radius: 4px;
+    }
+
+    .msg-wrap.other .msg-bubble {
+        background: var(--bg-bubble-other);
+        color: var(--text-primary);
+        border-bottom-left-radius: 4px;
+    }
+
+    .msg-time {
+        font-size: 1.05rem;
+        opacity: 0.6;
+        margin-top: 0.4rem;
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+    }
+
+    .msg-wrap.own .msg-time { justify-content: flex-end; }
+
+    /* Read receipt */
+    .read-tick {
         font-size: 1rem;
-        margin-top: 0.5rem;
-        text-align: right;
         opacity: 0.7;
     }
 
-    /* Reply Indicator */
-    .reply-indicator {
-        margin-left: 1rem;
-        margin-bottom: 0.5rem;
-        padding: 0.5rem 1rem;
-        background: var(--color-dark);
-        border-radius: 0.8rem;
-        font-size: 1.2rem;
-        color: var(--color-light-gray);
-        border-left: 2px solid var(--color-main);
-        cursor: pointer;
-    }
+    .read-tick.read { color: #7dd3fc; opacity: 1; }
 
-    .reply-indicator:hover {
-        background: var(--color-dark-light);
-    }
-
-    /* Message Actions */
-    .message-actions {
+    /* ── Message Actions (hover) ── */
+    .msg-actions {
         position: absolute;
-        top: -2rem;
-        right: 0;
+        top: 50%;
+        transform: translateY(-50%);
         display: flex;
-        gap: 0.5rem;
-        background: var(--color-dark);
-        padding: 0.3rem;
-        border-radius: 2rem;
+        gap: 0.3rem;
+        background: var(--bg-surface);
+        border: 1px solid var(--border);
+        border-radius: 10rem;
+        padding: 0.4rem 0.6rem;
         opacity: 0;
-        transition: opacity 0.2s ease;
+        pointer-events: none;
+        transition: opacity 0.15s;
         z-index: 10;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        box-shadow: var(--shadow-sm);
     }
 
-    .message-wrapper:hover .message-actions {
+    .msg-wrap.own .msg-actions { right: calc(100% + 0.8rem); }
+    .msg-wrap.other .msg-actions { left: calc(100% + 0.8rem); }
+
+    .msg-wrap:hover .msg-actions {
         opacity: 1;
+        pointer-events: all;
     }
 
-    .message-action-btn {
-        background: var(--color-dark-light);
+    .msg-action-btn {
+        width: 2.8rem;
+        height: 2.8rem;
+        background: transparent;
         border: none;
         border-radius: 50%;
-        width: 2.5rem;
-        height: 2.5rem;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        transition: all 0.2s ease;
+        transition: background 0.15s;
     }
 
-    .message-action-btn:hover {
-        background: var(--color-main);
-    }
-
-    .message-action-btn:hover svg {
-        fill: var(--color-dark);
-    }
-
-    .message-action-btn svg {
+    .msg-action-btn svg {
         width: 1.4rem;
         height: 1.4rem;
-        fill: var(--color-light);
+        fill: var(--text-secondary);
+        transition: fill 0.15s;
     }
+
+    .msg-action-btn:hover { background: var(--accent-soft); }
+    .msg-action-btn:hover svg { fill: var(--accent); }
+    .msg-action-btn.danger:hover { background: rgba(245,101,101,0.12); }
+    .msg-action-btn.danger:hover svg { fill: var(--red); }
 
     /* Reactions */
-    .message-reactions {
+    .msg-reactions {
         display: flex;
-        gap: 0.3rem;
-        margin-top: 0.5rem;
         flex-wrap: wrap;
+        gap: 0.4rem;
+        margin-top: 0.5rem;
     }
 
-    .reaction-badge {
-        background: var(--color-dark);
-        padding: 0.2rem 0.6rem;
-        border-radius: 1rem;
-        font-size: 1.1rem;
-        display: flex;
+    .reaction-chip {
+        display: inline-flex;
         align-items: center;
         gap: 0.3rem;
-        cursor: pointer;
-        transition: all 0.2s ease;
-        border: 1px solid var(--color-dark-light);
-    }
-
-    .reaction-badge:hover {
-        background: var(--color-main);
-        color: var(--color-dark);
-        border-color: var(--color-main);
-    }
-
-    .reaction-badge.active {
-        background: var(--color-main);
-        color: var(--color-dark);
-        border-color: var(--color-main);
-    }
-
-    .reaction-count {
-        font-weight: bold;
-    }
-
-    /* Reaction Picker Modal */
-    .reaction-picker {
-        display: grid;
-        grid-template-columns: repeat(6, 1fr);
-        gap: 1rem;
-        padding: 1rem;
-    }
-
-    .reaction-option {
-        font-size: 2.4rem;
-        text-align: center;
-        padding: 0.5rem;
-        cursor: pointer;
-        border-radius: 0.5rem;
-        transition: all 0.2s ease;
-    }
-
-    .reaction-option:hover {
-        background: var(--color-dark-light);
-        transform: scale(1.2);
-    }
-
-    /* Typing Indicator */
-    .typing-indicator {
-        padding: 1rem 2rem;
-        display: flex;
-        gap: 0.5rem;
-        align-items: center;
-        color: var(--color-light-gray);
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        border-radius: 10rem;
+        padding: 0.25rem 0.7rem;
         font-size: 1.2rem;
+        cursor: pointer;
+        transition: all 0.15s;
+    }
+
+    .reaction-chip:hover,
+    .reaction-chip.active {
+        background: var(--accent-soft);
+        border-color: var(--accent);
+    }
+
+    .reaction-chip .r-count {
+        font-size: 1.1rem;
+        color: var(--text-secondary);
+        font-weight: 600;
+    }
+
+    /* Deleted */
+    .msg-deleted {
+        font-style: italic;
+        color: var(--text-muted);
+        font-size: 1.3rem;
+    }
+
+    /* File & Image messages */
+    .msg-image {
+        border-radius: 12px;
+        overflow: hidden;
+        max-width: 240px;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+
+    .msg-image:hover { transform: scale(1.02); }
+
+    .msg-image img {
+        width: 100%;
+        height: auto;
+        display: block;
+    }
+
+    .msg-file {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1rem 1.2rem;
+        background: rgba(0,0,0,0.2);
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+
+    .msg-file:hover { background: rgba(0,0,0,0.35); }
+
+    .msg-file svg {
+        width: 2.4rem;
+        height: 2.4rem;
+        fill: var(--accent);
+        flex-shrink: 0;
+    }
+
+    .msg-file-name {
+        font-size: 1.3rem;
+        color: var(--text-primary);
+        word-break: break-all;
+        flex: 1;
+    }
+
+    .msg-file-size {
+        font-size: 1.1rem;
+        color: var(--text-secondary);
+        white-space: nowrap;
+    }
+
+    /* ── Typing Indicator ── */
+    .typing-bar {
+        padding: 0.8rem 2rem;
+        display: none;
+        align-items: center;
+        gap: 0.8rem;
+        flex-shrink: 0;
+    }
+
+    .typing-bar.active { display: flex; }
+
+    .typing-avatar {
+        width: 2.6rem;
+        height: 2.6rem;
+        border-radius: 50%;
+        background: var(--bg-elevated);
+    }
+
+    .typing-bubble {
+        background: var(--bg-bubble-other);
+        border-radius: 12px;
+        padding: 0.8rem 1.2rem;
+        display: flex;
+        gap: 0.4rem;
+        align-items: center;
+    }
+
+    .typing-bubble span {
+        width: 0.6rem;
+        height: 0.6rem;
+        background: var(--text-secondary);
+        border-radius: 50%;
+        animation: typing-anim 1.4s infinite;
+    }
+
+    .typing-bubble span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-bubble span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes typing-anim {
+        0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
+        30% { transform: translateY(-5px); opacity: 1; }
+    }
+
+    .typing-label {
+        font-size: 1.2rem;
+        color: var(--text-muted);
         font-style: italic;
     }
 
-    .typing-dots {
-        display: flex;
-        gap: 0.3rem;
+    /* ── Input Area ── */
+    .input-zone {
+        padding: 1.4rem 2rem;
+        background: var(--bg-surface);
+        border-top: 1px solid var(--border);
+        flex-shrink: 0;
     }
 
-    .typing-dots span {
-        width: 0.6rem;
-        height: 0.6rem;
-        background: var(--color-light-gray);
-        border-radius: 50%;
-        animation: typing 1.4s infinite;
-    }
-
-    .typing-dots span:nth-child(2) { animation-delay: 0.2s; }
-    .typing-dots span:nth-child(3) { animation-delay: 0.4s; }
-
-    @keyframes typing {
-        0%, 60%, 100% { transform: translateY(0); }
-        30% { transform: translateY(-6px); }
-    }
-
-    /* Message Input */
-    .message-input-container {
-        padding: 2rem;
-        background: var(--color-dark-medium);
-        border-top: 1px solid var(--color-dark-light);
-    }
-
-    .reply-preview {
-        background: var(--color-dark);
-        padding: 1rem;
-        border-radius: 1rem;
-        margin-bottom: 1rem;
-        display: flex;
-        justify-content: space-between;
+    /* Reply preview */
+    .reply-banner {
+        display: none;
         align-items: center;
-        border-left: 3px solid var(--color-main);
+        justify-content: space-between;
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        padding: 0.8rem 1.2rem;
+        margin-bottom: 1rem;
+        border-left: 3px solid var(--accent);
     }
 
-    .reply-preview-content {
-        flex: 1;
-    }
+    .reply-banner.visible { display: flex; }
 
-    .reply-preview-sender {
-        color: var(--color-main);
-        font-weight: bold;
-        font-size: 1.2rem;
-        margin-bottom: 0.3rem;
-    }
+    .reply-banner-content .sender { font-size: 1.2rem; font-weight: 600; color: var(--accent); }
+    .reply-banner-content .text { font-size: 1.2rem; color: var(--text-secondary); margin-top: 0.2rem; }
 
-    .reply-preview-text {
-        color: var(--color-light-gray);
-        font-size: 1.2rem;
-    }
-
-    .cancel-reply {
+    .reply-close {
         background: none;
         border: none;
-        color: var(--color-error);
+        color: var(--text-muted);
+        font-size: 1.8rem;
         cursor: pointer;
-        font-size: 1.4rem;
-        padding: 0.5rem;
+        padding: 0 0.3rem;
+        line-height: 1;
+        transition: color 0.2s;
     }
 
-    .input-wrapper {
+    .reply-close:hover { color: var(--red); }
+
+    /* Input row */
+    .input-row {
         display: flex;
-        gap: 1rem;
-        align-items: center;
-    }
-
-    .input-wrapper input {
-        flex: 1;
-        padding: 1.5rem;
-        background: var(--color-dark);
-        border: 2px solid var(--color-dark-light);
-        border-radius: 3rem;
-        color: var(--color-light);
-        font-size: 1.4rem;
-        transition: all 0.3s ease;
-    }
-
-    .input-wrapper input:focus {
-        border-color: var(--color-main);
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(113, 198, 221, 0.2);
-    }
-
-    .input-wrapper input::placeholder {
-        color: var(--color-light-gray);
-    }
-
-    .input-actions {
-        display: flex;
+        align-items: flex-end;
         gap: 1rem;
     }
 
-    .input-btn {
-        background: var(--color-dark);
-        border: 2px solid var(--color-dark-light);
+    .input-left-actions {
+        display: flex;
+        gap: 0.5rem;
+        flex-shrink: 0;
+    }
+
+    .input-icon-btn {
+        width: 4.2rem;
+        height: 4.2rem;
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
         border-radius: 50%;
-        width: 5rem;
-        height: 5rem;
         display: flex;
         align-items: center;
         justify-content: center;
         cursor: pointer;
-        transition: all 0.2s ease;
+        transition: all 0.2s;
+        flex-shrink: 0;
     }
 
-    .input-btn:hover {
-        background: var(--color-main);
-        border-color: var(--color-main);
+    .input-icon-btn svg {
+        width: 1.9rem;
+        height: 1.9rem;
+        fill: var(--text-secondary);
+        transition: fill 0.2s;
     }
 
-    .input-btn:hover svg {
-        fill: var(--color-dark);
+    .input-icon-btn:hover {
+        background: var(--accent-soft);
+        border-color: var(--accent);
     }
 
-    .input-btn svg {
+    .input-icon-btn:hover svg { fill: var(--accent); }
+
+    .input-field-wrap {
+        flex: 1;
+        background: var(--bg-elevated);
+        border: 1.5px solid var(--border);
+        border-radius: 2.4rem;
+        display: flex;
+        align-items: center;
+        padding: 0 1.2rem;
+        transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .input-field-wrap:focus-within {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .message-input {
+        flex: 1;
+        background: transparent;
+        border: none;
+        outline: none;
+        color: var(--text-primary);
+        font-family: var(--font-body);
+        font-size: 1.45rem;
+        padding: 1.2rem 0.4rem;
+        resize: none;
+        max-height: 12rem;
+        overflow-y: auto;
+    }
+
+    .message-input::placeholder { color: var(--text-muted); }
+
+    .emoji-btn {
+        background: none;
+        border: none;
+        font-size: 2rem;
+        cursor: pointer;
+        padding: 0 0.4rem;
+        opacity: 0.5;
+        transition: opacity 0.2s, transform 0.2s;
+        flex-shrink: 0;
+    }
+
+    .emoji-btn:hover { opacity: 1; transform: scale(1.2); }
+
+    .send-btn {
+        width: 4.6rem;
+        height: 4.6rem;
+        background: var(--accent);
+        border: none;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        flex-shrink: 0;
+        box-shadow: 0 4px 16px rgba(91,141,238,0.4);
+    }
+
+    .send-btn svg {
         width: 2rem;
         height: 2rem;
-        fill: var(--color-light);
+        fill: #fff;
     }
 
-    /* Theme Modal */
-    .modal {
+    .send-btn:hover {
+        transform: scale(1.07);
+        box-shadow: 0 6px 20px rgba(91,141,238,0.55);
+    }
+
+    /* ─────────────── MODALS ─────────────── */
+    .modal-overlay {
         display: none;
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.8);
+        inset: 0;
+        background: rgba(0,0,0,0.75);
+        backdrop-filter: blur(8px);
         z-index: 1000;
-        justify-content: center;
         align-items: center;
-    }
-
-    .modal.active {
-        display: flex;
-    }
-
-    .modal-content {
-        background: var(--color-dark);
-        border-radius: 1.5rem;
-        width: 90%;
-        max-width: 600px;
-        max-height: 80vh;
-        overflow-y: auto;
+        justify-content: center;
         padding: 2rem;
+    }
+
+    .modal-overlay.active { display: flex; }
+
+    .modal-box {
+        background: var(--bg-surface);
+        border: 1.5px solid var(--border);
+        border-radius: 2rem;
+        width: 100%;
+        max-width: 520px;
+        max-height: 85vh;
+        overflow-y: auto;
+        box-shadow: var(--shadow-md);
+        animation: modal-in 0.25s ease;
+    }
+
+    @keyframes modal-in {
+        from { opacity: 0; transform: scale(0.95) translateY(10px); }
+        to { opacity: 1; transform: none; }
     }
 
     .modal-header {
+        padding: 1.8rem 2rem;
+        border-bottom: 1px solid var(--border);
         display: flex;
-        justify-content: space-between;
         align-items: center;
-        margin-bottom: 2rem;
+        justify-content: space-between;
+        position: sticky;
+        top: 0;
+        background: var(--bg-surface);
+        z-index: 1;
     }
 
     .modal-header h2 {
-        color: var(--color-main);
-        font-size: 2rem;
+        font-family: var(--font-display);
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--text-primary);
     }
 
-    .close-modal {
-        background: none;
-        border: none;
-        color: var(--color-light-gray);
-        font-size: 2.4rem;
+    .modal-close-btn {
+        width: 3.2rem;
+        height: 3.2rem;
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
         cursor: pointer;
+        font-size: 1.8rem;
+        color: var(--text-secondary);
+        transition: all 0.2s;
     }
 
-    .close-modal:hover {
-        color: var(--color-main);
+    .modal-close-btn:hover { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
+
+    /* Reaction Picker */
+    .reaction-grid {
+        display: grid;
+        grid-template-columns: repeat(6, 1fr);
+        gap: 0.8rem;
+        padding: 1.8rem;
     }
 
+    .reaction-opt {
+        font-size: 2.6rem;
+        text-align: center;
+        padding: 0.6rem;
+        cursor: pointer;
+        border-radius: var(--radius-sm);
+        transition: all 0.15s;
+    }
+
+    .reaction-opt:hover {
+        background: var(--bg-elevated);
+        transform: scale(1.2);
+    }
+
+    /* Theme Grid */
     .theme-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-        gap: 1rem;
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 1.2rem;
+        padding: 1.8rem;
     }
 
-    .theme-option {
-        background: var(--color-dark-medium);
-        padding: 1rem;
-        border-radius: 1rem;
+    .theme-card {
         cursor: pointer;
-        transition: all 0.2s ease;
-        border: 2px solid transparent;
+        border-radius: var(--radius-md);
+        overflow: hidden;
+        border: 2px solid var(--border);
+        transition: all 0.2s;
     }
 
-    .theme-option:hover {
-        transform: translateY(-2px);
-        border-color: var(--color-main);
+    .theme-card:hover, .theme-card.active {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-glow);
     }
 
-    .theme-option.active {
-        border-color: var(--color-main);
-        background: var(--color-dark-light);
+    .theme-preview-box {
+        height: 70px;
     }
 
-    .theme-preview {
-        height: 80px;
-        border-radius: 0.8rem;
-        margin-bottom: 0.8rem;
-    }
-
-    .theme-name {
-        color: var(--color-light);
-        font-size: 1.3rem;
+    .theme-label {
+        padding: 0.8rem;
         text-align: center;
+        font-size: 1.25rem;
+        color: var(--text-secondary);
+        background: var(--bg-elevated);
     }
 
-    .custom-bg-upload {
-        margin-top: 2rem;
-        padding: 2rem;
-        background: var(--color-dark-medium);
-        border-radius: 1rem;
-        text-align: center;
-    }
-
-    .custom-bg-upload input {
-        display: none;
-    }
-
-    .upload-label {
-        display: inline-block;
-        padding: 1rem 2rem;
-        background: var(--color-main);
-        color: var(--color-dark);
-        border-radius: 2rem;
-        cursor: pointer;
-        font-weight: bold;
-        transition: all 0.2s ease;
-    }
-
-    .upload-label:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(113, 198, 221, 0.3);
-    }
-
-    /* Deleted Message */
-    .message-deleted {
-        font-style: italic;
-        color: var(--color-light-gray);
-        opacity: 0.7;
-    }
-
-    /* File Modal */
+    /* File preview modal */
     .file-modal-img {
         max-width: 100%;
-        max-height: 70vh;
+        max-height: 65vh;
         object-fit: contain;
+        border-radius: var(--radius-md);
+        display: block;
+        margin: 0 auto;
     }
 
-    /* Mobile Responsive */
+    /* Upload progress */
+    .upload-toast {
+        position: fixed;
+        bottom: 9rem;
+        right: 2rem;
+        background: var(--bg-surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 1.2rem 1.6rem;
+        box-shadow: var(--shadow-md);
+        z-index: 999;
+        min-width: 220px;
+        animation: slide-up 0.3s ease;
+    }
+
+    @keyframes slide-up {
+        from { opacity: 0; transform: translateY(12px); }
+        to { opacity: 1; transform: none; }
+    }
+
+    .upload-toast-label {
+        font-size: 1.25rem;
+        color: var(--text-secondary);
+        margin-bottom: 0.6rem;
+    }
+
+    .upload-progress-bar {
+        height: 3px;
+        background: var(--bg-elevated);
+        border-radius: 2px;
+        overflow: hidden;
+    }
+
+    .upload-progress-fill {
+        height: 100%;
+        background: var(--accent);
+        width: 0;
+        transition: width 0.3s;
+        border-radius: 2px;
+    }
+
+    /* Toast notification */
+    .toast-container {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.8rem;
+        z-index: 9999;
+    }
+
+    .toast {
+        background: var(--bg-surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 1.2rem 1.8rem;
+        font-size: 1.35rem;
+        color: var(--text-primary);
+        box-shadow: var(--shadow-md);
+        animation: toast-in 0.3s ease;
+        max-width: 300px;
+    }
+
+    .toast.success { border-left: 3px solid var(--green); }
+    .toast.error { border-left: 3px solid var(--red); }
+    .toast.info { border-left: 3px solid var(--accent); }
+
+    @keyframes toast-in {
+        from { opacity: 0; transform: translateX(20px); }
+        to { opacity: 1; transform: none; }
+    }
+
+    /* ── Responsive ── */
     @media (max-width: 768px) {
-        .chat-sidebar {
-            display: none;
-        }
-
-        .message-bubble {
-            max-width: 80%;
-        }
-
-        .chat-header-actions {
-            gap: 0.5rem;
-        }
-
-        .input-btn {
-            width: 4rem;
-            height: 4rem;
-        }
+        .chat-sidebar { display: none; }
+        .msg-wrap { max-width: 85%; }
+        .msg-actions { display: none; }
     }
 </style>
 
-<div class="chat-detail-container">
-    <!-- Sidebar -->
+<div class="chat-shell">
+    <!-- ───── SIDEBAR ───── -->
     <div class="chat-sidebar">
-        <div class="chat-sidebar-header">
+        <div class="sidebar-top">
             <h3>Chat Info</h3>
             <p>Started {{ chat.created|timesince }} ago</p>
         </div>
 
-        <!-- Participant -->
-        <div class="chat-participant">
-            <div class="chat-participant-avatar">
-                <img src="{{ other_user.avatar_url }}" 
-                     alt="{{ other_user.username }}"
+        <a href="{% url 'user-profile' other_user.id %}" class="participant-card">
+            <div class="participant-avatar">
+                <img src="{{ other_user.avatar_url }}" alt="{{ other_user.username }}"
                      data-default="{% static 'images/avatar.svg' %}"
                      onerror="this.onerror=null; this.src=this.dataset.default;">
-                <span class="online-status" id="onlineStatus" style="display: none;"></span>
+                <span class="p-online-dot" id="sidebarOnlineDot"></span>
             </div>
-            <div class="chat-participant-info">
+            <div class="participant-info">
                 <h4>{{ other_user.username }}</h4>
                 <p>@{{ other_user.username }}</p>
             </div>
-        </div>
+        </a>
 
-        <!-- Pinned Messages -->
         {% if pinned_messages %}
-        <div class="pinned-messages-section">
-            <h4>
-                <svg viewBox="0 0 24 24">
-                    <path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5v6h2v-6h5v-2l-2-2z"/>
-                </svg>
-                Pinned Messages
-            </h4>
-            {% for msg in pinned_messages %}
-            <div class="pinned-message-item" onclick="scrollToMessage('{{ msg.id }}')">
-                <div class="pinned-message-sender">{{ msg.sender.username }}</div>
-                <div class="pinned-message-content">{{ msg.content|truncatechars:50 }}</div>
+        <div class="pinned-section">
+            <div class="pinned-section-header">
+                <svg viewBox="0 0 24 24"><path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5v6h2v-6h5v-2l-2-2z"/></svg>
+                <span>Pinned Messages</span>
             </div>
-            {% endfor %}
+            <div class="pinned-list">
+                {% for msg in pinned_messages %}
+                <div class="pinned-item" onclick="scrollToMessage('{{ msg.id }}')">
+                    <div class="pinned-item-sender">{{ msg.sender.username }}</div>
+                    <div class="pinned-item-text">{{ msg.content|truncatechars:45 }}</div>
+                </div>
+                {% endfor %}
+            </div>
         </div>
         {% endif %}
+
+        <div class="sidebar-actions">
+            <button class="sidebar-action-btn" onclick="openThemeModal()">
+                <svg viewBox="0 0 24 24"><path d="M12 22C6.49 22 2 17.51 2 12S6.49 2 12 2s10 4.04 10 10c0 3.31-2.69 6-6 6h-1.77c-.28 0-.5.22-.5.5 0 .12.05.23.13.33.41.47.64 1.06.64 1.67 0 1.38-1.12 2.5-2.5 2.5zm0-18c-4.41 0-8 3.59-8 8s3.59 8 8 8c.28 0 .5-.22.5-.5 0-.16-.08-.28-.14-.35-.41-.46-.63-1.05-.63-1.65 0-1.38 1.12-2.5 2.5-2.5H16c2.21 0 4-1.79 4-4 0-4.41-3.59-8-8-8z"/></svg>
+                Change Theme
+            </button>
+        </div>
     </div>
 
-    <!-- Main Chat Area -->
+    <!-- ───── MAIN CHAT ───── -->
     <div class="chat-main">
-        <!-- Chat Header -->
+        <!-- Header -->
         <div class="chat-header">
-            <a href="{% url 'user-profile' other_user.id %}" style="text-decoration: none; color: inherit;">
-                <div class="chat-header-info">
-                    <div class="chat-header-avatar">
-                        <img src="{{ other_user.avatar_url }}" alt="{{ other_user.username }}"
-                             data-default="{% static 'images/avatar.svg' %}"
-                             onerror="this.onerror=null; this.src=this.dataset.default;">
-                        <span class="online-status" id="headerOnlineStatus" style="display: none;"></span>
-                    </div>
-                    <div class="chat-header-text">
-                        <h2>{{ other_user.username }}</h2>
-                        <p id="typingStatus" style="display: none;">typing...</p>
-                        <p id="lastSeen" class="last-seen"></p>
-                    </div>
+            <a href="{% url 'user-profile' other_user.id %}" class="chat-header-left">
+                <div class="header-avatar-wrap">
+                    <img src="{{ other_user.avatar_url }}" alt="{{ other_user.username }}"
+                         data-default="{% static 'images/avatar.svg' %}"
+                         onerror="this.onerror=null; this.src=this.dataset.default;">
+                    <span class="header-online-dot" id="headerOnlineDot"></span>
+                </div>
+                <div class="chat-header-text">
+                    <h2>{{ other_user.username }}</h2>
+                    <p class="sub" id="headerSubtext">@{{ other_user.username }}</p>
                 </div>
             </a>
-            <div class="chat-header-actions">
-                <button class="chat-header-btn" onclick="openThemeModal()" title="Change Theme">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M12 22C6.49 22 2 17.51 2 12S6.49 2 12 2s10 4.04 10 10c0 3.31-2.69 6-6 6h-1.77c-.28 0-.5.22-.5.5 0 .12.05.23.13.33.41.47.64 1.06.64 1.67 0 1.38-1.12 2.5-2.5 2.5zm0-18c-4.41 0-8 3.59-8 8s3.59 8 8 8c.28 0 .5-.22.5-.5 0-.16-.08-.28-.14-.35-.41-.46-.63-1.05-.63-1.65 0-1.38 1.12-2.5 2.5-2.5H16c2.21 0 4-1.79 4-4 0-4.41-3.59-8-8-8z"/>
-                    </svg>
+            <div class="chat-header-right">
+                <button class="hdr-btn" onclick="openThemeModal()" title="Change Theme">
+                    <svg viewBox="0 0 24 24"><path d="M12 22C6.49 22 2 17.51 2 12S6.49 2 12 2s10 4.04 10 10c0 3.31-2.69 6-6 6h-1.77c-.28 0-.5.22-.5.5 0 .12.05.23.13.33.41.47.64 1.06.64 1.67 0 1.38-1.12 2.5-2.5 2.5zm0-18c-4.41 0-8 3.59-8 8s3.59 8 8 8c.28 0 .5-.22.5-.5 0-.16-.08-.28-.14-.35-.41-.46-.63-1.05-.63-1.65 0-1.38 1.12-2.5 2.5-2.5H16c2.21 0 4-1.79 4-4 0-4.41-3.59-8-8-8z"/></svg>
                 </button>
             </div>
         </div>
 
-        <!-- Messages Container - FIXED: REMOVED 'reversed' to maintain correct order (oldest at top, newest at bottom) -->
-        <!-- Messages Container -->
-<div class="messages-container" id="messagesContainer" 
-     {% if chat.custom_background %}style="background-image: url('{{ chat.custom_background.url }}'); background-size: cover; background-position: center; background-repeat: no-repeat;"
-     {% elif chat.theme and chat.theme.background_color %}style="background-color: {{ chat.theme.background_color }};"
-     {% endif %}>
-            
+        <!-- Messages -->
+        <div class="messages-area" id="messagesArea"
+             {% if chat.custom_background %}style="background-image: url('{{ chat.custom_background.url }}'); background-size: cover; background-position: center;"
+             {% elif chat.theme and chat.theme.background_color %}style="background-color: {{ chat.theme.background_color }};"
+             {% endif %}>
+
             {% for message in messages %}
-            <div class="message-wrapper {% if message.sender == request.user %}own-message{% endif %}" 
-                 id="message-{{ message.id }}" data-message-id="{{ message.id }}">
-                
+            <div class="msg-wrap {% if message.sender == request.user %}own{% else %}other{% endif %}"
+                 id="message-{{ message.id }}"
+                 data-message-id="{{ message.id }}">
+
+                {% if message.sender != request.user %}
+                <div class="msg-sender-label">{{ message.sender.username }}</div>
+                {% endif %}
+
                 {% if message.parent_message %}
-                <div class="reply-indicator" onclick="scrollToMessage('{{ message.parent_message.id }}')">
-                    <strong>↪ Reply to @{{ message.parent_message.sender.username }}</strong>: {{ message.parent_message.content|truncatechars:50 }}
+                <div class="msg-reply-strip" onclick="scrollToMessage('{{ message.parent_message.id }}')">
+                    <strong>↪ @{{ message.parent_message.sender.username }}</strong>: {{ message.parent_message.content|truncatechars:50 }}
                 </div>
                 {% endif %}
-                
-                <div class="message-bubble">
-                    {% if message.sender != request.user %}
-                    <div class="message-sender">{{ message.sender.username }}</div>
+
+                <div class="msg-bubble">
+                    {% if message.deleted_for_everyone %}
+                    <span class="msg-deleted">🚫 Message deleted</span>
+                    {% elif message.message_type == 'image' and message.file %}
+                    <div class="msg-image" onclick="openFileModal('{{ message.file.url }}')">
+                        <img src="{% if message.thumbnail %}{{ message.thumbnail.url }}{% else %}{{ message.file.url }}{% endif %}" alt="{{ message.file_name }}">
+                    </div>
+                    {% elif message.message_type == 'file' and message.file %}
+                    <div class="msg-file" onclick="window.open('{{ message.file.url }}', '_blank')">
+                        <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 18H6V4h7v5h5v11z"/></svg>
+                        <span class="msg-file-name">{{ message.file_name }}</span>
+                        <span class="msg-file-size">{{ message.file_size|filesizeformat }}</span>
+                    </div>
+                    {% else %}
+                    {{ message.content }}
                     {% endif %}
-                    
-                    <div class="message-content">
-                        {% if message.deleted_for_everyone %}
-                        <span class="message-deleted">This message was deleted</span>
-                        {% elif message.message_type == 'image' and message.file %}
-                            <div class="message-image">
-                                <img src="{% if message.thumbnail %}{{ message.thumbnail.url }}{% else %}{{ message.file.url }}{% endif %}" 
-                                     onclick="openFileModal('{{ message.file.url }}')"
-                                     alt="{{ message.file_name }}">
-                                <div class="file-name">{{ message.file_name }}</div>
-                            </div>
-                        {% elif message.message_type == 'file' and message.file %}
-                            <div class="message-file" onclick="window.open('{{ message.file.url }}', '_blank')">
-                                <svg viewBox="0 0 24 24">
-                                    <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 18H6V4h7v5h5v11z"/>
-                                </svg>
-                                <span class="file-name">{{ message.file_name }}</span>
-                                <span class="file-size">{{ message.file_size|filesizeformat }}</span>
-                            </div>
-                        {% else %}
-                            {{ message.content }}
-                        {% endif %}
-                    </div>
-                    
-                    <div class="message-time">{{ message.created|date:"H:i" }}</div>
-                    
+
                     {% if not message.deleted_for_everyone %}
-                    <!-- Reactions -->
-                    <div class="message-reactions" id="reactions-{{ message.id }}">
-                        {% for reaction, users in message.reactions.items %}
-                        <span class="reaction-badge {% if request.user.username in users %}active{% endif %}" 
-                              onclick="toggleReaction('{{ message.id }}', '{{ reaction }}')">
-                            {{ reaction }} <span class="reaction-count">{{ users|length }}</span>
-                        </span>
-                        {% endfor %}
-                    </div>
-                    
-                    <!-- Message Actions -->
-                    <div class="message-actions">
-                        <button class="message-action-btn" onclick="replyToMessage('{{ message.id }}', '{{ message.sender.username }}', '{{ message.content|escapejs }}')" title="Reply">
-                            <svg viewBox="0 0 24 24">
-                                <path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/>
-                            </svg>
+                    <!-- Hover actions -->
+                    <div class="msg-actions">
+                        <button class="msg-action-btn" onclick="replyToMessage('{{ message.id }}', '{{ message.sender.username }}', '{{ message.content|escapejs }}')" title="Reply">
+                            <svg viewBox="0 0 24 24"><path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/></svg>
                         </button>
-                        
-                        <button class="message-action-btn" onclick="showReactionPicker('{{ message.id }}')" title="React">
-                            <svg viewBox="0 0 24 24">
-                                <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/>
-                            </svg>
+                        <button class="msg-action-btn" onclick="showReactionPicker('{{ message.id }}')" title="React">
+                            <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/></svg>
                         </button>
-                        
                         {% if not message.is_pinned %}
-                        <button class="message-action-btn" onclick="pinMessage('{{ message.id }}')" title="Pin">
-                            <svg viewBox="0 0 24 24">
-                                <path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5v6h2v-6h5v-2l-2-2z"/>
-                            </svg>
+                        <button class="msg-action-btn" onclick="pinMessage('{{ message.id }}')" title="Pin">
+                            <svg viewBox="0 0 24 24"><path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5v6h2v-6h5v-2l-2-2z"/></svg>
                         </button>
                         {% else %}
-                        <button class="message-action-btn" onclick="unpinMessage('{{ message.id }}')" title="Unpin" style="background: var(--color-main);">
-                            <svg viewBox="0 0 24 24">
-                                <path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5v6h2v-6h5v-2l-2-2z"/>
-                            </svg>
+                        <button class="msg-action-btn" onclick="unpinMessage('{{ message.id }}')" title="Unpin" style="background: var(--accent-soft);">
+                            <svg viewBox="0 0 24 24" style="fill: var(--accent)"><path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5v6h2v-6h5v-2l-2-2z"/></svg>
                         </button>
                         {% endif %}
-                        
                         {% if message.sender == request.user %}
-                        <button class="message-action-btn" onclick="deleteMessage('{{ message.id }}', 'me')" title="Delete for me">
-                            <svg viewBox="0 0 24 24">
-                                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-                            </svg>
-                        </button>
-                        <button class="message-action-btn" onclick="deleteMessage('{{ message.id }}', 'everyone')" title="Delete for everyone">
-                            <svg viewBox="0 0 24 24">
-                                <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zm2.46-7.12l1.41-1.41L12 12.59l2.12-2.12 1.41 1.41L13.41 14l2.12 2.12-1.41 1.41L12 15.41l-2.12 2.12-1.41-1.41L10.59 14l-2.13-2.12zM15.5 4l-1-1h-5l-1 1H5v2h14V4z"/>
-                            </svg>
+                        <button class="msg-action-btn danger" onclick="deleteMessage('{{ message.id }}', 'everyone')" title="Delete for everyone">
+                            <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zm2.46-7.12l1.41-1.41L12 12.59l2.12-2.12 1.41 1.41L13.41 14l2.12 2.12-1.41 1.41L12 15.41l-2.12 2.12-1.41-1.41L10.59 14l-2.13-2.12zM15.5 4l-1-1h-5l-1 1H5v2h14V4z"/></svg>
                         </button>
                         {% endif %}
                     </div>
                     {% endif %}
                 </div>
+
+                <div class="msg-time">
+                    {{ message.created|date:"H:i" }}
+                    {% if message.sender == request.user %}<span class="read-tick {% if message.is_read %}read{% endif %}">✓✓</span>{% endif %}
+                </div>
+
+                {% if not message.deleted_for_everyone %}
+                <div class="msg-reactions" id="reactions-{{ message.id }}">
+                    {% for reaction, users in message.reactions.items %}
+                    <span class="reaction-chip {% if request.user.username in users %}active{% endif %}"
+                          onclick="toggleReaction('{{ message.id }}', '{{ reaction }}')">
+                        {{ reaction }} <span class="r-count">{{ users|length }}</span>
+                    </span>
+                    {% endfor %}
+                </div>
+                {% endif %}
             </div>
             {% endfor %}
         </div>
 
         <!-- Typing Indicator -->
-        <div class="typing-indicator" id="typingIndicator" style="display: none;">
-            <div class="typing-dots">
-                <span></span><span></span><span></span>
-            </div>
-            <span id="typingName"></span> is typing...
+        <div class="typing-bar" id="typingBar">
+            <div class="typing-bubble"><span></span><span></span><span></span></div>
+            <span class="typing-label" id="typingLabel">typing...</span>
         </div>
 
-        <!-- Message Input -->
-        <div class="message-input-container">
-            <div class="reply-preview" id="replyPreview" style="display: none;">
-                <div class="reply-preview-content">
-                    <div class="reply-preview-sender" id="replySender"></div>
-                    <div class="reply-preview-text" id="replyText"></div>
+        <!-- Input Zone -->
+        <div class="input-zone">
+            <!-- Reply Banner -->
+            <div class="reply-banner" id="replyBanner">
+                <div class="reply-banner-content">
+                    <div class="sender" id="replyBannerSender"></div>
+                    <div class="text" id="replyBannerText"></div>
                 </div>
-                <button class="cancel-reply" onclick="cancelReply()">✕</button>
+                <button class="reply-close" onclick="cancelReply()">×</button>
             </div>
 
-            <div class="input-wrapper">
-                <input type="text" id="messageInput" placeholder="Type a message..." autocomplete="off">
-                <div class="input-actions">
-                    <input type="file" id="fileInput" style="display: none;" onchange="uploadFile(this)">
-                    <button class="input-btn" onclick="document.getElementById('fileInput').click()" title="Attach file">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5v10.5c0 .55-.45 1-1 1s-1-.45-1-1V6H10v9.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V5c0-2.21-1.79-4-4-4S7 2.79 7 5v12.5c0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5V6h-1.5z"/>
-                        </svg>
-                    </button>
-                    <button class="input-btn" onclick="sendMessage()">
-                        <svg viewBox="0 0 24 24">
-                            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
-                        </svg>
+            <div class="input-row">
+                <div class="input-left-actions">
+                    <input type="file" id="fileInput" style="display:none;" onchange="uploadFile(this)">
+                    <button class="input-icon-btn" onclick="document.getElementById('fileInput').click()" title="Attach file">
+                        <svg viewBox="0 0 24 24"><path d="M16.5 6v11.5c0 2.21-1.79 4-4 4s-4-1.79-4-4V5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5v10.5c0 .55-.45 1-1 1s-1-.45-1-1V6H10v9.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5V5c0-2.21-1.79-4-4-4S7 2.79 7 5v12.5c0 3.04 2.46 5.5 5.5 5.5s5.5-2.46 5.5-5.5V6h-1.5z"/></svg>
                     </button>
                 </div>
+
+                <div class="input-field-wrap">
+                    <textarea class="message-input" id="messageInput" placeholder="Type a message…" rows="1" autocomplete="off"></textarea>
+                    <button class="emoji-btn" onclick="toggleEmojiPicker()" title="Emoji">😊</button>
+                </div>
+
+                <button class="send-btn" onclick="sendMessage()" title="Send">
+                    <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+                </button>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Theme Modal -->
-<div class="modal" id="themeModal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2>Choose Chat Theme</h2>
-            <button class="close-modal" onclick="closeThemeModal()">&times;</button>
-        </div>
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
 
-        <div class="theme-grid" id="themeGrid">
+<!-- ─── Theme Modal ─── -->
+<div class="modal-overlay" id="themeModal">
+    <div class="modal-box">
+        <div class="modal-header">
+            <h2>Choose Theme</h2>
+            <button class="modal-close-btn" onclick="closeThemeModal()">×</button>
+        </div>
+        <div class="theme-grid">
             {% for theme in themes %}
-            <div class="theme-option {% if chat.theme.id == theme.id %}active{% endif %}" 
-                 onclick="selectTheme('{{ theme.id }}')">
-                <div class="theme-preview" {% if theme.background_color %}style="background-color: {{ theme.background_color }};"{% else %}style="background-color: #2d2d39;"{% endif %}></div>
-                <div class="theme-name">{{ theme.name }}</div>
+            <div class="theme-card {% if chat.theme.id == theme.id %}active{% endif %}" onclick="selectTheme('{{ theme.id }}')">
+                <div class="theme-preview-box" {% if theme.background_color %}style="background-color: {{ theme.background_color }};"{% else %}style="background: #1a1e2a;"{% endif %}></div>
+                <div class="theme-label">{{ theme.name }}</div>
             </div>
             {% endfor %}
         </div>
-
-       <!-- <div class="custom-bg-upload">
-            <input type="file" id="customBg" accept="image/*" onchange="uploadCustomBackground(this)">
-            <label for="customBg" class="upload-label">Upload Custom Background</label>
-        </div>
     </div>
-</div> -->
+</div>
 
-<!-- Reaction Picker Modal -->
-<div class="modal" id="reactionPickerModal">
-    <div class="modal-content" style="max-width: 400px;">
+<!-- ─── Reaction Picker Modal ─── -->
+<div class="modal-overlay" id="reactionModal">
+    <div class="modal-box" style="max-width: 380px;">
         <div class="modal-header">
-            <h2>Choose Reaction</h2>
-            <button class="close-modal" onclick="closeReactionPicker()">&times;</button>
+            <h2>React</h2>
+            <button class="modal-close-btn" onclick="closeReactionPicker()">×</button>
         </div>
-        <div class="reaction-picker" id="reactionPicker">
-            <span class="reaction-option" onclick="addReaction('👍')">👍</span>
-            <span class="reaction-option" onclick="addReaction('❤️')">❤️</span>
-            <span class="reaction-option" onclick="addReaction('😂')">😂</span>
-            <span class="reaction-option" onclick="addReaction('😮')">😮</span>
-            <span class="reaction-option" onclick="addReaction('😢')">😢</span>
-            <span class="reaction-option" onclick="addReaction('👎')">👎</span>
-            <span class="reaction-option" onclick="addReaction('🔥')">🔥</span>
-            <span class="reaction-option" onclick="addReaction('🎉')">🎉</span>
-            <span class="reaction-option" onclick="addReaction('💯')">💯</span>
-            <span class="reaction-option" onclick="addReaction('⭐')">⭐</span>
-            <span class="reaction-option" onclick="addReaction('🏆')">🏆</span>
-            <span class="reaction-option" onclick="addReaction('💔')">💔</span>
+        <div class="reaction-grid">
+            {% for emoji in "👍❤️😂😮😢👎🔥🎉💯⭐🏆💔🙏🥲🤯🫶" %}
+            <span class="reaction-opt" onclick="addReaction('{{ emoji }}')">{{ emoji }}</span>
+            {% endfor %}
         </div>
     </div>
 </div>
 
-<!-- File View Modal -->
-<div class="modal" id="fileModal">
-    <div class="modal-content" style="max-width: 800px; text-align: center;">
+<!-- ─── File Preview Modal ─── -->
+<div class="modal-overlay" id="fileModal">
+    <div class="modal-box" style="max-width: 760px;">
         <div class="modal-header">
-            <h2>File Preview</h2>
-            <button class="close-modal" onclick="closeFileModal()">&times;</button>
+            <h2>Preview</h2>
+            <button class="modal-close-btn" onclick="closeFileModal()">×</button>
         </div>
-        <img src="" id="fileModalImg" class="file-modal-img" style="display: none;">
-        <div id="fileModalOther" style="display: none; color: var(--color-light); padding: 2rem;">
-            <p>This file type cannot be previewed. <a href="#" id="fileDownloadLink" style="color: var(--color-main);">Download</a></p>
+        <div style="padding: 1.8rem; text-align: center;">
+            <img src="" id="filePreviewImg" class="file-modal-img" style="display:none;">
+            <div id="filePreviewOther" style="display:none; padding: 2rem; color: var(--text-secondary); font-size: 1.4rem;">
+                Can't preview this file. <a href="#" id="fileDownloadLink" style="color: var(--accent);">Download it</a>
+            </div>
         </div>
     </div>
 </div>
 
 <script>
-// Toast notification system
-function showToast(message, type = 'info', duration = 3000) {
+// ─── Toast ───
+function showToast(msg, type = 'info', dur = 3000) {
+    const container = document.getElementById('toastContainer');
     const toast = document.createElement('div');
-    toast.style.cssText = `
-        position: fixed;
-        bottom: 2rem;
-        right: 2rem;
-        background: var(--color-dark);
-        color: var(--color-light);
-        padding: 1rem 2rem;
-        border-radius: 1rem;
-        border-left: 4px solid ${type === 'success' ? 'var(--color-success)' : type === 'error' ? 'var(--color-error)' : 'var(--color-main)'};
-        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        z-index: 9999;
-        animation: slideIn 0.3s ease;
-    `;
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    
+    toast.className = `toast ${type}`;
+    toast.textContent = msg;
+    container.appendChild(toast);
     setTimeout(() => {
-        toast.style.animation = 'slideOut 0.3s ease';
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(20px)';
+        toast.style.transition = 'all 0.3s';
         setTimeout(() => toast.remove(), 300);
-    }, duration);
+    }, dur);
 }
 
-// Helper function to format file size
-function formatFileSize(bytes) {
-    if (bytes === 0) return '0 Bytes';
-    const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+// ─── File size formatter ───
+function fmtSize(b) {
+    if (!b) return '';
+    const k = 1024, s = ['B','KB','MB','GB'];
+    const i = Math.floor(Math.log(b) / Math.log(k));
+    return (b / Math.pow(k, i)).toFixed(1) + ' ' + s[i];
 }
 
-// File upload function
+// ─── File upload ───
 function uploadFile(input) {
     const file = input.files[0];
     if (!file) return;
-    
-    // Check file size (max 10MB)
-    if (file.size > 10 * 1024 * 1024) {
-        showToast('File too large. Max size 10MB.', 'error');
-        input.value = '';
-        return;
-    }
-    
-    showToast('Uploading file...', 'info');
-    
-    const formData = new FormData();
-    formData.append('file', file);
-    
+    if (file.size > 10 * 1024 * 1024) { showToast('File too large (max 10 MB)', 'error'); input.value = ''; return; }
+
+    showToast('Uploading…', 'info');
+    const fd = new FormData();
+    fd.append('file', file);
+
     fetch(`/chat/{{ chat.id }}/upload/`, {
         method: 'POST',
-        headers: {
-            'X-CSRFToken': '{{ csrf_token }}',
-        },
-        body: formData
+        headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+        body: fd
     })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            showToast('File uploaded successfully!', 'success');
-            input.value = '';
-        } else {
-            showToast('Upload failed: ' + data.error, 'error');
-        }
+    .then(r => r.json())
+    .then(d => {
+        input.value = '';
+        if (d.success) { showToast('File uploaded!', 'success'); }
+        else { showToast('Upload failed: ' + (d.error || 'unknown'), 'error'); }
     })
-    .catch(err => {
-        showToast('Upload failed', 'error');
-        console.error(err);
-    });
+    .catch(() => { showToast('Upload failed', 'error'); input.value = ''; });
 }
 
-// WebSocket connection
+// ─── WebSocket ───
 const chatId = "{{ chat.id }}";
-const protocol = window.location.protocol === "https:" ? "wss://" : "ws://";
-const socket = new WebSocket(protocol + window.location.host + "/ws/chat/" + chatId + "/");
+const proto = location.protocol === 'https:' ? 'wss://' : 'ws://';
+const socket = new WebSocket(proto + location.host + '/ws/chat/' + chatId + '/');
 
 let replyingTo = null;
 let typingTimer;
-let currentMessageId = null;
+let activeReactionMsgId = null;
 
-// WebSocket event handlers
 socket.onmessage = function(e) {
     const data = JSON.parse(e.data);
-    
-    switch(data.type) {
-        case 'new_message':
-            addMessageToChat(data);
-            break;
-        case 'user_online':
-            updateOnlineStatus(true, data.online_users);
-            break;
-        case 'user_offline':
-            updateOnlineStatus(false, data.online_users);
-            break;
-        case 'typing':
-            showTypingIndicator(data.username, data.is_typing);
-            break;
-        case 'message_reaction':
-            updateMessageReaction(data.message_id, data.reaction, data.user_id, data.action);
-            break;
-        case 'message_pinned':
-            updateMessagePinStatus(data.message_id, data.is_pinned);
-            break;
-        case 'message_deleted':
-            handleMessageDeleted(data.message_id, data.deleted_for, data.user_id);
-            break;
+    switch (data.type) {
+        case 'new_message': addMessage(data); break;
+        case 'user_online': setOnlineStatus(data.online_users, true); break;
+        case 'user_offline': setOnlineStatus(data.online_users, false); break;
+        case 'typing': handleTyping(data); break;
+        case 'message_reaction': updateReactions(data); break;
+        case 'message_pinned': handlePinUpdate(data); break;
+        case 'message_deleted': handleDelete(data); break;
     }
 };
 
-// Send message with Enter key
-document.getElementById('messageInput').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
+// ─── Auto-resize textarea ───
+const msgInput = document.getElementById('messageInput');
+msgInput.addEventListener('input', function() {
+    this.style.height = 'auto';
+    this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+});
+
+// ─── Send on Enter (Shift+Enter for newline) ───
+msgInput.addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
         sendMessage();
     }
 });
 
-// Send message
+// ─── Typing broadcast ───
+msgInput.addEventListener('input', function() {
+    socket.send(JSON.stringify({ type: 'typing', is_typing: this.value.length > 0 }));
+    clearTimeout(typingTimer);
+    typingTimer = setTimeout(() => socket.send(JSON.stringify({ type: 'typing', is_typing: false })), 1500);
+});
+
 function sendMessage() {
-    const input = document.getElementById('messageInput');
-    const content = input.value.trim();
-    
-    if (!content) return;
-    
+    const val = msgInput.value.trim();
+    if (!val) return;
     socket.send(JSON.stringify({
         type: 'message',
-        content: content,
+        content: val,
         parent_id: replyingTo ? replyingTo.id : null
     }));
-    
-    input.value = '';
+    msgInput.value = '';
+    msgInput.style.height = 'auto';
     cancelReply();
 }
 
-// Add message to chat - APPENDS TO BOTTOM (newest)
-function addMessageToChat(data) {
-    const container = document.getElementById('messagesContainer');
-    const messageHtml = createMessageHtml(data);
-    container.insertAdjacentHTML('beforeend', messageHtml);
-    container.scrollTop = container.scrollHeight;
-    
-    // Mark as read if it's from other user
-    if (data.sender_id !== parseInt("{{ request.user.id }}")) {
-        markMessageAsRead(data.message_id);
-    }
-}
-
-// Create message HTML
-function createMessageHtml(data) {
+// ─── Add incoming message ───
+function addMessage(data) {
+    const area = document.getElementById('messagesArea');
     const isOwn = data.sender_id === parseInt("{{ request.user.id }}");
     let contentHtml = '';
-    
+
     if (data.message_type === 'image') {
-        contentHtml = `
-            <div class="message-image">
-                <img src="${data.thumbnail_url || data.file_url}" 
-                     onclick="openFileModal('${data.file_url}')"
-                     style="max-width: 200px; max-height: 200px; border-radius: 8px; cursor: pointer;">
-                <div class="file-name">${data.file_name}</div>
-            </div>
-        `;
+        contentHtml = `<div class="msg-image" onclick="openFileModal('${data.file_url}')"><img src="${data.thumbnail_url || data.file_url}" alt="${data.file_name}"></div>`;
     } else if (data.message_type === 'file') {
-        contentHtml = `
-            <div class="message-file" onclick="window.open('${data.file_url}', '_blank')" style="cursor: pointer;">
-                <svg viewBox="0 0 24 24" width="24" height="24" style="fill: currentColor;">
-                    <path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 18H6V4h7v5h5v11z"/>
-                </svg>
-                <span class="file-name">${data.file_name}</span>
-                <span class="file-size">${formatFileSize(data.file_size)}</span>
-            </div>
-        `;
+        contentHtml = `<div class="msg-file" onclick="window.open('${data.file_url}','_blank')"><svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 18H6V4h7v5h5v11z"/></svg><span class="msg-file-name">${data.file_name}</span><span class="msg-file-size">${fmtSize(data.file_size)}</span></div>`;
     } else {
-        contentHtml = `<div class="message-content">${data.content}</div>`;
+        contentHtml = data.content;
     }
-    
-    return `
-        <div class="message-wrapper ${isOwn ? 'own-message' : ''}" id="message-${data.message_id}" data-message-id="${data.message_id}">
-            ${data.parent_id ? `
-                <div class="reply-indicator" onclick="scrollToMessage('${data.parent_id}')">
-                    <strong>↪ Reply to someone</strong>
-                </div>
-            ` : ''}
-            
-            <div class="message-bubble">
-                ${!isOwn ? `<div class="message-sender">${data.sender_username}</div>` : ''}
-                
+
+    const html = `
+        <div class="msg-wrap ${isOwn ? 'own' : 'other'}" id="message-${data.message_id}" data-message-id="${data.message_id}">
+            ${!isOwn ? `<div class="msg-sender-label">${data.sender_username}</div>` : ''}
+            ${data.parent_id ? `<div class="msg-reply-strip" onclick="scrollToMessage('${data.parent_id}')"><strong>↪ Reply</strong></div>` : ''}
+            <div class="msg-bubble">
                 ${contentHtml}
-                
-                <div class="message-time">${new Date(data.created).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
-                
-                <div class="message-actions">
-                    <button class="message-action-btn" onclick="replyToMessage('${data.message_id}', '${data.sender_username}', '${data.content}')" title="Reply">
+                <div class="msg-actions">
+                    <button class="msg-action-btn" onclick="replyToMessage('${data.message_id}','${data.sender_username}','${(data.content||'').replace(/'/g,"\\'")}')">
                         <svg viewBox="0 0 24 24"><path d="M10 9V5l-7 7 7 7v-4.1c5 0 8.5 1.6 11 5.1-1-5-4-10-11-11z"/></svg>
                     </button>
-                    
-                    ${isOwn ? `
-                        <button class="message-action-btn" onclick="deleteMessage('${data.message_id}', 'me')" title="Delete for me">
-                            <svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>
-                        </button>
-                    ` : ''}
+                    <button class="msg-action-btn" onclick="showReactionPicker('${data.message_id}')">
+                        <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/></svg>
+                    </button>
+                    ${isOwn ? `<button class="msg-action-btn danger" onclick="deleteMessage('${data.message_id}','everyone')"><svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zm2.46-7.12l1.41-1.41L12 12.59l2.12-2.12 1.41 1.41L13.41 14l2.12 2.12-1.41 1.41L12 15.41l-2.12 2.12-1.41-1.41L10.59 14l-2.13-2.12zM15.5 4l-1-1h-5l-1 1H5v2h14V4z"/></svg></button>` : ''}
                 </div>
             </div>
+            <div class="msg-time">${new Date(data.created).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'})}${isOwn ? '<span class="read-tick">✓✓</span>' : ''}</div>
+            <div class="msg-reactions" id="reactions-${data.message_id}"></div>
         </div>
     `;
-}
 
-// Typing indicator
-document.getElementById('messageInput').addEventListener('input', function() {
-    socket.send(JSON.stringify({
-        type: 'typing',
-        is_typing: this.value.length > 0
-    }));
-    
-    clearTimeout(typingTimer);
-    typingTimer = setTimeout(() => {
-        socket.send(JSON.stringify({
-            type: 'typing',
-            is_typing: false
-        }));
-    }, 1000);
-});
+    area.insertAdjacentHTML('beforeend', html);
+    area.scrollTop = area.scrollHeight;
 
-function showTypingIndicator(username, isTyping) {
-    const indicator = document.getElementById('typingIndicator');
-    const typingName = document.getElementById('typingName');
-    const typingStatus = document.getElementById('typingStatus');
-    
-    if (isTyping) {
-        typingName.textContent = username;
-        indicator.style.display = 'flex';
-        typingStatus.style.display = 'block';
-    } else {
-        indicator.style.display = 'none';
-        typingStatus.style.display = 'none';
+    if (data.sender_id !== parseInt("{{ request.user.id }}")) {
+        socket.send(JSON.stringify({ type: 'read', message_id: data.message_id }));
     }
 }
 
-// Online status
-function updateOnlineStatus(isOnline, onlineUsers) {
-    const otherUserId = parseInt("{{ other_user.id }}");
-    const isOtherOnline = onlineUsers && onlineUsers.includes(otherUserId);
-    
-    const statusDots = document.querySelectorAll('.online-status');
-    statusDots.forEach(dot => {
-        dot.style.display = isOtherOnline ? 'block' : 'none';
-    });
+// ─── Online status ───
+function setOnlineStatus(onlineUsers, isOnline) {
+    const otherId = parseInt("{{ other_user.id }}");
+    const show = onlineUsers && onlineUsers.includes(otherId);
+    document.getElementById('sidebarOnlineDot').style.display = show ? 'block' : 'none';
+    document.getElementById('headerOnlineDot').style.display = show ? 'block' : 'none';
 }
 
-// Reply functionality
-function replyToMessage(messageId, username, content) {
-    replyingTo = { id: messageId, username, content };
-    
-    document.getElementById('replyPreview').style.display = 'flex';
-    document.getElementById('replySender').textContent = `Replying to @${username}`;
-    document.getElementById('replyText').textContent = content.substring(0, 50) + (content.length > 50 ? '...' : '');
-    
-    document.getElementById('messageInput').focus();
+// ─── Typing ───
+function handleTyping(data) {
+    const bar = document.getElementById('typingBar');
+    const sub = document.getElementById('headerSubtext');
+    if (data.is_typing) {
+        bar.classList.add('active');
+        document.getElementById('typingLabel').textContent = data.username + ' is typing…';
+        sub.textContent = 'typing…';
+        sub.classList.add('typing');
+    } else {
+        bar.classList.remove('active');
+        sub.textContent = '@{{ other_user.username }}';
+        sub.classList.remove('typing');
+    }
+}
+
+// ─── Reply ───
+function replyToMessage(id, username, content) {
+    replyingTo = { id, username, content };
+    document.getElementById('replyBanner').classList.add('visible');
+    document.getElementById('replyBannerSender').textContent = '↪ Replying to @' + username;
+    document.getElementById('replyBannerText').textContent = content.slice(0, 60) + (content.length > 60 ? '…' : '');
+    msgInput.focus();
 }
 
 function cancelReply() {
     replyingTo = null;
-    document.getElementById('replyPreview').style.display = 'none';
+    document.getElementById('replyBanner').classList.remove('visible');
 }
 
-// Reactions
-let activeMessageForReaction = null;
-
-function showReactionPicker(messageId) {
-    activeMessageForReaction = messageId;
-    document.getElementById('reactionPickerModal').classList.add('active');
+// ─── Reactions ───
+function showReactionPicker(msgId) {
+    activeReactionMsgId = msgId;
+    document.getElementById('reactionModal').classList.add('active');
 }
 
 function closeReactionPicker() {
-    document.getElementById('reactionPickerModal').classList.remove('active');
-    activeMessageForReaction = null;
+    document.getElementById('reactionModal').classList.remove('active');
+    activeReactionMsgId = null;
 }
 
-function addReaction(reaction) {
-    if (activeMessageForReaction) {
-        socket.send(JSON.stringify({
-            type: 'reaction',
-            message_id: parseInt(activeMessageForReaction),
-            reaction: reaction,
-            action: 'add'
-        }));
-        closeReactionPicker();
-    }
+function addReaction(emoji) {
+    if (!activeReactionMsgId) return;
+    socket.send(JSON.stringify({ type: 'reaction', message_id: parseInt(activeReactionMsgId), reaction: emoji, action: 'add' }));
+    closeReactionPicker();
 }
 
-function toggleReaction(messageId, reaction) {
-    socket.send(JSON.stringify({
-        type: 'reaction',
-        message_id: parseInt(messageId),
-        reaction: reaction,
-        action: 'add'
-    }));
+function toggleReaction(msgId, emoji) {
+    socket.send(JSON.stringify({ type: 'reaction', message_id: parseInt(msgId), reaction: emoji, action: 'add' }));
 }
 
-function updateMessageReaction(messageId, reaction, userId, action) {
-    // Reload to show updated reactions (simplified)
+function updateReactions(data) {
     location.reload();
 }
 
-// Pin/Unpin
-function pinMessage(messageId) {
-    socket.send(JSON.stringify({
-        type: 'pin',
-        message_id: parseInt(messageId)
-    }));
+// ─── Pin / Unpin ───
+function pinMessage(msgId) {
+    socket.send(JSON.stringify({ type: 'pin', message_id: parseInt(msgId) }));
 }
 
-function unpinMessage(messageId) {
-    socket.send(JSON.stringify({
-        type: 'unpin',
-        message_id: parseInt(messageId)
-    }));
+function unpinMessage(msgId) {
+    socket.send(JSON.stringify({ type: 'unpin', message_id: parseInt(msgId) }));
 }
 
-function updateMessagePinStatus(messageId, isPinned) {
-    location.reload();
+function handlePinUpdate() { location.reload(); }
+
+// ─── Delete ───
+function deleteMessage(msgId, deleteFor) {
+    if (!confirm('Delete this message' + (deleteFor === 'everyone' ? ' for everyone' : '') + '?')) return;
+    socket.send(JSON.stringify({ type: 'delete', message_id: parseInt(msgId), delete_for: deleteFor }));
 }
 
-// Delete message
-function deleteMessage(messageId, deleteFor) {
-    if (!confirm(`Delete this message ${deleteFor === 'everyone' ? 'for everyone' : 'for me'}?`)) return;
-    
-    socket.send(JSON.stringify({
-        type: 'delete',
-        message_id: parseInt(messageId),
-        delete_for: deleteFor
-    }));
-}
-
-function handleMessageDeleted(messageId, deletedFor, userId) {
-    const messageElement = document.getElementById(`message-${messageId}`);
-    if (messageElement) {
-        if (deletedFor === 'everyone') {
-            const contentDiv = messageElement.querySelector('.message-content');
-            if (contentDiv) {
-                contentDiv.innerHTML = '<span class="message-deleted">This message was deleted</span>';
-            }
-        } else if (userId === parseInt("{{ request.user.id }}")) {
-            messageElement.remove();
-        }
+function handleDelete(data) {
+    const el = document.getElementById('message-' + data.message_id);
+    if (!el) return;
+    if (data.deleted_for === 'everyone') {
+        const bubble = el.querySelector('.msg-bubble');
+        if (bubble) bubble.innerHTML = '<span class="msg-deleted">🚫 Message deleted</span>';
+    } else if (data.user_id === parseInt("{{ request.user.id }}")) {
+        el.remove();
     }
 }
 
-// Mark message as read
-function markMessageAsRead(messageId) {
-    socket.send(JSON.stringify({
-        type: 'read',
-        message_id: parseInt(messageId)
-    }));
+// ─── Scroll to message ───
+function scrollToMessage(msgId) {
+    const el = document.getElementById('message-' + msgId);
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    el.style.outline = '2px solid var(--accent)';
+    el.style.borderRadius = '12px';
+    setTimeout(() => { el.style.outline = ''; el.style.borderRadius = ''; }, 2000);
 }
 
-// Scroll to message
-function scrollToMessage(messageId) {
-    const element = document.getElementById(`message-${messageId}`);
-    if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        element.style.background = 'rgba(113, 198, 221, 0.2)';
-        setTimeout(() => {
-            element.style.background = '';
-        }, 2000);
-    }
-}
-
-// Theme modal
-function openThemeModal() {
-    document.getElementById('themeModal').classList.add('active');
-}
-
-function closeThemeModal() {
-    document.getElementById('themeModal').classList.remove('active');
-}
+// ─── Theme modal ───
+function openThemeModal() { document.getElementById('themeModal').classList.add('active'); }
+function closeThemeModal() { document.getElementById('themeModal').classList.remove('active'); }
 
 function selectTheme(themeId) {
     fetch(`/chat/{{ chat.id }}/update-theme/`, {
         method: 'POST',
-        headers: {
-            'X-CSRFToken': '{{ csrf_token }}',
-            'Content-Type': 'application/x-www-form-urlencoded',
-        },
+        headers: { 'X-CSRFToken': '{{ csrf_token }}', 'Content-Type': 'application/x-www-form-urlencoded' },
         body: `theme_id=${themeId}`
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        }
-    });
+    }).then(r => r.json()).then(d => { if (d.success) location.reload(); });
 }
 
-function uploadCustomBackground(input) {
-    const formData = new FormData();
-    formData.append('custom_background', input.files[0]);
-    
-    fetch(`/chat/{{ chat.id }}/update-theme/`, {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': '{{ csrf_token }}',
-        },
-        body: formData
-    })
-    .then(res => res.json())
-    .then(data => {
-        if (data.success) {
-            location.reload();
-        }
-    });
-}
-
-// File modal
-function openFileModal(fileUrl) {
-    const img = document.getElementById('fileModalImg');
-    const other = document.getElementById('fileModalOther');
-    const link = document.getElementById('fileDownloadLink');
-    
-    // Check if it's an image
-    if (fileUrl.match(/\.(jpeg|jpg|gif|png|webp)$/i)) {
-        img.src = fileUrl;
-        img.style.display = 'block';
-        other.style.display = 'none';
+// ─── File preview modal ───
+function openFileModal(url) {
+    const img = document.getElementById('filePreviewImg');
+    const other = document.getElementById('filePreviewOther');
+    if (/\.(jpe?g|gif|png|webp|svg)$/i.test(url)) {
+        img.src = url; img.style.display = 'block'; other.style.display = 'none';
     } else {
-        img.style.display = 'none';
-        other.style.display = 'block';
-        link.href = fileUrl;
+        img.style.display = 'none'; other.style.display = 'block';
+        document.getElementById('fileDownloadLink').href = url;
     }
-    
     document.getElementById('fileModal').classList.add('active');
 }
 
-function closeFileModal() {
-    document.getElementById('fileModal').classList.remove('active');
+function closeFileModal() { document.getElementById('fileModal').classList.remove('active'); }
+
+// ─── Emoji picker placeholder (toggles a basic panel) ───
+function toggleEmojiPicker() {
+    showToast('Emoji picker coming soon 😊', 'info', 2000);
 }
 
-// Auto-scroll to bottom on load
-document.addEventListener('DOMContentLoaded', function() {
-    const container = document.getElementById('messagesContainer');
-    container.scrollTop = container.scrollHeight;
+// ─── Close modals on backdrop click ───
+document.querySelectorAll('.modal-overlay').forEach(overlay => {
+    overlay.addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.remove('active');
+            if (this.id === 'reactionModal') activeReactionMsgId = null;
+        }
+    });
 });
 
-// Close modals when clicking outside
-window.onclick = function(event) {
-    const themeModal = document.getElementById('themeModal');
-    const reactionModal = document.getElementById('reactionPickerModal');
-    const fileModal = document.getElementById('fileModal');
-    
-    if (event.target === themeModal) {
-        closeThemeModal();
-    }
-    if (event.target === reactionModal) {
-        closeReactionPicker();
-    }
-    if (event.target === fileModal) {
-        closeFileModal();
-    }
-};
+// ─── Scroll to bottom on load ───
+document.addEventListener('DOMContentLoaded', () => {
+    const area = document.getElementById('messagesArea');
+    area.scrollTop = area.scrollHeight;
+});
 </script>
 
 {% endblock %}

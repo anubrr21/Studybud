@@ -2,606 +2,748 @@
 {% load static %}
 
 {% block content %}
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet">
+
 <style>
-    /* Chats Page Styles */
-    .chats-container {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 2rem;
+    :root {
+        --bg-base: #0d0f14;
+        --bg-surface: #13161e;
+        --bg-elevated: #1a1e2a;
+        --bg-hover: #1f2436;
+        --accent: #5b8dee;
+        --accent-soft: rgba(91, 141, 238, 0.12);
+        --accent-glow: rgba(91, 141, 238, 0.25);
+        --green: #3ecf8e;
+        --green-soft: rgba(62, 207, 142, 0.12);
+        --text-primary: #e8eaf2;
+        --text-secondary: #8b90a7;
+        --text-muted: #4a4f66;
+        --border: rgba(255,255,255,0.06);
+        --border-hover: rgba(91, 141, 238, 0.35);
+        --shadow-sm: 0 2px 12px rgba(0,0,0,0.3);
+        --shadow-md: 0 8px 32px rgba(0,0,0,0.4);
+        --shadow-accent: 0 0 40px rgba(91, 141, 238, 0.15);
+        --font-display: 'Syne', sans-serif;
+        --font-body: 'DM Sans', sans-serif;
+        --radius-sm: 8px;
+        --radius-md: 14px;
+        --radius-lg: 20px;
+        --radius-xl: 28px;
     }
 
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body, .chats-page-wrapper {
+        font-family: var(--font-body);
+        background: var(--bg-base);
+        color: var(--text-primary);
+        min-height: 100vh;
+    }
+
+    .chats-page-wrapper {
+        max-width: 1300px;
+        margin: 0 auto;
+        padding: 2.5rem 2rem 4rem;
+    }
+
+    /* ── Header ── */
     .chats-header {
         display: flex;
+        align-items: flex-end;
         justify-content: space-between;
-        align-items: center;
         margin-bottom: 3rem;
+        gap: 1.5rem;
     }
 
-    .chats-header h1 {
-        font-size: 3.2rem;
-        color: var(--color-main);
-        display: flex;
+    .chats-header-left h1 {
+        font-family: var(--font-display);
+        font-size: 3.6rem;
+        font-weight: 800;
+        letter-spacing: -0.03em;
+        color: var(--text-primary);
+        line-height: 1;
+    }
+
+    .chats-header-left h1 span {
+        color: var(--accent);
+    }
+
+    .chats-header-left p {
+        font-size: 1.35rem;
+        color: var(--text-secondary);
+        margin-top: 0.6rem;
+        font-weight: 300;
+    }
+
+    .header-badge {
+        display: inline-flex;
         align-items: center;
-        gap: 1rem;
+        gap: 0.5rem;
+        background: var(--accent-soft);
+        border: 1px solid var(--border-hover);
+        color: var(--accent);
+        font-family: var(--font-display);
+        font-size: 1.2rem;
+        font-weight: 700;
+        padding: 0.5rem 1.2rem;
+        border-radius: 10rem;
     }
 
-    .chats-header h1 svg {
-        width: 3.2rem;
-        height: 3.2rem;
-        fill: var(--color-main);
+    .header-badge .dot {
+        width: 0.6rem;
+        height: 0.6rem;
+        background: var(--accent);
+        border-radius: 50%;
+        animation: pulse-dot 2s infinite;
     }
 
-    .unread-badge {
-        background: var(--color-main);
-        color: var(--color-dark);
-        font-size: 1.4rem;
-        font-weight: bold;
-        padding: 0.3rem 1rem;
-        border-radius: 2rem;
-        margin-left: 1rem;
+    @keyframes pulse-dot {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(0.8); }
     }
 
-    /* New Chat Button */
-    .new-chat-section {
-        margin-bottom: 2rem;
+    /* ── Controls Bar ── */
+    .controls-bar {
+        display: flex;
+        gap: 1.2rem;
+        margin-bottom: 2.4rem;
+        align-items: center;
     }
+
+    .search-container {
+        flex: 1;
+        position: relative;
+    }
+
+    .search-container svg {
+        position: absolute;
+        left: 1.6rem;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 1.8rem;
+        height: 1.8rem;
+        fill: var(--text-muted);
+        pointer-events: none;
+        transition: fill 0.2s;
+    }
+
+    .search-input {
+        width: 100%;
+        padding: 1.4rem 1.8rem 1.4rem 4.8rem;
+        background: var(--bg-surface);
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius-xl);
+        color: var(--text-primary);
+        font-family: var(--font-body);
+        font-size: 1.45rem;
+        font-weight: 400;
+        transition: all 0.2s;
+        outline: none;
+    }
+
+    .search-input:focus {
+        border-color: var(--accent);
+        background: var(--bg-elevated);
+        box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .search-input:focus ~ svg,
+    .search-container:focus-within svg {
+        fill: var(--accent);
+    }
+
+    .search-input::placeholder { color: var(--text-muted); }
 
     .new-chat-btn {
-        width: 100%;
-        padding: 1.2rem;
-        background: var(--color-main);
-        color: var(--color-dark);
-        border: none;
-        border-radius: 3rem;
-        font-size: 1.6rem;
-        font-weight: bold;
-        cursor: pointer;
-        display: flex;
+        display: inline-flex;
         align-items: center;
-        justify-content: center;
-        gap: 1rem;
-        transition: all 0.3s ease;
+        gap: 0.8rem;
+        padding: 1.4rem 2.4rem;
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        border-radius: var(--radius-xl);
+        font-family: var(--font-display);
+        font-size: 1.4rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.25s;
+        white-space: nowrap;
+        box-shadow: 0 4px 20px rgba(91, 141, 238, 0.35);
     }
 
     .new-chat-btn:hover {
         transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(113, 198, 221, 0.3);
+        box-shadow: 0 8px 30px rgba(91, 141, 238, 0.5);
+        background: #6d9cf0;
     }
 
     .new-chat-btn svg {
-        width: 2rem;
-        height: 2rem;
-        fill: var(--color-dark);
+        width: 1.8rem;
+        height: 1.8rem;
+        fill: #fff;
     }
 
-    /* Search Section */
-    .chats-search {
-        background: var(--color-dark);
-        border-radius: 1.5rem;
-        padding: 2rem;
-        margin-bottom: 2rem;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    /* ── Filter Tabs ── */
+    .filter-tabs {
+        display: flex;
+        gap: 0.6rem;
+        margin-bottom: 2.4rem;
     }
 
-    .search-wrapper {
-        position: relative;
+    .filter-tab {
+        padding: 0.7rem 1.6rem;
+        background: transparent;
+        border: 1.5px solid var(--border);
+        border-radius: 10rem;
+        color: var(--text-secondary);
+        font-family: var(--font-body);
+        font-size: 1.3rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s;
     }
 
-    .search-wrapper input {
-        width: 100%;
-        padding: 1.5rem 2rem 1.5rem 5rem;
-        background: var(--color-dark-medium);
-        border: 2px solid var(--color-dark-light);
-        border-radius: 3rem;
-        color: var(--color-light);
-        font-size: 1.6rem;
-        transition: all 0.3s ease;
+    .filter-tab.active,
+    .filter-tab:hover {
+        background: var(--accent-soft);
+        border-color: var(--accent);
+        color: var(--accent);
     }
 
-    .search-wrapper input:focus {
-        border-color: var(--color-main);
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(113, 198, 221, 0.2);
-    }
-
-    .search-wrapper svg {
-        position: absolute;
-        left: 1.8rem;
-        top: 50%;
-        transform: translateY(-50%);
-        width: 2rem;
-        height: 2rem;
-        fill: var(--color-light-gray);
-    }
-
-    /* Chats Grid */
+    /* ── Chats Grid ── */
     .chats-grid {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-        gap: 2rem;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 1.6rem;
     }
 
-    /* Chat Tile */
+    /* ── Chat Tile ── */
     .chat-tile {
-        background: var(--color-dark);
-        border-radius: 1.5rem;
-        overflow: hidden;
-        transition: all 0.3s ease;
-        border: 1px solid transparent;
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        display: block;
+        background: var(--bg-surface);
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius-lg);
+        padding: 1.8rem;
         text-decoration: none;
         color: inherit;
-        display: block;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
+        overflow: hidden;
+    }
+
+    .chat-tile::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, var(--accent-soft) 0%, transparent 60%);
+        opacity: 0;
+        transition: opacity 0.3s;
     }
 
     .chat-tile:hover {
-        transform: translateY(-5px);
-        border-color: var(--color-main);
-        box-shadow: 0 10px 25px rgba(113, 198, 221, 0.2);
+        border-color: var(--border-hover);
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-md), var(--shadow-accent);
     }
+
+    .chat-tile:hover::before { opacity: 1; }
 
     .chat-tile.unread {
-        border-left: 4px solid var(--color-main);
+        border-left: 3px solid var(--accent);
     }
 
+    .chat-tile.unread .chat-tile__name {
+        color: #fff;
+        font-weight: 600;
+    }
+
+    /* Tile Header */
     .chat-tile__header {
-        padding: 1.5rem;
         display: flex;
         align-items: center;
-        gap: 1.5rem;
-        border-bottom: 1px solid var(--color-dark-light);
+        gap: 1.4rem;
+        margin-bottom: 1.2rem;
+        position: relative;
     }
 
     .chat-tile__avatar {
         position: relative;
+        flex-shrink: 0;
     }
 
     .chat-tile__avatar img {
-        width: 5rem;
-        height: 5rem;
+        width: 5.2rem;
+        height: 5.2rem;
         border-radius: 50%;
-        border: 2px solid var(--color-main);
+        object-fit: cover;
+        border: 2px solid var(--border);
+        transition: border-color 0.2s;
     }
 
-    .online-status {
+    .chat-tile:hover .chat-tile__avatar img {
+        border-color: var(--accent);
+    }
+
+    .online-indicator {
         position: absolute;
         bottom: 2px;
         right: 2px;
-        width: 1.2rem;
-        height: 1.2rem;
+        width: 1.3rem;
+        height: 1.3rem;
+        background: var(--green);
         border-radius: 50%;
-        background: #4caf50;
-        border: 2px solid var(--color-dark);
+        border: 2px solid var(--bg-surface);
+        display: none;
     }
 
-    .chat-tile__info {
+    .online-indicator.visible { display: block; }
+
+    .chat-tile__meta {
         flex: 1;
+        min-width: 0;
     }
 
-    .chat-tile__info h3 {
-        font-size: 1.8rem;
-        color: var(--color-light);
-        margin-bottom: 0.3rem;
-    }
-
-    .chat-tile__info p {
-        font-size: 1.2rem;
-        color: var(--color-light-gray);
-    }
-
-    .chat-tile__time {
-        font-size: 1.2rem;
-        color: var(--color-light-gray);
-    }
-
-    .chat-tile__content {
-        padding: 1.5rem;
-    }
-
-    .chat-tile__last-message {
-        display: flex;
-        align-items: center;
-        gap: 1rem;
-        margin-bottom: 1rem;
-    }
-
-    .chat-tile__last-message-sender {
-        font-weight: bold;
-        color: var(--color-main);
-        font-size: 1.3rem;
-    }
-
-    .chat-tile__last-message-text {
-        color: var(--color-light-gray);
-        font-size: 1.3rem;
+    .chat-tile__name {
+        font-family: var(--font-display);
+        font-size: 1.7rem;
+        font-weight: 600;
+        color: var(--text-primary);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        max-width: 200px;
     }
-    /* Diamond icon for chat tiles */
-.chat-tile__diamond {
-    position: absolute;
-    top: 1rem;
-    left: 1rem;
-    width: 2rem;
-    height: 2rem;
-    background: var(--color-main);
-    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
-    z-index: 5;
-    opacity: 0.8;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-}
 
-.chat-tile__diamond::before {
-    content: '';
-    position: absolute;
-    top: 2px;
-    left: 2px;
-    width: calc(100% - 4px);
-    height: calc(100% - 4px);
-    background: var(--color-dark);
-    clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
-}
-
-.chat-tile__diamond::after {
-    content: '💬';
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    font-size: 1rem;
-    color: var(--color-main);
-}
-
-    .chat-tile__badge {
-        position: absolute;
-        top: 1rem;
-        right: 1rem;
-        background: var(--color-main);
-        color: var(--color-dark);
+    .chat-tile__handle {
         font-size: 1.2rem;
-        font-weight: bold;
-        padding: 0.3rem 0.8rem;
-        border-radius: 1rem;
-        min-width: 2rem;
-        text-align: center;
+        color: var(--text-muted);
+        margin-top: 0.2rem;
+    }
+
+    .chat-tile__time {
+        font-size: 1.15rem;
+        color: var(--text-muted);
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .chat-unread-badge {
+        position: absolute;
+        top: 0;
+        right: 0;
+        min-width: 2.2rem;
+        height: 2.2rem;
+        background: var(--accent);
+        color: #fff;
+        border-radius: 10rem;
+        font-family: var(--font-display);
+        font-size: 1.1rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 0.5rem;
+        box-shadow: 0 2px 8px rgba(91, 141, 238, 0.4);
+    }
+
+    /* Tile Body */
+    .chat-tile__body {
+        padding-top: 1.2rem;
+        border-top: 1px solid var(--border);
+    }
+
+    .chat-tile__preview {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+    }
+
+    .chat-tile__preview-sender {
+        font-size: 1.3rem;
+        font-weight: 600;
+        color: var(--accent);
+        white-space: nowrap;
+        flex-shrink: 0;
+    }
+
+    .chat-tile__preview-text {
+        font-size: 1.3rem;
+        color: var(--text-secondary);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .chat-tile__typing {
-        color: var(--color-main);
+        display: none;
+        align-items: center;
+        gap: 0.6rem;
+        color: var(--accent);
+        font-size: 1.25rem;
         font-style: italic;
-        font-size: 1.2rem;
-        margin-top: 0.5rem;
     }
 
-    /* No Chats */
+    .chat-tile__typing.active { display: flex; }
+
+    .typing-dots-mini span {
+        display: inline-block;
+        width: 0.5rem;
+        height: 0.5rem;
+        background: var(--accent);
+        border-radius: 50%;
+        animation: bounce-dot 1.4s infinite;
+    }
+
+    .typing-dots-mini span:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dots-mini span:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes bounce-dot {
+        0%, 60%, 100% { transform: translateY(0); }
+        30% { transform: translateY(-4px); }
+    }
+
+    /* ── Empty State ── */
     .no-chats {
         grid-column: 1 / -1;
         text-align: center;
-        padding: 5rem;
-        background: var(--color-dark);
-        border-radius: 1.5rem;
+        padding: 7rem 2rem;
+        background: var(--bg-surface);
+        border-radius: var(--radius-lg);
+        border: 1.5px dashed var(--border);
     }
 
-    .no-chats svg {
-        width: 6rem;
-        height: 6rem;
-        fill: var(--color-dark-light);
-        margin-bottom: 2rem;
+    .no-chats-icon {
+        width: 7rem;
+        height: 7rem;
+        background: var(--accent-soft);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 2rem;
+    }
+
+    .no-chats-icon svg {
+        width: 3.2rem;
+        height: 3.2rem;
+        fill: var(--accent);
     }
 
     .no-chats h3 {
-        color: var(--color-light);
-        font-size: 2rem;
-        margin-bottom: 1rem;
+        font-family: var(--font-display);
+        font-size: 2.2rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 0.8rem;
     }
 
     .no-chats p {
-        color: var(--color-light-gray);
         font-size: 1.4rem;
-        margin-bottom: 2rem;
+        color: var(--text-secondary);
+        margin-bottom: 2.5rem;
     }
 
-    .no-chats .btn {
-        display: inline-block;
-        padding: 1.2rem 3rem;
-        background: var(--color-main);
-        color: var(--color-dark);
-        border-radius: 3rem;
-        text-decoration: none;
-        font-weight: bold;
-        transition: all 0.3s ease;
-    }
-
-    .no-chats .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(113, 198, 221, 0.3);
-    }
-
-    /* Modal Styles */
-    .modal {
+    /* ── Modal ── */
+    .modal-overlay {
         display: none;
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.8);
+        inset: 0;
+        background: rgba(0,0,0,0.75);
+        backdrop-filter: blur(8px);
         z-index: 1000;
-        justify-content: center;
         align-items: center;
-    }
-
-    .modal.active {
-        display: flex;
-    }
-
-    .modal-content {
-        background: var(--color-dark);
-        border-radius: 1.5rem;
-        width: 90%;
-        max-width: 500px;
-        max-height: 80vh;
-        overflow-y: auto;
+        justify-content: center;
         padding: 2rem;
     }
 
-    .modal-header {
+    .modal-overlay.active { display: flex; }
+
+    .modal-box {
+        background: var(--bg-surface);
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius-xl);
+        width: 100%;
+        max-width: 480px;
+        max-height: 80vh;
         display: flex;
-        justify-content: space-between;
+        flex-direction: column;
+        box-shadow: var(--shadow-md), 0 0 60px rgba(91, 141, 238, 0.1);
+        overflow: hidden;
+        animation: modal-in 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    @keyframes modal-in {
+        from { opacity: 0; transform: translateY(16px) scale(0.97); }
+        to { opacity: 1; transform: none; }
+    }
+
+    .modal-header {
+        padding: 2rem 2rem 1.5rem;
+        border-bottom: 1px solid var(--border);
+        display: flex;
         align-items: center;
-        margin-bottom: 2rem;
+        justify-content: space-between;
     }
 
     .modal-header h2 {
-        color: var(--color-main);
+        font-family: var(--font-display);
         font-size: 2rem;
+        font-weight: 700;
+        color: var(--text-primary);
     }
 
-    .close-modal {
-        background: none;
-        border: none;
-        color: var(--color-light-gray);
-        font-size: 2.4rem;
+    .modal-close {
+        width: 3.2rem;
+        height: 3.2rem;
+        background: var(--bg-elevated);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        display: flex;
+        align-items: center;
+        justify-content: center;
         cursor: pointer;
+        transition: all 0.2s;
+        color: var(--text-secondary);
+        font-size: 1.8rem;
+        line-height: 1;
     }
 
-    .close-modal:hover {
-        color: var(--color-main);
+    .modal-close:hover {
+        background: var(--accent-soft);
+        border-color: var(--accent);
+        color: var(--accent);
     }
 
-    .search-users input {
+    .modal-search {
+        padding: 1.5rem 2rem;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .modal-search input {
         width: 100%;
-        padding: 1rem;
-        background: var(--color-dark-medium);
-        border: 2px solid var(--color-dark-light);
-        border-radius: 2rem;
-        color: var(--color-light);
+        padding: 1.1rem 1.6rem;
+        background: var(--bg-elevated);
+        border: 1.5px solid var(--border);
+        border-radius: var(--radius-md);
+        color: var(--text-primary);
+        font-family: var(--font-body);
         font-size: 1.4rem;
-        margin-bottom: 1rem;
+        outline: none;
+        transition: all 0.2s;
     }
 
-    .search-users input:focus {
-        border-color: var(--color-main);
-        outline: none;
+    .modal-search input:focus {
+        border-color: var(--accent);
+        box-shadow: 0 0 0 3px var(--accent-glow);
     }
+
+    .modal-search input::placeholder { color: var(--text-muted); }
 
     .users-list {
-        max-height: 400px;
+        flex: 1;
         overflow-y: auto;
+        padding: 1rem;
     }
+
+    .users-list::-webkit-scrollbar { width: 4px; }
+    .users-list::-webkit-scrollbar-track { background: transparent; }
+    .users-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
     .user-item {
         display: flex;
         align-items: center;
-        gap: 1rem;
-        padding: 1rem;
+        gap: 1.2rem;
+        padding: 1.2rem 1.4rem;
         text-decoration: none;
-        color: var(--color-light);
-        border-bottom: 1px solid var(--color-dark-light);
-        transition: background 0.2s ease;
+        color: inherit;
+        border-radius: var(--radius-md);
+        transition: all 0.2s;
     }
 
     .user-item:hover {
-        background: var(--color-dark-medium);
+        background: var(--bg-hover);
     }
 
     .user-item img {
-        width: 40px;
-        height: 40px;
+        width: 4.2rem;
+        height: 4.2rem;
         border-radius: 50%;
-        border: 2px solid var(--color-main);
+        object-fit: cover;
+        border: 2px solid var(--border);
     }
 
     .user-item-info h4 {
-        font-size: 1.4rem;
-        margin-bottom: 0.2rem;
+        font-family: var(--font-display);
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: var(--text-primary);
     }
 
     .user-item-info p {
-        color: var(--color-light-gray);
         font-size: 1.2rem;
+        color: var(--text-muted);
+        margin-top: 0.2rem;
     }
 
-    /* Loading Animation */
-    .loading-skeleton {
-        animation: pulse 1.5s infinite;
-    }
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
 
-    @keyframes pulse {
-        0% { opacity: 0.6; }
-        50% { opacity: 1; }
-        100% { opacity: 0.6; }
-    }
-
-    /* Mobile Responsive */
+    /* ── Responsive ── */
     @media (max-width: 768px) {
-        .chats-container {
-            padding: 1rem;
-        }
-
-        .chats-header h1 {
-            font-size: 2.4rem;
-        }
-
-        .chats-grid {
-            grid-template-columns: 1fr;
-            gap: 1rem;
-        }
-
-        .chat-tile:hover {
-            transform: none;
-        }
+        .chats-page-wrapper { padding: 1.5rem 1rem 3rem; }
+        .chats-header h1 { font-size: 2.8rem; }
+        .chats-grid { grid-template-columns: 1fr; }
+        .controls-bar { flex-wrap: wrap; }
+        .new-chat-btn { width: 100%; justify-content: center; }
     }
 </style>
 
-<div class="chats-container">
+<div class="chats-page-wrapper">
     <!-- Header -->
     <div class="chats-header">
-        <h1>
-            <svg viewBox="0 0 24 24">
-                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
-            </svg>
-            Messages
-            {% if total_unread > 0 %}
-            <span class="unread-badge">{{ total_unread }}</span>
-            {% endif %}
-        </h1>
+        <div class="chats-header-left">
+            <h1>Mess<span>ages</span></h1>
+            <p>Your conversations, all in one place</p>
+        </div>
+        {% if total_unread > 0 %}
+        <div class="header-badge">
+            <span class="dot"></span>
+            {{ total_unread }} unread
+        </div>
+        {% endif %}
     </div>
 
-    <!-- New Chat Button -->
-    <div class="new-chat-section">
+    <!-- Controls -->
+    <div class="controls-bar">
+        <div class="search-container">
+            <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+            <input type="text" class="search-input" id="chatSearch" placeholder="Search conversations..." autocomplete="off">
+        </div>
         <button class="new-chat-btn" onclick="openNewChatModal()">
-            <svg viewBox="0 0 24 24">
-                <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
-            </svg>
-            Start New Chat
+            <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+            New Chat
         </button>
     </div>
 
-    <!-- Search -->
-    <div class="chats-search">
-        <div class="search-wrapper">
-            <svg viewBox="0 0 24 24">
-                <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/>
-            </svg>
-            <input type="text" id="chatSearch" placeholder="Search your chats by username or message..." autocomplete="off">
-        </div>
+    <!-- Filter Tabs -->
+    <div class="filter-tabs">
+        <button class="filter-tab active" data-filter="all">All</button>
+        <button class="filter-tab" data-filter="unread">Unread</button>
+        <button class="filter-tab" data-filter="online">Online</button>
     </div>
 
     <!-- Chats Grid -->
     <div class="chats-grid" id="chatsGrid">
         {% for chat_data in chats %}
-        <a href="{% url 'chat-detail' chat_data.chat.id %}" class="chat-tile {% if chat_data.unread_count > 0 %}unread{% endif %}" data-chat-id="{{ chat_data.chat.id }}">
+        <a href="{% url 'chat-detail' chat_data.chat.id %}"
+           class="chat-tile {% if chat_data.unread_count > 0 %}unread{% endif %}"
+           data-chat-id="{{ chat_data.chat.id }}"
+           data-username="{{ chat_data.other_user.username|lower }}">
+
             {% if chat_data.unread_count > 0 %}
-            <span class="chat-tile__badge">{{ chat_data.unread_count }}</span>
+            <div class="chat-unread-badge">{{ chat_data.unread_count }}</div>
             {% endif %}
-            
+
             <div class="chat-tile__header">
                 <div class="chat-tile__avatar">
-                    <div class="chat-tile__diamond"></div>
-                    <img src="{{ chat_data.other_user.avatar_url }}" 
+                    <img src="{{ chat_data.other_user.avatar_url }}"
                          alt="{{ chat_data.other_user.username }}"
                          data-default="{% static 'images/avatar.svg' %}"
                          onerror="this.onerror=null; this.src=this.dataset.default;">
-                    <span class="online-status" style="display: none;"></span>
+                    <span class="online-indicator" id="online-{{ chat_data.chat.id }}"></span>
                 </div>
-                <div class="chat-tile__info">
-                    <h3>{{ chat_data.other_user.username }}</h3>
-                    <p>@{{ chat_data.other_user.username }}</p>
+                <div class="chat-tile__meta">
+                    <div class="chat-tile__name">{{ chat_data.other_user.username }}</div>
+                    <div class="chat-tile__handle">@{{ chat_data.other_user.username }}</div>
                 </div>
                 {% if chat_data.last_message %}
                 <span class="chat-tile__time">{{ chat_data.last_message.created|timesince }} ago</span>
                 {% endif %}
             </div>
-            
-            <div class="chat-tile__content">
-                {% if chat_data.last_message %}
-                <div class="chat-tile__last-message">
-                    <span class="chat-tile__last-message-sender">
+
+            <div class="chat-tile__body">
+                <div class="chat-tile__preview">
+                    {% if chat_data.last_message %}
+                    <span class="chat-tile__preview-sender">
                         {% if chat_data.last_message.sender == request.user %}You{% else %}{{ chat_data.last_message.sender.username }}{% endif %}:
                     </span>
-                    <span class="chat-tile__last-message-text">
-                        {% if chat_data.last_message.message_type == 'text' %}
-                            {{ chat_data.last_message.content }}
-                        {% elif chat_data.last_message.message_type == 'image' %}
-                            📷 Image
-                        {% elif chat_data.last_message.message_type == 'file' %}
-                            📎 File
+                    <span class="chat-tile__preview-text">
+                        {% if chat_data.last_message.message_type == 'text' %}{{ chat_data.last_message.content }}
+                        {% elif chat_data.last_message.message_type == 'image' %}📷 Image
+                        {% elif chat_data.last_message.message_type == 'file' %}📎 File
                         {% endif %}
                     </span>
+                    {% else %}
+                    <span class="chat-tile__preview-text" style="color: var(--text-muted);">No messages yet — say hello!</span>
+                    {% endif %}
                 </div>
-                {% else %}
-                <div class="chat-tile__last-message">
-                    <span class="chat-tile__last-message-text" style="color: var(--color-light-gray);">No messages yet</span>
-                </div>
-                {% endif %}
-                
-                <div class="chat-tile__typing" id="typing-{{ chat_data.chat.id }}" style="display: none;">
-                    <span>typing...</span>
+                <div class="chat-tile__typing" id="typing-{{ chat_data.chat.id }}">
+                    <div class="typing-dots-mini"><span></span><span></span><span></span></div>
+                    typing...
                 </div>
             </div>
         </a>
         {% empty %}
         <div class="no-chats">
-            <svg viewBox="0 0 24 24">
-                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/>
-            </svg>
+            <div class="no-chats-icon">
+                <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+            </div>
             <h3>No conversations yet</h3>
-            <p>Start chatting with other users by clicking "Start New Chat" above!</p>
+            <p>Start chatting with other students by clicking "New Chat" above</p>
         </div>
         {% endfor %}
     </div>
 </div>
 
 <!-- New Chat Modal -->
-<div class="modal" id="newChatModal">
-    <div class="modal-content">
+<div class="modal-overlay" id="newChatModal">
+    <div class="modal-box">
         <div class="modal-header">
             <h2>Start New Chat</h2>
-            <button class="close-modal" onclick="closeNewChatModal()">&times;</button>
+            <button class="modal-close" onclick="closeNewChatModal()">×</button>
         </div>
-        
-        <div class="search-users">
-            <input type="text" id="userSearch" placeholder="Search users by username..." autocomplete="off">
+        <div class="modal-search">
+            <input type="text" id="userSearch" placeholder="Search by username..." autocomplete="off">
         </div>
-        
-        <div class="users-list" id="usersList">
-            <!-- Users will be loaded here -->
-        </div>
+        <div class="users-list" id="usersList"></div>
     </div>
 </div>
 
 <script>
-// Live search functionality for existing chats
-const searchInput = document.getElementById('chatSearch');
-const chatTiles = document.querySelectorAll('.chat-tile');
-let searchTimeout;
-
-searchInput.addEventListener('input', () => {
-    clearTimeout(searchTimeout);
-    searchTimeout = setTimeout(() => {
-        const searchTerm = searchInput.value.toLowerCase();
-        
-        chatTiles.forEach(tile => {
-            const username = tile.querySelector('h3').textContent.toLowerCase();
-            const lastMessage = tile.querySelector('.chat-tile__last-message-text')?.textContent.toLowerCase() || '';
-            
-            if (username.includes(searchTerm) || lastMessage.includes(searchTerm)) {
-                tile.style.display = 'block';
-            } else {
-                tile.style.display = 'none';
-            }
-        });
-    }, 300);
+// ── Search chats ──
+document.getElementById('chatSearch').addEventListener('input', function() {
+    const q = this.value.toLowerCase();
+    document.querySelectorAll('.chat-tile').forEach(tile => {
+        const name = (tile.dataset.username || '');
+        const msg = tile.querySelector('.chat-tile__preview-text')?.textContent.toLowerCase() || '';
+        tile.style.display = (name.includes(q) || msg.includes(q)) ? '' : 'none';
+    });
 });
 
-// New Chat Modal Functions
+// ── Filter tabs ──
+document.querySelectorAll('.filter-tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+        document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+        this.classList.add('active');
+        const filter = this.dataset.filter;
+        document.querySelectorAll('.chat-tile').forEach(tile => {
+            if (filter === 'all') { tile.style.display = ''; return; }
+            if (filter === 'unread') { tile.style.display = tile.classList.contains('unread') ? '' : 'none'; return; }
+            if (filter === 'online') {
+                const dot = tile.querySelector('.online-indicator');
+                tile.style.display = dot?.classList.contains('visible') ? '' : 'none';
+            }
+        });
+    });
+});
+
+// ── New Chat Modal ──
 function openNewChatModal() {
     document.getElementById('newChatModal').classList.add('active');
     searchUsers('');
+    setTimeout(() => document.getElementById('userSearch').focus(), 100);
 }
 
 function closeNewChatModal() {
@@ -614,97 +756,59 @@ function searchUsers(query) {
     fetch(`/api/search-users/?q=${encodeURIComponent(query)}`)
         .then(res => res.json())
         .then(data => {
-            const usersList = document.getElementById('usersList');
-            usersList.innerHTML = '';
-            
-            if (data.users.length === 0) {
-                usersList.innerHTML = '<p style="color: var(--color-light-gray); text-align: center; padding: 2rem;">No users found</p>';
+            const list = document.getElementById('usersList');
+            if (!data.users || data.users.length === 0) {
+                list.innerHTML = '<p style="color: var(--text-muted); text-align: center; padding: 3rem; font-size: 1.4rem;">No users found</p>';
                 return;
             }
-            
-            data.users.forEach(user => {
-                usersList.innerHTML += `
-                    <a href="/start-chat/${user.id}/" class="user-item">
-                        <img src="${user.avatar}" alt="${user.username}"
-                             data-default="{% static 'images/avatar.svg' %}"
-                             onerror="this.onerror=null; this.src=this.dataset.default;">
-                        <div class="user-item-info">
-                            <h4>${user.username}</h4>
-                            <p>@${user.username}</p>
-                        </div>
-                    </a>
-                `;
-            });
-        });
+            list.innerHTML = data.users.map(user => `
+                <a href="/start-chat/${user.id}/" class="user-item">
+                    <img src="${user.avatar}" alt="${user.username}" onerror="this.src='{% static 'images/avatar.svg' %}'">
+                    <div class="user-item-info">
+                        <h4>${user.username}</h4>
+                        <p>@${user.username}</p>
+                    </div>
+                </a>
+            `).join('');
+        })
+        .catch(() => {});
 }
 
-// Live search in modal
-document.getElementById('userSearch').addEventListener('input', function() {
-    searchUsers(this.value);
+document.getElementById('userSearch').addEventListener('input', function() { searchUsers(this.value); });
+
+window.addEventListener('click', e => {
+    if (e.target === document.getElementById('newChatModal')) closeNewChatModal();
 });
 
-// Close modal when clicking outside
-window.onclick = function(event) {
-    const modal = document.getElementById('newChatModal');
-    if (event.target === modal) {
-        closeNewChatModal();
-    }
-}
+// ── WebSocket connections for online status + typing ──
+document.querySelectorAll('.chat-tile[data-chat-id]').forEach(tile => {
+    const chatId = tile.dataset.chatId;
+    if (!chatId) return;
+    const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+    const ws = new WebSocket(protocol + window.location.host + '/ws/chat/' + chatId + '/');
 
-// WebSocket connections for online status
-const chatIds = [...document.querySelectorAll('.chat-tile')].map(tile => tile.dataset.chatId);
-const sockets = {};
-
-chatIds.forEach(chatId => {
-    if (chatId) {
-        const protocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
-        const socket = new WebSocket(protocol + window.location.host + '/ws/chat/' + chatId + '/');
-        
-        socket.onmessage = function(e) {
-            const data = JSON.parse(e.data);
-            
-            if (data.type === 'user_online') {
-                const tile = document.querySelector(`.chat-tile[data-chat-id="${chatId}"]`);
-                const statusDot = tile?.querySelector('.online-status');
-                if (statusDot) {
-                    statusDot.style.display = 'block';
-                }
-            } else if (data.type === 'user_offline') {
-                const tile = document.querySelector(`.chat-tile[data-chat-id="${chatId}"]`);
-                const statusDot = tile?.querySelector('.online-status');
-                if (statusDot) {
-                    statusDot.style.display = 'none';
-                }
-            } else if (data.type === 'typing') {
-                const typingIndicator = document.getElementById(`typing-${chatId}`);
-                if (typingIndicator) {
-                    typingIndicator.style.display = data.is_typing ? 'block' : 'none';
-                }
-            }
-        };
-        
-        sockets[chatId] = socket;
-    }
+    ws.onmessage = function(e) {
+        const data = JSON.parse(e.data);
+        if (data.type === 'user_online') {
+            document.getElementById('online-' + chatId)?.classList.add('visible');
+        } else if (data.type === 'user_offline') {
+            document.getElementById('online-' + chatId)?.classList.remove('visible');
+        } else if (data.type === 'typing') {
+            const typingEl = document.getElementById('typing-' + chatId);
+            if (typingEl) typingEl.classList.toggle('active', !!data.is_typing);
+        }
+    };
 });
 
-// Update unread count in navbar periodically
+// ── Update unread every 30s ──
 function updateUnreadCount() {
-    fetch('/api/unread-count/')
-        .then(res => res.json())
-        .then(data => {
-            const badge = document.querySelector('.unread-badge');
-            if (badge) {
-                if (data.unread_count > 0) {
-                    badge.textContent = data.unread_count;
-                    badge.style.display = 'inline-block';
-                } else {
-                    badge.style.display = 'none';
-                }
-            }
-        });
+    fetch('/api/unread-count/').then(r => r.json()).then(data => {
+        const badge = document.querySelector('.header-badge');
+        if (badge) {
+            badge.style.display = data.unread_count > 0 ? '' : 'none';
+        }
+    }).catch(() => {});
 }
-
-// Update every 30 seconds
 setInterval(updateUnreadCount, 30000);
 </script>
 
