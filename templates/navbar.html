@@ -115,7 +115,7 @@
           </p>
         </a>
         
-        <button class="dropdown-button">
+        <button class="dropdown-button" id="userDropdownBtn">
           <svg width="32" height="32" viewBox="0 0 32 32">
             <path d="M16 21l-13-13h-3l16 16 16-16h-3l-13 13z"></path>
           </svg>
@@ -123,7 +123,7 @@
       </div>
 
       <!-- Dropdown Menu -->
-      <div class="dropdown-menu">
+      <div class="dropdown-menu" id="userDropdownMenu">
         <a href="{% url 'user-profile' request.user.id %}">
           <span>👤</span> Profile
         </a>
@@ -242,20 +242,22 @@
       font-size: 12px;
     }
     
-    /* Improved dropdown menu */
+    /* Improved dropdown menu - FIXED */
     .dropdown-menu {
       position: absolute;
       top: 100%;
       right: 0;
-      min-width: 200px;
+      min-width: 220px;
       background: var(--color-dark);
-      border-radius: 8px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+      border-radius: 12px;
+      box-shadow: 0 8px 30px rgba(0,0,0,0.4);
       opacity: 0;
       visibility: hidden;
       transform: translateY(-10px);
-      transition: all 0.2s;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       z-index: 1000;
+      margin-top: 8px;
+      overflow: hidden;
     }
     
     .dropdown-menu.active {
@@ -268,20 +270,45 @@
       display: flex;
       align-items: center;
       gap: 12px;
-      padding: 10px 16px;
+      padding: 12px 18px;
       text-decoration: none;
-      color: inherit;
-      font-size: 13px;
-      transition: background 0.2s;
+      color: var(--color-light);
+      font-size: 14px;
+      transition: all 0.2s;
     }
     
     .dropdown-menu a:hover {
-      background: rgba(255,255,255,0.05);
+      background: rgba(255,255,255,0.08);
+      padding-left: 24px;
     }
     
     .dropdown-menu hr {
       margin: 8px 0;
       opacity: 0.1;
+    }
+    
+    /* Header user button fix */
+    .header__user {
+      position: relative;
+      cursor: pointer;
+    }
+    
+    .dropdown-button {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      display: flex;
+      align-items: center;
+    }
+    
+    .dropdown-button svg {
+      fill: var(--color-light);
+      transition: transform 0.2s;
+    }
+    
+    .dropdown-button.active svg {
+      transform: rotate(180deg);
     }
   </style>
 
@@ -298,14 +325,15 @@
         });
       }
 
-      // User dropdown toggle
-      const dropdownButton = document.querySelector(".dropdown-button");
-      const dropdownMenu = document.querySelector(".dropdown-menu");
+      // User dropdown toggle - FIXED: using correct selectors
+      const dropdownButton = document.getElementById("userDropdownBtn");
+      const dropdownMenu = document.getElementById("userDropdownMenu");
       
       if (dropdownButton && dropdownMenu) {
         dropdownButton.addEventListener("click", function(e) {
           e.stopPropagation();
           dropdownMenu.classList.toggle("active");
+          dropdownButton.classList.toggle("active");
         });
       }
 
@@ -321,6 +349,7 @@
             !dropdownButton.contains(e.target) && 
             !dropdownMenu.contains(e.target)) {
           dropdownMenu.classList.remove("active");
+          dropdownButton.classList.remove("active");
         }
       });
     });
@@ -331,17 +360,23 @@
         OneSignal.Notifications.requestPermission()
           .then(accepted => {
             if (accepted) {
-              showToast("✅ Success! You're now subscribed to notifications!", "success");
+              if (typeof showToast === 'function') {
+                showToast("✅ Success! You're now subscribed to notifications!", "success");
+              }
             } else {
-              showToast("❌ You declined notifications. You can enable them later in browser settings.", "warning");
+              if (typeof showToast === 'function') {
+                showToast("❌ You declined notifications. You can enable them later in browser settings.", "warning");
+              }
             }
           });
       } else {
-        showToast("OneSignal not loaded yet. Please wait a moment.", "info");
+        if (typeof showToast === 'function') {
+          showToast("OneSignal not loaded yet. Please wait a moment.", "info");
+        }
       }
     }
 
-    // Update navbar unread count for messages - FIXED to work properly
+    // Update navbar unread count for messages - FIXED
     function updateNavUnreadCount() {
       fetch('/api/unread-chats-count/')
         .then(res => {
@@ -355,7 +390,6 @@
             if (unreadCount > 0) {
               badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
               badge.style.display = 'inline-block';
-              // Also add a subtle animation
               badge.style.animation = 'none';
               setTimeout(() => {
                 badge.style.animation = 'bounce 0.3s ease';
@@ -367,40 +401,34 @@
         })
         .catch(err => {
           console.log('Error fetching unread count:', err);
-          // Don't show toast for this error to avoid spam
         });
     }
 
     // Add bounce animation
-    const style = document.createElement('style');
-    style.textContent = `
-      @keyframes bounce {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.2); }
-      }
-    `;
-    document.head.appendChild(style);
+    if (!document.querySelector('#bounceStyle')) {
+      const style = document.createElement('style');
+      style.id = 'bounceStyle';
+      style.textContent = `
+        @keyframes bounce {
+          0%, 100% { transform: scale(1); }
+          50% { transform: scale(1.2); }
+        }
+      `;
+      document.head.appendChild(style);
+    }
 
-    // Update every 15 seconds (more frequent for better UX)
+    // Update every 15 seconds
     setInterval(updateNavUnreadCount, 15000);
     
-    // Also update when page becomes visible again
     document.addEventListener('visibilitychange', () => {
       if (!document.hidden) {
         updateNavUnreadCount();
       }
     });
     
-    // Initial call when page loads
     updateNavUnreadCount();
     
-    // Listen for new messages via WebSocket (if available)
-    function setupMessageListener() {
-      // This will be called from chat pages to update the badge
-      window.updateUnreadCount = updateNavUnreadCount;
-    }
-    
-    setupMessageListener();
+    window.updateUnreadCount = updateNavUnreadCount;
   </script>
 
 </header>
