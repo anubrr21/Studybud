@@ -22,7 +22,6 @@
         <input name="q" placeholder="Search for posts..." />
       </label>
     </form>
-  
 
     <!-- Menu -->
     <nav class="header__menu">
@@ -51,13 +50,10 @@
           {% endif %}
         </button>
 
-        <!-- Dropdown -->
         <div id="notification-dropdown" class="notification-dropdown">
           <h4 class="dropdown-title">Notifications</h4>
-
           {% if notifications %}
             {% for notification in notifications %}
-
               {% if notification.type == "follow" %}
                 {% url 'user-profile' notification.sender.id as notif_url %}
               {% elif notification.type == "comment" %}
@@ -67,12 +63,9 @@
               {% elif notification.type == "like" %}
                 {% url 'room' notification.room.id as notif_url %}
               {% endif %}
-
               <a href="{{ notif_url }}" class="dropdown-link-item">
                 <div class="dropdown-notification {% if not notification.is_read %}unread{% endif %}">
-
                   <strong>@{{ notification.sender.username }}</strong>
-
                   {% if notification.type == 'like' %}
                     liked "<strong>{{ notification.room.name }}</strong>"
                   {% elif notification.type == 'comment' %}
@@ -82,25 +75,15 @@
                   {% elif notification.type == 'follow' %}
                     started following you
                   {% endif %}
-
-                  <div class="dropdown-time">
-                    {{ notification.created|timesince }} ago
-                  </div>
-
+                  <div class="dropdown-time">{{ notification.created|timesince }} ago</div>
                 </div>
               </a>
-
             {% endfor %}
-
-            <a href="{% url 'notifications' %}" class="view-all-link">
-              View All Notifications
-            </a>
-
+            <a href="{% url 'notifications' %}" class="view-all-link">View All Notifications</a>
           {% else %}
             <p class="no-notifications">No new notifications</p>
           {% endif %}
         </div>
-
       </div>
 
       <!-- User Profile -->
@@ -114,7 +97,6 @@
             <span>@{{ request.user.username }}</span>
           </p>
         </a>
-        
         <button class="dropdown-button" id="userDropdownBtn">
           <svg width="32" height="32" viewBox="0 0 32 32">
             <path d="M16 21l-13-13h-3l16 16 16-16h-3l-13 13z"></path>
@@ -122,56 +104,30 @@
         </button>
       </div>
 
-      <!-- Dropdown Menu -->
       <div class="dropdown-menu" id="userDropdownMenu">
-        <a href="{% url 'user-profile' request.user.id %}">
-          <span>👤</span> Profile
-        </a>
-        
-        <!-- Messages Link with Unread Badge -->
-        <a href="{% url 'chats' %}" style="display: flex; align-items: center; justify-content: space-between;" id="navMessagesLink">
+        <a href="{% url 'user-profile' request.user.id %}"><span>👤</span> Profile</a>
+        <a href="{% url 'chats' %}" style="display: flex; align-items: center; justify-content: space-between;">
           <span>💬 Messages</span>
           <span id="nav-unread-chats-badge" style="background: var(--color-main); color: var(--color-dark); padding: 0.2rem 0.6rem; border-radius: 1rem; font-size: 1.2rem; display: none; min-width: 24px; text-align: center;">0</span>
         </a>
-        
-        <a href="{% url 'study-planner' %}" style="display: flex; align-items: center; gap: 0.5rem;">
-          <span>📚</span> Study Planner
-        </a>
-        
-        <a href="{% url 'update-user' %}">
-          <span>⚙️</span> Settings
-        </a>
-        
-        <a href="{% url 'notifications' %}">
-          <span>🔔</span> Notifications
-        </a>
-        
+        <a href="{% url 'study-planner' %}"><span>📚</span> Study Planner</a>
+        <a href="{% url 'update-user' %}"><span>⚙️</span> Settings</a>
+        <a href="{% url 'notifications' %}"><span>🔔</span> Notifications</a>
         <hr style="opacity:0.2; margin:8px 0;">
-        
-        <a href="{% url 'logout' %}">
-          <span>🚪</span> Logout
-        </a>
-        
-        <a href="{% url 'delete-account' %}" style="color:#ff5c5c;">
-          <span>🗑️</span> Delete Account
-        </a>
+        <a href="{% url 'logout' %}"><span>🚪</span> Logout</a>
+        <a href="{% url 'delete-account' %}" style="color:#ff5c5c;"><span>🗑️</span> Delete Account</a>
       </div>
     
       {% else %}
-
       <a href="{% url 'login' %}">
         <img src="{% static 'images/avatar.svg' %}" />
         <p>Login</p>
       </a>
-
       {% endif %}
-
     </nav>
-
   </div>
 
   <style>
-    /* Improved notification dropdown */
     .notification-dropdown {
       display: none;
       position: absolute;
@@ -185,46 +141,26 @@
       box-shadow: 0 4px 20px rgba(0,0,0,0.3);
       z-index: 1000;
     }
-    
-    .notification-dropdown.active {
-      display: block;
-    }
-    
+    .notification-dropdown.active { display: block; }
     .dropdown-title {
       padding: 12px 16px;
       margin: 0;
       border-bottom: 1px solid rgba(255,255,255,0.1);
       font-size: 14px;
     }
-    
-    .dropdown-link-item {
-      text-decoration: none;
-      color: inherit;
-      display: block;
-    }
-    
+    .dropdown-link-item { text-decoration: none; color: inherit; display: block; }
     .dropdown-notification {
       padding: 12px 16px;
       border-bottom: 1px solid rgba(255,255,255,0.05);
       font-size: 13px;
       transition: background 0.2s;
     }
-    
-    .dropdown-notification:hover {
-      background: rgba(255,255,255,0.05);
-    }
-    
+    .dropdown-notification:hover { background: rgba(255,255,255,0.05); }
     .dropdown-notification.unread {
       background: rgba(91, 141, 238, 0.1);
       border-left: 3px solid var(--color-main);
     }
-    
-    .dropdown-time {
-      font-size: 10px;
-      color: var(--color-gray);
-      margin-top: 6px;
-    }
-    
+    .dropdown-time { font-size: 10px; color: var(--color-gray); margin-top: 6px; }
     .view-all-link {
       display: block;
       padding: 12px 16px;
@@ -234,15 +170,12 @@
       font-size: 12px;
       border-top: 1px solid rgba(255,255,255,0.1);
     }
-    
     .no-notifications {
       padding: 40px 16px;
       text-align: center;
       color: var(--color-gray);
       font-size: 12px;
     }
-    
-    /* Improved dropdown menu - FIXED */
     .dropdown-menu {
       position: absolute;
       top: 100%;
@@ -259,13 +192,11 @@
       margin-top: 8px;
       overflow: hidden;
     }
-    
     .dropdown-menu.active {
       opacity: 1;
       visibility: visible;
       transform: translateY(0);
     }
-    
     .dropdown-menu a {
       display: flex;
       align-items: center;
@@ -276,23 +207,12 @@
       font-size: 14px;
       transition: all 0.2s;
     }
-    
     .dropdown-menu a:hover {
       background: rgba(255,255,255,0.08);
       padding-left: 24px;
     }
-    
-    .dropdown-menu hr {
-      margin: 8px 0;
-      opacity: 0.1;
-    }
-    
-    /* Header user button fix */
-    .header__user {
-      position: relative;
-      cursor: pointer;
-    }
-    
+    .dropdown-menu hr { margin: 8px 0; opacity: 0.1; }
+    .header__user { position: relative; cursor: pointer; }
     .dropdown-button {
       background: none;
       border: none;
@@ -301,134 +221,74 @@
       display: flex;
       align-items: center;
     }
-    
-    .dropdown-button svg {
-      fill: var(--color-light);
-      transition: transform 0.2s;
-    }
-    
-    .dropdown-button.active svg {
-      transform: rotate(180deg);
-    }
+    .dropdown-button svg { fill: var(--color-light); transition: transform 0.2s; }
+    .dropdown-button.active svg { transform: rotate(180deg); }
   </style>
 
   <script>
     document.addEventListener('DOMContentLoaded', function() {
-      // Notification dropdown toggle
-      const notificationToggle = document.getElementById("notification-toggle");
-      const notificationDropdown = document.getElementById("notification-dropdown");
-      
-      if (notificationToggle && notificationDropdown) {
-        notificationToggle.addEventListener("click", function(e) {
+      // Notification dropdown
+      const notifToggle = document.getElementById("notification-toggle");
+      const notifDropdown = document.getElementById("notification-dropdown");
+      if (notifToggle && notifDropdown) {
+        notifToggle.addEventListener("click", function(e) {
           e.stopPropagation();
-          notificationDropdown.classList.toggle("active");
+          notifDropdown.classList.toggle("active");
         });
       }
 
-      // User dropdown toggle - FIXED: using correct selectors
-      const dropdownButton = document.getElementById("userDropdownBtn");
+      // User dropdown - FIXED toggle issue
+      const dropdownBtn = document.getElementById("userDropdownBtn");
       const dropdownMenu = document.getElementById("userDropdownMenu");
       
-      if (dropdownButton && dropdownMenu) {
-        dropdownButton.addEventListener("click", function(e) {
+      if (dropdownBtn && dropdownMenu) {
+        dropdownBtn.addEventListener("click", function(e) {
           e.stopPropagation();
-          dropdownMenu.classList.toggle("active");
-          dropdownButton.classList.toggle("active");
+          const isActive = dropdownMenu.classList.contains("active");
+          if (isActive) {
+            dropdownMenu.classList.remove("active");
+            dropdownBtn.classList.remove("active");
+          } else {
+            dropdownMenu.classList.add("active");
+            dropdownBtn.classList.add("active");
+          }
         });
       }
 
       // Close dropdowns when clicking outside
       document.addEventListener('click', function(e) {
-        if (notificationDropdown && notificationToggle && 
-            !notificationToggle.contains(e.target) && 
-            !notificationDropdown.contains(e.target)) {
-          notificationDropdown.classList.remove("active");
+        if (notifDropdown && notifToggle && 
+            !notifToggle.contains(e.target) && 
+            !notifDropdown.contains(e.target)) {
+          notifDropdown.classList.remove("active");
         }
-        
-        if (dropdownMenu && dropdownButton && 
-            !dropdownButton.contains(e.target) && 
+        if (dropdownMenu && dropdownBtn && 
+            !dropdownBtn.contains(e.target) && 
             !dropdownMenu.contains(e.target)) {
           dropdownMenu.classList.remove("active");
-          dropdownButton.classList.remove("active");
+          dropdownBtn.classList.remove("active");
         }
       });
     });
 
-    // Subscribe to notifications
-    function subscribeToNotifications() {
-      if (window.OneSignal) {
-        OneSignal.Notifications.requestPermission()
-          .then(accepted => {
-            if (accepted) {
-              if (typeof showToast === 'function') {
-                showToast("✅ Success! You're now subscribed to notifications!", "success");
-              }
-            } else {
-              if (typeof showToast === 'function') {
-                showToast("❌ You declined notifications. You can enable them later in browser settings.", "warning");
-              }
-            }
-          });
-      } else {
-        if (typeof showToast === 'function') {
-          showToast("OneSignal not loaded yet. Please wait a moment.", "info");
-        }
-      }
-    }
-
-    // Update navbar unread count for messages - FIXED
     function updateNavUnreadCount() {
       fetch('/api/unread-chats-count/')
-        .then(res => {
-          if (!res.ok) throw new Error('Network response was not ok');
-          return res.json();
-        })
+        .then(res => res.json())
         .then(data => {
           const badge = document.getElementById('nav-unread-chats-badge');
           if (badge) {
-            const unreadCount = data.unread_count || 0;
-            if (unreadCount > 0) {
-              badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+            const count = data.unread_count || 0;
+            if (count > 0) {
+              badge.textContent = count > 99 ? '99+' : count;
               badge.style.display = 'inline-block';
-              badge.style.animation = 'none';
-              setTimeout(() => {
-                badge.style.animation = 'bounce 0.3s ease';
-              }, 10);
             } else {
               badge.style.display = 'none';
             }
           }
         })
-        .catch(err => {
-          console.log('Error fetching unread count:', err);
-        });
+        .catch(err => console.log('Error:', err));
     }
-
-    // Add bounce animation
-    if (!document.querySelector('#bounceStyle')) {
-      const style = document.createElement('style');
-      style.id = 'bounceStyle';
-      style.textContent = `
-        @keyframes bounce {
-          0%, 100% { transform: scale(1); }
-          50% { transform: scale(1.2); }
-        }
-      `;
-      document.head.appendChild(style);
-    }
-
-    // Update every 15 seconds
     setInterval(updateNavUnreadCount, 15000);
-    
-    document.addEventListener('visibilitychange', () => {
-      if (!document.hidden) {
-        updateNavUnreadCount();
-      }
-    });
-    
     updateNavUnreadCount();
-    
-    window.updateUnreadCount = updateNavUnreadCount;
   </script>
-
 </header>
