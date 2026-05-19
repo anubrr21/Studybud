@@ -375,7 +375,7 @@
     @keyframes tbounce { 0%,60%,100%{transform:translateY(0);opacity:.4} 30%{transform:translateY(-6px);opacity:1} }
     .tlabel { font-size: 11px; color: var(--text-muted); font-style: italic; }
 
-    /* Input zone - FIXED (always visible) */
+    /* Input zone - FIXED (always visible and properly styled) */
     .izone {
         padding: 14px 20px;
         background: var(--bg-surface);
@@ -559,12 +559,125 @@
     .ctoast.info { border-left: 3px solid var(--accent); }
     @keyframes ctin { from{opacity:0;transform:translateX(-16px)} to{opacity:1;transform:none} }
 
+    /* Mobile styles - ensure input box is visible and usable */
     @media (max-width: 768px) {
         .csidebar { display: none; }
         .mwrap { max-width: 85%; }
         .mactions { display: none; }
         .mwrap.selected .mactions { display: flex; position: static; transform: none; margin-top: 8px; }
         :root { --nav-h: 60px; }
+        
+        /* FIX: Ensure input zone is clearly visible on mobile */
+        .izone {
+            padding: 10px 12px;
+            background: var(--bg-surface);
+            border-top: 1px solid var(--border);
+            flex-shrink: 0;
+            width: 100%;
+        }
+        
+        .irow {
+            gap: 8px;
+            align-items: center;
+        }
+        
+        .iibtn {
+            width: 40px;
+            height: 40px;
+        }
+        
+        .iibtn svg {
+            width: 18px;
+            height: 18px;
+        }
+        
+        .ifield {
+            border-radius: 24px;
+            padding: 0 12px;
+            background: var(--bg-elevated);
+            min-height: 44px;
+        }
+        
+        .minput {
+            font-size: 15px;
+            padding: 10px 4px;
+            line-height: 1.4;
+            max-height: 80px;
+        }
+        
+        .sbtn {
+            width: 42px;
+            height: 42px;
+        }
+        
+        .sbtn svg {
+            width: 18px;
+            height: 18px;
+        }
+        
+        .eqbtn {
+            font-size: 18px;
+            padding: 0 2px;
+        }
+        
+        /* FIX: Ensure reply banner and emoji bar are tappable */
+        .rbanner {
+            padding: 6px 10px;
+            margin-bottom: 8px;
+        }
+        
+        .iqbar {
+            padding: 6px 10px;
+            gap: 6px;
+            margin-bottom: 8px;
+        }
+        
+        .iqbar span {
+            font-size: 20px;
+        }
+        
+        /* Adjust go down button position */
+        .godown {
+            bottom: 75px;
+            right: 12px;
+            width: 34px;
+            height: 34px;
+        }
+        
+        .godown svg {
+            width: 16px;
+            height: 16px;
+        }
+    }
+    
+    /* Extra small devices */
+    @media (max-width: 480px) {
+        .izone {
+            padding: 8px 10px;
+        }
+        
+        .irow {
+            gap: 6px;
+        }
+        
+        .iibtn {
+            width: 36px;
+            height: 36px;
+        }
+        
+        .ifield {
+            padding: 0 10px;
+        }
+        
+        .minput {
+            font-size: 14px;
+            padding: 8px 2px;
+        }
+        
+        .sbtn {
+            width: 38px;
+            height: 38px;
+        }
     }
 </style>
 
@@ -675,7 +788,7 @@
                         </div>
                     {% elif message.message_type == 'file' and message.file %}
                         <div class="mfile" onclick="window.open('{{ message.file.url }}','_blank')">
-                            <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6zm2 18H6V4h7v5h5v11z"/></svg>
+                            <svg viewBox="0 0 24 24"><path d="M14 2H6c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V8l-6-6z"/></svg>
                             <span class="mfile-name">{{ message.file_name }}</span>
                         </div>
                     {% else %}
@@ -743,7 +856,7 @@
             <svg viewBox="0 0 24 24"><path d="M16.59 8.59L12 13.17 7.41 8.59 6 10l6 6 6-6z"/></svg>
         </button>
 
-        <!-- Input zone -->
+        <!-- Input zone - fixed to always be visible -->
         <div class="izone">
             <div class="rbanner" id="replyBanner">
                 <div>
