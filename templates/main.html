@@ -8,6 +8,110 @@
     <link rel="shortcut icon" href="assets/favicon.ico" type="image/x-icon" />
     <link rel="stylesheet" href="{% static 'styles/style.css' %}" />
     <title>StudyBuddy - Find study partners around the world!</title>
+    
+    <style>
+      /* Global fix for chat layout */
+      body {
+        overflow-x: hidden;
+      }
+      
+      /* Toast container - improved positioning */
+      .toast-container {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        z-index: 10000;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        max-width: 380px;
+      }
+      
+      .toast {
+        background: var(--bg-surface, #1a1e2a);
+        border-radius: 12px;
+        padding: 14px 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        animation: slideInRight 0.3s ease;
+        border-left: 3px solid;
+        backdrop-filter: blur(10px);
+      }
+      
+      .toast.success { border-left-color: #10b981; }
+      .toast.error { border-left-color: #f56565; }
+      .toast.warning { border-left-color: #fbbf24; }
+      .toast.info { border-left-color: #5b8dee; }
+      
+      .toast-icon svg {
+        width: 20px;
+        height: 20px;
+        fill: currentColor;
+      }
+      
+      .toast-content {
+        flex: 1;
+      }
+      
+      .toast-title {
+        font-weight: 600;
+        font-size: 13px;
+        margin-bottom: 2px;
+      }
+      
+      .toast-message {
+        font-size: 12px;
+        opacity: 0.8;
+      }
+      
+      .toast-close {
+        background: none;
+        border: none;
+        color: inherit;
+        font-size: 18px;
+        cursor: pointer;
+        opacity: 0.6;
+        padding: 0 4px;
+      }
+      
+      .toast-close:hover {
+        opacity: 1;
+      }
+      
+      @keyframes slideInRight {
+        from {
+          opacity: 0;
+          transform: translateX(30px);
+        }
+        to {
+          opacity: 1;
+          transform: translateX(0);
+        }
+      }
+      
+      /* Hide Django messages on chat pages */
+      body.chat-page .messages {
+        display: none !important;
+      }
+      
+      /* Global chat page body fix */
+      body.chat-page {
+        overflow: hidden;
+        height: 100vh;
+      }
+      
+      body.chat-page .container {
+        max-width: 100% !important;
+        padding: 0 !important;
+      }
+      
+      /* Fix for chat input visibility */
+      .chat-shell {
+        height: calc(100vh - 70px) !important;
+      }
+    </style>
   </head>
 
   <body>
@@ -15,11 +119,12 @@
     <div class="toast-container" id="toastContainer"></div>
    
     {% include 'navbar.html' %}
-  
+    
+    <!-- Django messages - hidden on chat pages to prevent spam -->
     {% if messages %}
-    <ul class="messages">
+    <ul class="messages" id="djangoMessages" style="display: none;">
         {% for message in messages %}
-        <li>{{message}}</li>
+        <li class="message-{{ message.tags }}">{{ message }}</li>
         {% endfor %}
     </ul>
     {% endif %}
@@ -29,54 +134,62 @@
     
     <script src="{% static 'js/script.js' %}"></script>
     
-    <!-- ONE SIGNAL - SIMPLE AS IT GETS -->
+    <!-- ONE SIGNAL -->
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js"></script>
     <script>
-      // This is ALL you need - no extra code!
       window.OneSignalDeferred = window.OneSignalDeferred || [];
       window.OneSignalDeferred.push(function(OneSignal) {
-         OneSignal.init({
-      appId: "9a9d316f-aaeb-4eca-95ee-c70a32e1b3d1",
-      autoPrompt: true,  // Add this
-      promptOptions: {
-        slidedown: {
-          prompts: [{
-            type: "push",
-            autoPrompt: true,
-            text: {
-              acceptButton: "Allow",
-              cancelButton: "No Thanks",
-              message: "Get study reminders and notifications from StudyBud!"
+        OneSignal.init({
+          appId: "9a9d316f-aaeb-4eca-95ee-c70a32e1b3d1",
+          autoPrompt: true,
+          promptOptions: {
+            slidedown: {
+              prompts: [{
+                type: "push",
+                autoPrompt: true,
+                text: {
+                  acceptButton: "Allow",
+                  cancelButton: "No Thanks",
+                  message: "Get study reminders and notifications from StudyBud!"
+                }
+              }]
             }
-          }]
-        }
-      }
-    });
-    
-    // Force show prompt after 3 seconds if not subscribed
-    setTimeout(() => {
-      OneSignal.Notions.getPermission().then(permission => {
-        if (permission === 'default') {
-          OneSignal.showSlidedownPrompt();
-        }
+          }
+        });
+        
+        setTimeout(() => {
+          OneSignal.Notifications.getPermission().then(permission => {
+            if (permission === 'default') {
+              OneSignal.showSlidedownPrompt();
+            }
+          });
+        }, 3000);
       });
-    }, 3000);
-  });
-      
-      console.log("✅ OneSignal initialized");
     </script>
     
-    <!-- Toast notification system (your existing code) -->
     <script>
+    // Global showToast function - only shows important notifications
     function showToast(message, type = 'info', title = '') {
         const container = document.getElementById('toastContainer');
+        if (!container) return;
+        
+        // Don't show empty messages
+        if (!message || message.trim() === '') return;
+        
+        // Don't show "info" toasts for chat messages (they're spammy)
+        // Check if we're on a chat page
+        const isChatPage = window.location.pathname.includes('/chat/');
+        if (isChatPage && type === 'info' && message.length < 50) {
+          // This is likely a chat message notification - don't show
+          return;
+        }
         
         if (!title) {
             switch(type) {
-                case 'success': title = 'Success!'; break;
-                case 'error': title = 'Error!'; break;
-                case 'warning': title = 'Warning!'; break;
-                default: title = 'Info';
+                case 'success': title = '✓ Success'; break;
+                case 'error': title = '⚠ Error'; break;
+                case 'warning': title = '⚠ Warning'; break;
+                default: title = 'ℹ Info';
             }
         }
         
@@ -96,27 +209,62 @@
         
         toast.innerHTML = `
             <div class="toast-icon">
-                <svg viewBox="0 0 24 24">${icon}</svg>
+                <svg viewBox="0 0 24 24" fill="currentColor">${icon}</svg>
             </div>
             <div class="toast-content">
-                <div class="toast-title">${title}</div>
-                <div class="toast-message">${message}</div>
+                <div class="toast-title">${escapeHtml(title)}</div>
+                <div class="toast-message">${escapeHtml(message)}</div>
             </div>
             <button class="toast-close" onclick="this.parentElement.remove()">&times;</button>
         `;
         
         container.appendChild(toast);
-        setTimeout(() => toast.remove(), 5000);
+        
+        // Auto-remove after 4 seconds
+        setTimeout(() => {
+            if (toast.parentElement) {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translateX(30px)';
+                toast.style.transition = 'all 0.3s';
+                setTimeout(() => toast.remove(), 300);
+            }
+        }, 4000);
     }
 
+    function escapeHtml(text) {
+        if (!text) return '';
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    // Handle Django messages - don't show them as toasts (they're often spammy)
     document.addEventListener('DOMContentLoaded', function() {
-        const messages = document.querySelectorAll('.messages li');
-        messages.forEach(msg => {
-            showToast(msg.textContent, 'info');
-            msg.remove();
-        });
+        // Check if we're on a chat page
+        const isChatPage = window.location.pathname.includes('/chat/');
+        
+        if (!isChatPage) {
+            // Only show Django messages on non-chat pages
+            const messages = document.querySelectorAll('#djangoMessages li');
+            messages.forEach(msg => {
+                const text = msg.textContent;
+                if (text && !text.includes('new message')) {
+                    let type = 'info';
+                    if (msg.classList.contains('message-success')) type = 'success';
+                    if (msg.classList.contains('message-error')) type = 'error';
+                    if (msg.classList.contains('message-warning')) type = 'warning';
+                    showToast(text, type);
+                }
+            });
+        }
+        
+        // Add chat-page class to body for chat pages
+        if (window.location.pathname.includes('/chat/')) {
+            document.body.classList.add('chat-page');
+        }
     });
 
+    // Like button functionality
     document.querySelectorAll(".like-btn").forEach(button => {
         button.addEventListener("click", function() {
             const roomId = this.dataset.room;
